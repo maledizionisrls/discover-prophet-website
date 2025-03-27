@@ -2,7 +2,9 @@
 
 # 🚀 Script Ottimizzato per Google Trends TV (Hot Trends) - V7.2
 
-!pip install urllib3==1.26.18 pytrends==4.9.2 requests beautifulsoup4 fake-useragent pandas tqdm cloudscraper pydantic
+# NOTA: Rimosso comando !pip install che funzionava solo in Jupyter/Colab
+# Le dipendenze dovrebbero essere installate tramite GitHub Actions
+
 import requests
 import random
 import time
@@ -136,6 +138,20 @@ COUNTRY_LOCALE_MAP = {
     'DEFAULT': {'hl': 'en-US', 'tz': 0}
 }
 def get_locale_for_geo(geo_code): return COUNTRY_LOCALE_MAP.get(geo_code.upper(), COUNTRY_LOCALE_MAP['DEFAULT'])
+
+# --- PATCH per correggere l'errore method_whitelist vs allowed_methods ---
+import urllib3
+from urllib3.util import Retry
+
+original_init = Retry.__init__
+
+def patched_init(self, *args, **kwargs):
+    if 'method_whitelist' in kwargs:
+        kwargs['allowed_methods'] = kwargs.pop('method_whitelist')
+    return original_init(self, *args, **kwargs)
+
+Retry.__init__ = patched_init
+# --- FINE PATCH ---
 
 # --- Classi AdvancedProxyManager e ConsistentBrowserProfile (Invariate da V7) ---
 class AdvancedProxyManager:
