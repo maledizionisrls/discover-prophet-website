@@ -1,14 +1,16 @@
 // Inizializzazione della dashboard
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("Discover Prophet Dashboard v7.2 - Inizializzazione dashboard...");
+
     // Inizializza anno corrente nel footer
     document.getElementById('currentYear').textContent = new Date().getFullYear();
-    
+
     // Carica i metadati
     loadMetadata();
-    
+
     // Carica e visualizza i dati delle tendenze
     renderTrendsTable(trendData);
-    
+
     // Configura gli ascoltatori per la ricerca e l'ordinamento
     setupEventListeners();
 });
@@ -21,184 +23,270 @@ function loadMetadata() {
         document.getElementById('topScore').textContent = runMetadata.top_score.toFixed(2);
         document.getElementById('runtimeMinutes').textContent = runMetadata.runtime_minutes.toFixed(1) + 'm';
         document.getElementById('proxiesUsed').textContent = runMetadata.proxies_used;
+        console.log("Metadati caricati con successo:", runMetadata);
     } else {
-        console.error('Dati dei metadati non disponibili');
+        console.error('Errore: Dati dei metadati non disponibili');
+        // Potresti voler mostrare un messaggio di errore all'utente qui
+        document.getElementById('updateTimestamp').textContent = 'N/A';
+        document.getElementById('trendsCount').textContent = 'N/A';
+        document.getElementById('topScore').textContent = 'N/A';
+        document.getElementById('runtimeMinutes').textContent = 'N/A';
+        document.getElementById('proxiesUsed').textContent = 'N/A';
     }
 }
 
 // Configura gli ascoltatori degli eventi per la ricerca e l'ordinamento
 function setupEventListeners() {
     // Ricerca in tempo reale
-    document.getElementById('searchBox').addEventListener('input', function() {
-        filterTable(this.value.trim().toLowerCase());
-    });
-    
+    const searchBox = document.getElementById('searchBox');
+    if (searchBox) {
+        searchBox.addEventListener('input', function() {
+            filterTable(this.value.trim().toLowerCase());
+        });
+    } else {
+        console.error("Elemento searchBox non trovato!");
+    }
+
     // Ordinamento
-    document.getElementById('sortBy').addEventListener('change', sortTable);
-    document.getElementById('sortOrder').addEventListener('change', sortTable);
+    const sortBy = document.getElementById('sortBy');
+    const sortOrder = document.getElementById('sortOrder');
+    if (sortBy && sortOrder) {
+        sortBy.addEventListener('change', sortTable);
+        sortOrder.addEventListener('change', sortTable);
+    } else {
+        console.error("Elementi sortBy o sortOrder non trovati!");
+    }
+
+    console.log("Event listeners configurati correttamente (se trovati)");
 }
 
 // Renderizza la tabella delle tendenze
 function renderTrendsTable(data) {
+    console.log(`Rendering tabella con ${data.length} trend...`);
     const tableBody = document.getElementById('trendsTableBody');
-    tableBody.innerHTML = '';
-    
+
+    if (!tableBody) {
+        console.error("Elemento trendsTableBody non trovato!");
+        return;
+    }
+
+    tableBody.innerHTML = ''; // Pulisce la tabella prima di renderizzare
+
     data.forEach((item, index) => {
         const row = document.createElement('tr');
+        // Usa dataset per memorizzare i dati per l'ordinamento/filtraggio
         row.dataset.entity = item.entity.toLowerCase();
         row.dataset.rank = item.rank;
         row.dataset.discoverScore = item.discover_score;
         row.dataset.score1h = item.score_1h;
         row.dataset.score4h = item.score_4h;
         row.dataset.score7d = item.score_7d;
-        
+
         // Determina la classe del badge in base al rank originale
         let rankBadgeClass = '';
         if (item.rank <= 10) rankBadgeClass = 'top-10';
         else if (item.rank <= 25) rankBadgeClass = 'top-25';
-        
+
         // Calcola l'indicatore di tendenza (in aumento, in calo, stabile)
         const trendIndicator = calculateTrendIndicator(item.score_1h, item.score_4h, item.score_7d);
-        
+
+        // Genera un ID univoco per il contenitore del grafico
+        const chartContainerId = `chart-${index}`;
+
         // Crea il contenuto della riga
         row.innerHTML = `
             <td>${index + 1}</td>
             <td><span class="rank-badge ${rankBadgeClass}">${item.rank}</span></td>
             <td>${item.entity}</td>
-            <td class="score">${item.discover_score.toFixed(3)}</td>
+            <td class="score">${item.discover_score.toFixed(3)} ${trendIndicator}</td>
             <td>${item.score_1h.toFixed(1)}</td>
             <td>${item.score_4h.toFixed(1)}</td>
             <td>${item.score_7d.toFixed(1)}</td>
             <td>
-                <div class="trend-chart-container" id="chart-${index}"></div>
+                <div class="trend-chart-container" id="${chartContainerId}" style="width: 100px; height: 40px; position: relative;"></div>
             </td>
         `;
-        
+
         tableBody.appendChild(row);
     });
-    
-    // Crea i grafici dopo aver aggiunto le righe alla tabella
+
+    console.log("Tabella renderizzata, creazione grafici...");
+
+    // Crea i grafici DOPO che le righe sono state aggiunte al DOM
+    // Aumentato timeout per assicurarsi che il DOM sia pronto
     setTimeout(() => {
-        data.forEach((item, index) => {
-            createTrendChart(`chart-${index}`, [item.score_1h, item.score_4h, item.score_7d]);
-        });
-    }, 100);
+        try {
+            console.log(`Creazione ${data.length} grafici...`);
+            data.forEach((item, index) => {
+                const chartContainerId = `chart-${index}`;
+                try {
+                    // Passa l'ID del contenitore DIV e i dati
+                    createTrendChart(chartContainerId, [item.score_1h, item.score_4h, item.score_7d]);
+                } catch (e) {
+                    console.error(`Errore nella creazione del grafico ${index} (${chartContainerId}):`, e);
+                    // Mostra un messaggio di errore nel container
+                     const container = document.getElementById(chartContainerId);
+                     if(container) {
+                         container.innerHTML = `<span style="font-size:10px; color:red;">Errore Grafico</span>`;
+                     }
+                }
+            });
+            console.log("Creazione grafici completata.");
+        } catch (error) {
+            console.error("Errore generale nella creazione dei grafici:", error);
+        }
+    }, 500); // Timeout di 500ms
 }
 
 // Crea un grafico di tendenza per una entità
 function createTrendChart(containerId, dataPoints) {
-    const ctx = document.getElementById(containerId);
-    if (!ctx) return;
-    
-    // Determina colore della linea in base alla tendenza
-    const lineColor = determineTrendColor(dataPoints);
-    
-    // Crea gradiente per lo sfondo
-    const gradient = createGradient(ctx, lineColor);
-    
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['1h', '4h', '7d'],
-            datasets: [{
-                data: dataPoints,
-                borderColor: lineColor,
-                backgroundColor: gradient,
-                borderWidth: 2,
-                pointRadius: 3,
-                pointBackgroundColor: lineColor,
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    enabled: true,
-                    callbacks: {
-                        label: function(context) {
-                            return `Score: ${context.parsed.y.toFixed(1)}`;
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.error(`Elemento con id ${containerId} non trovato`);
+        return;
+    }
+
+    try {
+        // SOLUZIONE: Creare un canvas all'interno del container
+        container.innerHTML = ''; // Pulisci il container
+        const canvas = document.createElement('canvas');
+        // Imposta le dimensioni del canvas per riempire il contenitore
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        container.appendChild(canvas);
+
+        // Ora usa il canvas per il grafico
+        const chartContext = canvas.getContext('2d');
+        if (!chartContext) {
+            throw new Error("Impossibile ottenere il contesto 2D del canvas.");
+        }
+
+        // Determina colore della linea e crea gradiente
+        const lineColor = determineTrendColor(dataPoints);
+        const gradient = chartContext.createLinearGradient(0, 0, 0, canvas.clientHeight || 40); // Usa altezza canvas o fallback
+        gradient.addColorStop(0, lineColor + '50'); // 50 = ~31% opacity
+        gradient.addColorStop(1, lineColor + '10'); // 10 = ~6% opacity
+
+        new Chart(canvas, { // Passa l'elemento canvas
+            type: 'line',
+            data: {
+                labels: ['1h', '4h', '7d'],
+                datasets: [{
+                    data: dataPoints,
+                    borderColor: lineColor,
+                    backgroundColor: gradient, // Usa il gradiente creato
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointBackgroundColor: lineColor,
+                    tension: 0.4, // Curva le linee
+                    fill: true // Riempie l'area sotto la linea
+                }]
+            },
+            options: {
+                responsive: true, // Rende il grafico responsivo al contenitore
+                maintainAspectRatio: false, // Permette al grafico di non mantenere l'aspetto ratio originale
+                plugins: {
+                    legend: {
+                        display: false // Nasconde la legenda
+                    },
+                    tooltip: {
+                        enabled: true, // Abilita i tooltip al passaggio del mouse
+                        callbacks: {
+                            label: function(context) {
+                                // Formatta il testo del tooltip
+                                return `Score: ${context.parsed.y.toFixed(1)}`;
+                            }
                         }
                     }
-                }
-            },
-            scales: {
-                x: {
-                    display: false
                 },
-                y: {
-                    display: false,
-                    min: 0
+                scales: {
+                    x: {
+                        display: false // Nasconde l'asse X
+                    },
+                    y: {
+                        display: false, // Nasconde l'asse Y
+                        min: 0 // Imposta il minimo dell'asse Y a 0
+                    }
                 }
             }
-        }
-    });
-}
-
-// Crea gradiente per lo sfondo del grafico
-function createGradient(ctx, color) {
-    const chartContext = ctx.getContext('2d');
-    const gradient = chartContext.createLinearGradient(0, 0, 0, 40);
-    gradient.addColorStop(0, color + '50'); // 50 = 31% opacity
-    gradient.addColorStop(1, color + '10'); // 10 = 6% opacity
-    return gradient;
+        });
+    } catch (error) {
+        console.error(`Errore creazione grafico ${containerId}:`, error);
+        // Fallback: mostra i valori come testo se la creazione del grafico fallisce
+        container.innerHTML = `<span style="font-size:10px; color: #555;">1h: ${dataPoints[0]?.toFixed(1) ?? 'N/A'} | 4h: ${dataPoints[1]?.toFixed(1) ?? 'N/A'} | 7d: ${dataPoints[2]?.toFixed(1) ?? 'N/A'}</span>`;
+    }
 }
 
 // Determina colore della tendenza in base all'andamento dei punteggi
 function determineTrendColor(dataPoints) {
-    // Confronta il valore più recente (1h) con quello a medio termine (7d)
-    if (dataPoints[0] > dataPoints[2] * 1.1) {
+    // Assicurati che ci siano abbastanza dati
+    if (!dataPoints || dataPoints.length < 3) {
+        return '#f39c12'; // Colore neutro/default se mancano dati
+    }
+    // Confronta il valore più recente (1h, indice 0) con quello a lungo termine (7d, indice 2)
+    const score1h = dataPoints[0];
+    const score7d = dataPoints[2];
+    const thresholdUp = 1.1; // Aumento del 10%
+    const thresholdDown = 0.9; // Diminuzione del 10%
+
+    if (score1h > score7d * thresholdUp) {
         return '#27ae60'; // verde - tendenza in crescita
-    } else if (dataPoints[0] < dataPoints[2] * 0.9) {
+    } else if (score1h < score7d * thresholdDown) {
         return '#e74c3c'; // rosso - tendenza in calo
     } else {
         return '#f39c12'; // arancione - tendenza stabile
     }
 }
 
-// Calcola l'indicatore di tendenza
+// Calcola l'indicatore di tendenza (icona freccia)
 function calculateTrendIndicator(score1h, score4h, score7d) {
-    if (score1h > score7d * 1.2) {
-        return '<span class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i></span>';
-    } else if (score1h < score7d * 0.8) {
-        return '<span class="trend-indicator trend-down"><i class="fas fa-arrow-down"></i></span>';
+    const thresholdUp = 1.2; // Aumento del 20% per l'icona
+    const thresholdDown = 0.8; // Diminuzione del 20% per l'icona
+
+    if (score1h > score7d * thresholdUp) {
+        // Usa classi Font Awesome se incluse nel progetto, altrimenti caratteri Unicode
+        return '<span class="trend-indicator trend-up" title="In crescita"><i class="fas fa-arrow-up"></i></span>'; // ↑
+    } else if (score1h < score7d * thresholdDown) {
+        return '<span class="trend-indicator trend-down" title="In calo"><i class="fas fa-arrow-down"></i></span>'; // ↓
     } else {
-        return '<span class="trend-indicator trend-neutral"><i class="fas fa-arrow-right"></i></span>';
+        return '<span class="trend-indicator trend-neutral" title="Stabile"><i class="fas fa-arrow-right"></i></span>'; // →
     }
 }
 
 // Filtra la tabella in base al testo di ricerca
 function filterTable(searchText) {
     const rows = document.querySelectorAll('#trendsTableBody tr');
-    
+    let visibleCount = 0;
+
     rows.forEach(row => {
+        // Usa dataset.entity che è già in lowercase
         const entity = row.dataset.entity;
+        // Controlla se l'entità include il testo di ricerca
         if (entity.includes(searchText)) {
-            row.classList.remove('hidden-row');
+            row.classList.remove('hidden-row'); // Mostra la riga
+            visibleCount++;
         } else {
-            row.classList.add('hidden-row');
+            row.classList.add('hidden-row'); // Nasconde la riga
         }
     });
+     console.log(`Filtraggio per "${searchText}", ${visibleCount} righe visibili.`);
 }
 
 // Ordina la tabella in base al criterio selezionato
 function sortTable() {
     const sortBy = document.getElementById('sortBy').value;
     const sortOrder = document.getElementById('sortOrder').value;
-    const isAsc = sortOrder === 'asc';
-    
+    const isAsc = sortOrder === 'asc'; // true per ascendente, false per discendente
+
     const tableBody = document.getElementById('trendsTableBody');
+    // Converti NodeList in Array per usare sort()
     const rows = Array.from(tableBody.querySelectorAll('tr'));
-    
-    // Ordina le righe
+
+    // Ordina l'array di righe
     rows.sort((a, b) => {
         let valueA, valueB;
-        
+
+        // Estrai i valori da confrontare dal dataset della riga
         switch (sortBy) {
             case 'discover_score':
                 valueA = parseFloat(a.dataset.discoverScore);
@@ -220,23 +308,37 @@ function sortTable() {
                 valueA = parseFloat(a.dataset.score7d);
                 valueB = parseFloat(b.dataset.score7d);
                 break;
-            default:
+            case 'entity': // Aggiungi ordinamento per nome entità (alfabetico)
+                 valueA = a.dataset.entity;
+                 valueB = b.dataset.entity;
+                 // Confronto stringhe
+                 if (valueA < valueB) return isAsc ? -1 : 1;
+                 if (valueA > valueB) return isAsc ? 1 : -1;
+                 return 0;
+            default: // Fallback su discover_score se sortBy non è riconosciuto
                 valueA = parseFloat(a.dataset.discoverScore);
                 valueB = parseFloat(b.dataset.discoverScore);
         }
-        
+
+        // Gestione NaN (valori non numerici) - mettili alla fine
+        if (isNaN(valueA)) return 1;
+        if (isNaN(valueB)) return -1;
+
+        // Ritorna la differenza per l'ordinamento numerico
         return isAsc ? valueA - valueB : valueB - valueA;
     });
-    
-    // Rimuovi le righe esistenti
+
+    // Rimuovi le righe esistenti dal DOM (più efficiente che innerHTML = '')
     while (tableBody.firstChild) {
         tableBody.removeChild(tableBody.firstChild);
     }
-    
-    // Aggiungi le righe riordinate
+
+    // Aggiungi le righe riordinate al DOM
     rows.forEach((row, index) => {
-        // Aggiorna il numero d'ordine
+        // Aggiorna il numero progressivo nella prima cella
         row.cells[0].textContent = index + 1;
         tableBody.appendChild(row);
     });
+
+    console.log(`Tabella ordinata per ${sortBy} (${sortOrder})`);
 }
