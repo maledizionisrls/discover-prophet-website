@@ -12,20 +12,14 @@
     <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 
     <style>
-        /* Stili specifici che sovrascrivono o aggiungono a styles.css */
-        body {
-            padding-top: 20px;
-            padding-bottom: 40px;
-        }
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
-        }
+        body { padding-top: 20px; padding-bottom: 40px; }
+        .table th, .table td { text-align: center; vertical-align: middle; }
+
         /* !!! ATTENZIONE: Controlla questi indici se cambi le colonne in Python !!! */
-        /* Indici basati sull'ordine in df_html_ready: Rank(1), Score(2), Entita(3), Avg...(4,5,6), Grafico(7), Keyword(8), RankOrig(9) */
+        /* Indici basati sull'ordine V8.2: Rank(1), Score(2), Entita(3), Avg...(4,5,6), Grafico(7), Keyword(8), RankOrig(9) */
         .table td:nth-child(3) { /* Colonna Entita */
              text-align: left;
-             word-break: break-word;
+             word-break: break-word; /* Va a capo se nome lungo */
         }
          .table td:nth-child(8) { /* Colonna Related Keywords */
              text-align: left;
@@ -33,42 +27,30 @@
         }
         .table td:nth-child(7) div[id^='plotly-'] { /* Colonna Grafico Trend Score */
              margin-left: auto;
-             margin-right: auto;
+             margin-right: auto; /* Centra il grafico */
         }
         /* Fine controllo indici */
 
-        .table-sm th, .table-sm td {
-             padding: 0.4rem;
-        }
+        .table-sm th, .table-sm td { padding: 0.4rem; }
         .related-keywords div { margin-bottom: 0.3rem; }
         .related-keywords small { font-size: 0.75rem; }
-
-        .footer-text {
-             margin-top: 30px;
-             font-size: 0.8em;
-             color: #6c757d;
-        }
+        .footer-text { margin-top: 30px; font-size: 0.8em; color: #6c757d; }
     </style>
     </head>
 <body>
     <div class="container-fluid">
-
         <header class="text-center mb-4">
              <img src="https://img.icons8.com/fluency/48/prophet.png" alt="Discover Prophet Logo" class="mb-2">
              <h1 class="display-5">{{ main_heading }}</h1>
              <p class="lead">{{ sub_heading }} (Top {{ top_n_display }})</p>
              <p class="text-muted small">Ultimo Aggiornamento: {{ current_timestamp }}</p>
         </header>
-
-
         <div class="table-responsive">
-            {{ html_table | safe }} {# Il filtro '| safe' dice a Jinja2 di non escapare l'HTML della tabella #}
+            {{ html_table | safe }} {# Filtro 'safe' per non escapare l'HTML #}
         </div>
-
         <footer class="text-center footer-text">
             <p>&copy; {{ current_year }} {{ main_heading }} | Discover Score = (1 + Sum(Avg Scores)) / log(Original Rank + 1)</p>
             <p>Script {{ script_version }}</p>
         </footer>
-
     </div> </body>
 </html>
