@@ -1,48 +1,60 @@
-name: Update Discover Prophet Trends
+name: Discover Prophet Daily Update
 
 on:
   schedule:
-    # Esegue ogni giorno alle 02:00 UTC (che sono le 03:00 o 04:00 in Italia a seconda dell'ora legale)
-    # Puoi personalizzare la frequenza - vedi https://crontab.guru/
+    # Esegui ogni giorno alle 02:00 UTC (corrisponde alle 04:00 CEST in estate e 03:00 CET in inverno)
     - cron: '0 2 * * *'
-  workflow_dispatch: # Permette l'avvio manuale dall'interfaccia di GitHub Actions
+  
+  # Permette l'esecuzione manuale dal tab Actions
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest # Usa una macchina virtuale Linux
-
+  update-trends:
+    runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4 # Scarica il codice del tuo repository
-
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.10' # Specifica una versione di Python
-
-      - name: Install Dependencies
+          python-version: '3.10'
+      
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests pandas numpy beautifulsoup4 pytrends cloudscraper fake-useragent plotly Jinja2 tqdm
-          # Se avessi un file requirements.txt, useresti: pip install -r requirements.txt
-
-      - name: Run Discover Prophet Script
+          pip install pandas numpy requests bs4 pytrends tqdm cloudscraper fake-useragent
+      
+      - name: Create required directories
+        run: |
+          mkdir -p templates
+          mkdir -p docs
+          mkdir -p checkpoint_data
+      
+      - name: Copy template files
+        run: |
+          cp templates/index.html templates/index.html.bak || echo "No previous template to backup"
+          cp index.html templates/index.html || echo "Using default template"
+          cp style.css templates/style.css || echo "Using default style"
+          cp script.js templates/script.js || echo "Using default script"
+      
+      - name: Run Discover Prophet script
         run: python discover_prophet.py
-        env:
-          # !!! IMPORTANTE: Passa la stringa proxy come variabile d'ambiente !!!
-          # Dovrai creare un GitHub Secret chiamato PROXY_STRING con il valore
-          # della tua stringa proxy completa (es. "provider:port:user-country-{geo}:pass")
-          PROXY_STRING: ${{ secrets.PROXY_STRING }}
-
-      - name: Commit and Push Changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: 'Automated update of Discover Prophet trends'
-          # Specifica i file da aggiungere e committare se cambiati
-          file_pattern: 'index.html *.csv checkpoint_data_v8_1/*' # Aggiorna index.html, CSV e checkpoint
-          # Opzionale: configura user name e email per i commit automatici
-          commit_user_name: 'GitHub Actions Bot'
-          commit_user_email: 'actions@github.com'
-          # Aggiungi opzioni per gestire errori se non ci sono modifiche
-          skip_dirty_check: false
-          skip_fetch: true
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+      
+      - name: Commit and push changes
+        run: |
+          # Aggiungi tutti i file generati
+          git add docs/
+          git add checkpoint_data/
+          
+          # Commit con timestamp
+          git commit -m "Update trends data: $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
+          
+          # Push dei cambiamenti
+          git push
