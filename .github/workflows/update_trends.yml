@@ -1,0 +1,48 @@
+name: Update Discover Prophet Trends
+
+on:
+  schedule:
+    # Esegue ogni giorno alle 02:00 UTC (che sono le 03:00 o 04:00 in Italia a seconda dell'ora legale)
+    # Puoi personalizzare la frequenza - vedi https://crontab.guru/
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Permette l'avvio manuale dall'interfaccia di GitHub Actions
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest # Usa una macchina virtuale Linux
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4 # Scarica il codice del tuo repository
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10' # Specifica una versione di Python
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas numpy beautifulsoup4 pytrends cloudscraper fake-useragent plotly Jinja2 tqdm
+          # Se avessi un file requirements.txt, useresti: pip install -r requirements.txt
+
+      - name: Run Discover Prophet Script
+        run: python discover_prophet.py
+        env:
+          # !!! IMPORTANTE: Passa la stringa proxy come variabile d'ambiente !!!
+          # Dovrai creare un GitHub Secret chiamato PROXY_STRING con il valore
+          # della tua stringa proxy completa (es. "provider:port:user-country-{geo}:pass")
+          PROXY_STRING: ${{ secrets.PROXY_STRING }}
+
+      - name: Commit and Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Automated update of Discover Prophet trends'
+          # Specifica i file da aggiungere e committare se cambiati
+          file_pattern: 'index.html *.csv checkpoint_data_v8_1/*' # Aggiorna index.html, CSV e checkpoint
+          # Opzionale: configura user name e email per i commit automatici
+          commit_user_name: 'GitHub Actions Bot'
+          commit_user_email: 'actions@github.com'
+          # Aggiungi opzioni per gestire errori se non ci sono modifiche
+          skip_dirty_check: false
+          skip_fetch: true
