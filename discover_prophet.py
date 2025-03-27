@@ -6,6 +6,21 @@
 #    Output in HTML anzichè CSV
 
 # --- Import Librerie Essenziali ---
+
+# --- PATCH per correggere l'errore method_whitelist vs allowed_methods ---
+import urllib3
+from urllib3.util import Retry
+
+original_init = Retry.__init__
+
+def patched_init(self, *args, **kwargs):
+    if 'method_whitelist' in kwargs:
+        kwargs['allowed_methods'] = kwargs.pop('method_whitelist')
+    return original_init(self, *args, **kwargs)
+
+Retry.__init__ = patched_init
+# --- FINE PATCH ---
+
 import requests
 import random
 import time
