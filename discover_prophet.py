@@ -1,25 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # 🚀 Script Ottimizzato per Google Trends TV (Hot Trends) - V7.2
-#    Implementa Heuristic Discover Score: (1+VolContext)/log(Rank+1) <-- Volume Lineare
-#    Ordina per Discover_Score decrescente. Contesto per Top N.
-#    Output in HTML anzichè CSV
 
-# --- Import Librerie Essenziali ---
-
-# --- PATCH per correggere l'errore method_whitelist vs allowed_methods ---
-import urllib3
-from urllib3.util import Retry
-
-original_init = Retry.__init__
-
-def patched_init(self, *args, **kwargs):
-    if 'method_whitelist' in kwargs:
-        kwargs['allowed_methods'] = kwargs.pop('method_whitelist')
-    return original_init(self, *args, **kwargs)
-
-Retry.__init__ = patched_init
-# --- FINE PATCH ---
 !pip install urllib3==1.26.18 pytrends==4.9.2 requests beautifulsoup4 fake-useragent pandas tqdm cloudscraper pydantic
 import requests
 import random
