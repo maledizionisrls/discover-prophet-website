@@ -20,7 +20,7 @@ def patched_init(self, *args, **kwargs):
 
 Retry.__init__ = patched_init
 # --- FINE PATCH ---
-
+!pip install urllib3==1.26.18 pytrends==4.9.2 requests beautifulsoup4 fake-useragent pandas tqdm cloudscraper pydantic
 import requests
 import random
 import time
