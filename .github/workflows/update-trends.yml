@@ -2,8 +2,12 @@ name: Discover Prophet Daily Update
 
 on:
   schedule:
-    # Esegui ogni giorno alle 02:00 UTC (corrisponde alle 04:00 CEST in estate e 03:00 CET in inverno)
-    - cron: '0 2 * * *'
+    # Esegui ogni ora dalle 9:30 alle 17:30 (Roma)
+    # Convertito in UTC (che è il fuso usato da GitHub Actions):
+    # - In inverno (UTC+1): dalle 8:30 alle 16:30 UTC
+    # - In estate (UTC+2): dalle 7:30 alle 15:30 UTC
+    # Quindi usiamo un intervallo che copre entrambi i periodi: 7:30-16:30 UTC
+    - cron: '30 7-16 * * *'
   
   # Permette l'esecuzione manuale dal tab Actions
   workflow_dispatch:
