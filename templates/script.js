@@ -69,12 +69,15 @@ function renderTrendsTable(data) {
         if (item.rank <= 10) rankBadgeClass = 'top-10';
         else if (item.rank <= 25) rankBadgeClass = 'top-25';
         
+        // Calcola l'indicatore di tendenza (in aumento, in calo, stabile)
+        const trendIndicator = calculateTrendIndicator(item.score_1h, item.score_4h, item.score_7d);
+        
         // Crea il contenuto della riga
         row.innerHTML = `
             <td>${index + 1}</td>
             <td><span class="rank-badge ${rankBadgeClass}">${item.rank}</span></td>
             <td>${item.entity}</td>
-            <td class="score">${item.discover_score.toFixed(3)}</td>
+            <td class="score">${item.discover_score.toFixed(3)} ${trendIndicator}</td>
             <td>${item.score_1h.toFixed(1)}</td>
             <td>${item.score_4h.toFixed(1)}</td>
             <td>${item.score_7d.toFixed(1)}</td>
@@ -173,6 +176,15 @@ function createTrendChart(containerId, dataPoints) {
     }
 }
 
+// Crea gradiente per lo sfondo del grafico
+function createGradient(ctx, color) {
+    const chartContext = ctx.getContext('2d');
+    const gradient = chartContext.createLinearGradient(0, 0, 0, 40);
+    gradient.addColorStop(0, color + '50'); // 50 = 31% opacity
+    gradient.addColorStop(1, color + '10'); // 10 = 6% opacity
+    return gradient;
+}
+
 // Determina colore della tendenza in base all'andamento dei punteggi
 function determineTrendColor(dataPoints) {
     // Confronta il valore più recente (1h) con quello a medio termine (7d)
@@ -182,6 +194,17 @@ function determineTrendColor(dataPoints) {
         return '#e74c3c'; // rosso - tendenza in calo
     } else {
         return '#f39c12'; // arancione - tendenza stabile
+    }
+}
+
+// Calcola l'indicatore di tendenza
+function calculateTrendIndicator(score1h, score4h, score7d) {
+    if (score1h > score7d * 1.2) {
+        return '<span class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i></span>';
+    } else if (score1h < score7d * 0.8) {
+        return '<span class="trend-indicator trend-down"><i class="fas fa-arrow-down"></i></span>';
+    } else {
+        return '<span class="trend-indicator trend-neutral"><i class="fas fa-arrow-right"></i></span>';
     }
 }
 
