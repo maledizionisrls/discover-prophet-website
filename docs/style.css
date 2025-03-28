@@ -10,6 +10,9 @@
     --trending-up: #27ae60;
     --trending-down: #e74c3c;
     --trending-neutral: #f39c12;
+    --flame-color-1: #ff9900;
+    --flame-color-2: #ff5500;
+    --flame-color-3: #ff3300;
 }
 
 body {
@@ -137,13 +140,18 @@ select {
     font-size: 0.95rem;
 }
 
+/* Responsive table container */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
 .trends-table {
     width: 100%;
     border-collapse: collapse;
     background-color: var(--card-color);
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .trends-table th, 
@@ -151,12 +159,16 @@ select {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
 }
 
 .trends-table th {
     background-color: var(--primary-color);
     color: white;
     font-weight: 500;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .trends-table tr:last-child td {
@@ -165,6 +177,11 @@ select {
 
 .trends-table tr:hover {
     background-color: rgba(0,0,0,0.02);
+}
+
+.trends-table td:nth-child(3) {
+    white-space: normal; /* Solo la colonna del trend può andare a capo */
+    max-width: 200px;
 }
 
 .rank-badge {
@@ -193,6 +210,9 @@ select {
 
 .score {
     font-weight: bold;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
 }
 
 .trend-indicator {
@@ -200,66 +220,6 @@ select {
     font-size: 0.9rem;
 }
 
-.trend-up {
-    color: var(--trending-up);
-}
-
-.trend-down {
-    color: var(--trending-down);
-}
-
-.trend-neutral {
-    color: var(--trending-neutral);
-}
-
-footer {
-    text-align: center;
-    padding: 1.5rem;
-    margin-top: 2rem;
-    color: var(--text-light);
-    font-size: 0.9rem;
-    border-top: 1px solid var(--border-color);
-}
-
-.version {
-    font-size: 0.8rem;
-    margin-top: 0.5rem;
-}
-
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .header-badge {
-        margin-top: 0.8rem;
-    }
-
-    .controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .search-box {
-        max-width: 100%;
-    }
-
-    .trends-table th, 
-    .trends-table td {
-        padding: 0.75rem 0.5rem;
-    }
-
-    .trend-chart-container {
-        width: 80px;
-        height: 30px;
-    }
-}
-
-.hidden-row {
-    display: none;
-}
-/* Nuovi stili per indicatori di tendenza più dettagliati */
 .trend-stable {
     color: #7f8c8d; /* grigio neutro */
 }
@@ -294,57 +254,272 @@ footer {
     text-shadow: 0 0 2px rgba(231, 76, 60, 0.5);
 }
 
-/* Effetto "fuoco" per entità "hot" */
-@keyframes hotTrendAnimation {
-    0% {
-        background-color: rgba(255, 102, 0, 0.03);
-    }
-    50% {
-        background-color: rgba(255, 102, 0, 0.08);
-    }
-    100% {
-        background-color: rgba(255, 102, 0, 0.03);
-    }
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-color);
 }
 
+.version {
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+.hidden-row {
+    display: none;
+}
+
+/* ============ NUOVE CLASSI FIAMME ============ */
+
+/* Container per fiamme - impostato direttamente sulla riga */
 .hot-trend {
     position: relative;
-    animation: hotTrendAnimation 2s infinite;
 }
 
-.hot-trend::before {
+/* Indicatore visivo di trend a fuoco */
+.hot-trend td:first-child {
+    position: relative;
+}
+
+.hot-trend td:first-child::before {
     content: "";
     position: absolute;
-    top: 0;
     left: 0;
-    right: 0;
+    top: 0;
     bottom: 0;
-    border-left: 3px solid #ff6600;
-    pointer-events: none;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--flame-color-1), var(--flame-color-2), var(--flame-color-3));
+    box-shadow: 0 0 8px 1px rgba(255, 153, 0, 0.6);
+    animation: flamePulse 2s infinite;
 }
 
-.hot-trend td {
-    position: relative;
-}
-
+/* Effetto di fuoco sul punteggio */
 .hot-trend .score {
     position: relative;
+    padding-right: 30px; /* Spazio per l'emoji di fuoco */
 }
 
 .hot-trend .score::after {
-    content: " 🔥";
-    font-size: 14px;
+    content: "🔥";
+    font-size: 16px;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    filter: drop-shadow(0 0 2px rgba(255, 165, 0, 0.7));
+    animation: flameShake 0.3s infinite alternate;
 }
 
-@media (max-width: 768px) {
-    .trends-table th:nth-child(5),
-    .trends-table th:nth-child(6),
-    .trends-table td:nth-child(5),
-    .trends-table td:nth-child(6) {
-        display: none; /* Nascondi colonne meno importanti su mobile */
+/* Effetto fiamme avanzato */
+.flame-effect {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    right: 20px;
+    bottom: -5px;
+    transform-origin: center bottom;
+    z-index: 5;
+}
+
+.flame-wrapper {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: scaleY(0.8) translateY(15%);
+    filter: blur(0.5px) contrast(1.5);
+    animation: flicker 0.8s infinite alternate;
+}
+
+.flame {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50% 50% 20% 20%;
+    background: radial-gradient(ellipse at center, rgba(255, 247, 130, 0.7) 0%, 
+                                                 rgba(255, 153, 0, 0.7) 50%, 
+                                                 rgba(255, 51, 0, 0.5) 100%);
+    transform-origin: center bottom;
+    animation: flame 0.5s infinite alternate;
+}
+
+.flame::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 90%;
+    height: 90%;
+    border-radius: 50% 50% 20% 20%;
+    background: radial-gradient(ellipse at center, rgba(255, 247, 130, 0.5) 0%, 
+                                                  rgba(255, 153, 0, 0.5) 50%, 
+                                                  rgba(255, 51, 0, 0.3) 100%);
+    transform: translateX(5%) translateY(5%) scale(0.9);
+    filter: blur(1px);
+    animation: flame 0.7s 0.1s infinite alternate;
+}
+
+.flame::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 80%;
+    height: 80%;
+    border-radius: 50% 50% 20% 20%;
+    background: radial-gradient(ellipse at center, rgba(255, 247, 130, 0.3) 0%, 
+                                                 rgba(255, 153, 0, 0.3) 50%, 
+                                                 rgba(255, 51, 0, 0.2) 100%);
+    transform: translateX(10%) translateY(10%) scale(0.8);
+    filter: blur(2px);
+    animation: flame 0.6s 0.2s infinite alternate;
+}
+
+/* Animazioni fiamme */
+@keyframes flame {
+    0% {
+        transform: scaleY(1) scaleX(1);
+    }
+    100% {
+        transform: scaleY(1.1) scaleX(0.9);
+    }
+}
+
+@keyframes flameShake {
+    0% {
+        transform: translateY(-50%) rotate(-2deg);
+    }
+    100% {
+        transform: translateY(-50%) rotate(2deg);
+    }
+}
+
+@keyframes flicker {
+    0% {
+        opacity: 0.8;
+        transform: scaleY(0.8) translateY(15%);
+    }
+    100% {
+        opacity: 1;
+        transform: scaleY(0.85) translateY(12%);
+    }
+}
+
+@keyframes flamePulse {
+    0%, 100% {
+        opacity: 0.8;
+        box-shadow: 0 0 8px 1px rgba(255, 153, 0, 0.6);
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 12px 2px rgba(255, 153, 0, 0.8);
+    }
+}
+
+/* Responsive design migliorato */
+@media (max-width: 1200px) {
+    .trends-table th, 
+    .trends-table td {
+        padding: 0.8rem 0.6rem;
     }
     
     .trend-chart-container {
-        width: 60px; /* Grafici più compatti su mobile */
+        width: 100px;
+    }
+}
+
+@media (max-width: 992px) {
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-badge {
+        margin-top: 0.8rem;
+    }
+    
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .trends-table th:nth-child(6),
+    .trends-table td:nth-child(6) {
+        display: none; /* Nascondi colonna 4h */
+    }
+    
+    .trend-chart-container {
+        width: 90px;
+    }
+}
+
+@media (max-width: 768px) {
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box {
+        max-width: 100%;
+    }
+    
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .trends-table th, 
+    .trends-table td {
+        padding: 0.7rem 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .trends-table th:nth-child(5),
+    .trends-table td:nth-child(5),
+    .trends-table th:nth-child(7),
+    .trends-table td:nth-child(7) {
+        display: none; /* Nascondi colonne 1h e 7d */
+    }
+    
+    .trend-chart-container {
+        width: 70px;
+        height: 35px;
+    }
+    
+    .rank-badge {
+        min-width: 1.5rem;
+        padding: 0.15rem 0.4rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .trends-table th, 
+    .trends-table td {
+        padding: 0.6rem 0.4rem;
+        font-size: 0.85rem;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    .header-content {
+        padding: 0.5rem 0;
+    }
+    
+    .trend-chart-container {
+        width: 60px;
+        height: 30px;
+    }
+    
+    /* Ottimizzazione per schermi molto piccoli */
+    .trends-table th:first-child,
+    .trends-table td:first-child {
+        display: none; /* Nascondi numero progressivo */
     }
 }
