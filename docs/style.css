@@ -259,3 +259,92 @@ footer {
 .hidden-row {
     display: none;
 }
+/* Nuovi stili per indicatori di tendenza più dettagliati */
+.trend-stable {
+    color: #7f8c8d; /* grigio neutro */
+}
+
+.trend-small-up {
+    color: #2ecc71; /* verde chiaro */
+}
+
+.trend-medium-up {
+    color: #27ae60; /* verde medio */
+    font-weight: bold;
+}
+
+.trend-strong-up {
+    color: #16a085; /* verde scuro */
+    font-weight: bold;
+    text-shadow: 0 0 2px rgba(39, 174, 96, 0.5);
+}
+
+.trend-small-down {
+    color: #e74c3c; /* rosso chiaro */
+}
+
+.trend-medium-down {
+    color: #c0392b; /* rosso medio */
+    font-weight: bold;
+}
+
+.trend-strong-down {
+    color: #922b21; /* rosso scuro */
+    font-weight: bold;
+    text-shadow: 0 0 2px rgba(231, 76, 60, 0.5);
+}
+
+/* Effetto "fuoco" per entità "hot" */
+@keyframes hotTrendAnimation {
+    0% {
+        background-color: rgba(255, 102, 0, 0.03);
+    }
+    50% {
+        background-color: rgba(255, 102, 0, 0.08);
+    }
+    100% {
+        background-color: rgba(255, 102, 0, 0.03);
+    }
+}
+
+.hot-trend {
+    position: relative;
+    animation: hotTrendAnimation 2s infinite;
+}
+
+.hot-trend::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-left: 3px solid #ff6600;
+    pointer-events: none;
+}
+
+.hot-trend td {
+    position: relative;
+}
+
+.hot-trend .score {
+    position: relative;
+}
+
+.hot-trend .score::after {
+    content: " 🔥";
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .trends-table th:nth-child(5),
+    .trends-table th:nth-child(6),
+    .trends-table td:nth-child(5),
+    .trends-table td:nth-child(6) {
+        display: none; /* Nascondi colonne meno importanti su mobile */
+    }
+    
+    .trend-chart-container {
+        width: 60px; /* Grafici più compatti su mobile */
+    }
+}
