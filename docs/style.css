@@ -10,10 +10,8 @@
     --trending-up: #27ae60;
     --trending-down: #e74c3c;
     --trending-neutral: #f39c12;
-    --flame-color-1: #ffdd33;
-    --flame-color-2: #ff9500;
-    --flame-color-3: #ff5500;
-    --flame-color-4: #ff3300;
+    --hot-trend-bg: rgba(255, 228, 196, 0.3);
+    --hot-trend-border: #ff5500;
 }
 
 body {
@@ -160,7 +158,7 @@ select {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
-    position: relative;
+    vertical-align: middle;
 }
 
 .trends-table th {
@@ -207,8 +205,6 @@ select {
 .score {
     font-weight: bold;
     white-space: nowrap;
-    display: flex;
-    align-items: center;
 }
 
 .trend-indicator {
@@ -232,7 +228,6 @@ select {
 .trend-strong-up {
     color: #16a085; /* verde scuro */
     font-weight: bold;
-    text-shadow: 0 0 2px rgba(39, 174, 96, 0.5);
 }
 
 .trend-small-down {
@@ -247,7 +242,6 @@ select {
 .trend-strong-down {
     color: #922b21; /* rosso scuro */
     font-weight: bold;
-    text-shadow: 0 0 2px rgba(231, 76, 60, 0.5);
 }
 
 footer {
@@ -268,142 +262,34 @@ footer {
     display: none;
 }
 
-/* =============== EFFETTO FIAMME TOTALMENTE RIFATTO =============== */
-
-/* CASELLA CHE VA A FUOCO (effetto fuoco su tutta la riga) */
-.hot-trend td {
-    position: relative;
-    overflow: hidden; /* Contiene l'animazione */
-    z-index: 1; /* Per posizionamento appropriato dell'effetto */
+/* SOLUZIONE ULTRA-SEMPLIFICATA PER HOT TRENDS */
+.hot-trend {
+    background-color: var(--hot-trend-bg);
 }
 
-/* Bordo sinistro fiamme super visibile e animato */
-.hot-trend::before {
+.hot-trend td:first-child {
+    position: relative;
+}
+
+.hot-trend td:first-child::before {
     content: "";
     position: absolute;
     left: 0;
     top: 0;
     bottom: 0;
-    width: 6px; /* Bordo più spesso e visibile */
-    background: linear-gradient(to bottom, var(--flame-color-2), var(--flame-color-3), var(--flame-color-4));
-    box-shadow: 0 0 10px 2px rgba(255, 85, 0, 0.8);
-    z-index: 2;
-    animation: flameBorder 1.5s infinite alternate ease-in-out;
+    width: 4px;
+    background-color: var(--hot-trend-border);
 }
 
-@keyframes flameBorder {
-    0% { opacity: 0.85; width: 6px; }
-    100% { opacity: 1; width: 8px; }
-}
-
-/* Sfondo fiamme animato per tutta la riga */
-.hot-trend {
-    position: relative;
-    background: linear-gradient(90deg, 
-        rgba(255, 153, 0, 0.12), 
-        rgba(255, 153, 0, 0.05) 70%, 
-        rgba(255, 153, 0, 0) 100%);
-    animation: rowFlame 3s infinite alternate;
-}
-
-@keyframes rowFlame {
-    0% {
-        background: linear-gradient(90deg, 
-            rgba(255, 153, 0, 0.12), 
-            rgba(255, 153, 0, 0.05) 70%, 
-            rgba(255, 153, 0, 0) 100%);
-    }
-    100% {
-        background: linear-gradient(90deg, 
-            rgba(255, 85, 0, 0.15), 
-            rgba(255, 85, 0, 0.08) 70%, 
-            rgba(255, 85, 0, 0) 100%);
-    }
-}
-
-/* Pseudo-elemento per l'ombra inferiore delle fiamme */
-.hot-trend::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, 
-        rgba(255, 69, 0, 0.4), 
-        rgba(255, 69, 0, 0.2) 40%, 
-        rgba(255, 69, 0, 0) 80%);
-    z-index: 3;
-}
-
-/* Badge HOT con fiamme per il punteggio */
 .hot-badge {
-    display: inline-flex;
-    align-items: center;
-    margin-left: 8px;
-    height: 20px;
-    border-radius: 10px;
-    background: linear-gradient(90deg, var(--flame-color-2), var(--flame-color-3));
+    display: inline-block;
+    margin-left: 6px;
+    background-color: var(--hot-trend-border);
     color: white;
-    padding: 0 8px;
-    font-size: 0.8em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.75em;
     font-weight: bold;
-    position: relative;
-    box-shadow: 0 0 6px 1px rgba(255, 85, 0, 0.4);
-    animation: hotBadgePulse 1.5s infinite alternate;
-}
-
-@keyframes hotBadgePulse {
-    0% { 
-        box-shadow: 0 0 6px 1px rgba(255, 85, 0, 0.4);
-        transform: scale(1);
-    }
-    100% { 
-        box-shadow: 0 0 10px 2px rgba(255, 85, 0, 0.6);
-        transform: scale(1.05);
-    }
-}
-
-.hot-badge i {
-    margin-right: 4px;
-    animation: flameIconShake 0.3s infinite alternate;
-}
-
-@keyframes flameIconShake {
-    0% { transform: rotate(-5deg) scale(1); }
-    100% { transform: rotate(5deg) scale(1.1); }
-}
-
-/* Aggiunta di fiamme che salgono verso l'alto per le tendenze HOT più esplosive */
-.super-hot-trend::before {
-    content: "";
-    position: absolute;
-    left: 2px;
-    bottom: 0;
-    width: 20px;
-    height: 60%;
-    background: 
-        radial-gradient(
-            ellipse at center bottom, 
-            rgba(255, 221, 51, 0.2) 0%, 
-            rgba(255, 153, 0, 0.15) 40%, 
-            rgba(255, 51, 0, 0.1) 70%,
-            rgba(255, 51, 0, 0) 100%
-        );
-    z-index: 1;
-    transform-origin: center bottom;
-    animation: flameRise 3s infinite alternate;
-}
-
-@keyframes flameRise {
-    0% {
-        transform: scaleY(0.8) translateY(0);
-        opacity: 0.7;
-    }
-    100% {
-        transform: scaleY(1) translateY(-10px);
-        opacity: 0.9;
-    }
 }
 
 /* Responsive design migliorato */
@@ -501,7 +387,6 @@ footer {
         height: 30px;
     }
     
-    /* Ottimizzazione per schermi molto piccoli */
     .trends-table th:first-child,
     .trends-table td:first-child {
         display: none; /* Nascondi numero progressivo */
