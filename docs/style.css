@@ -10,8 +10,6 @@
     --trending-up: #27ae60;
     --trending-down: #e74c3c;
     --trending-neutral: #f39c12;
-    --hot-trend-bg: rgba(255, 228, 196, 0.3);
-    --hot-trend-border: #ff5500;
 }
 
 body {
@@ -158,7 +156,6 @@ select {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
-    vertical-align: middle;
 }
 
 .trends-table th {
@@ -204,7 +201,6 @@ select {
 
 .score {
     font-weight: bold;
-    white-space: nowrap;
 }
 
 .trend-indicator {
@@ -262,34 +258,32 @@ footer {
     display: none;
 }
 
-/* SOLUZIONE ULTRA-SEMPLIFICATA PER HOT TRENDS */
+/* Stile per trend HOT - NON modifica layout! */
 .hot-trend {
-    background-color: var(--hot-trend-bg);
+    background-color: rgba(255, 249, 240, 0.6);
 }
 
-.hot-trend td:first-child {
+.hot-trend td:nth-child(3) {
     position: relative;
 }
 
-.hot-trend td:first-child::before {
+/* Bordo sinistro (NON sposta contenuto) */
+.hot-trend td:nth-child(3)::before {
     content: "";
     position: absolute;
     left: 0;
     top: 0;
-    bottom: 0;
-    width: 4px;
-    background-color: var(--hot-trend-border);
+    height: 100%;
+    width: 3px;
+    background-color: #ff6600;
 }
 
-.hot-badge {
-    display: inline-block;
-    margin-left: 6px;
-    background-color: var(--hot-trend-border);
-    color: white;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.75em;
+/* Badge HOT direttamente nel testo del punteggio */
+.hot-indicator {
+    display: inline;
+    color: #ff6600;
     font-weight: bold;
+    margin-left: 5px;
 }
 
 /* Responsive design migliorato */
@@ -364,31 +358,5 @@ footer {
         min-width: 1.5rem;
         padding: 0.15rem 0.4rem;
         font-size: 0.85rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .trends-table th, 
-    .trends-table td {
-        padding: 0.6rem 0.4rem;
-        font-size: 0.85rem;
-    }
-    
-    h1 {
-        font-size: 1.5rem;
-    }
-    
-    .header-content {
-        padding: 0.5rem 0;
-    }
-    
-    .trend-chart-container {
-        width: 60px;
-        height: 30px;
-    }
-    
-    .trends-table th:first-child,
-    .trends-table td:first-child {
-        display: none; /* Nascondi numero progressivo */
     }
 }
