@@ -38,13 +38,16 @@ function setupEventListeners() {
     document.getElementById('sortOrder').addEventListener('change', sortTable);
 }
 
-// Renderizza la tabella delle tendenze
+// Renderizza la tabella delle tendenze - ULTRA SEMPLIFICATA
 function renderTrendsTable(data) {
     const tableBody = document.getElementById('trendsTableBody');
     tableBody.innerHTML = '';
     
     data.forEach((item, index) => {
+        // Crea la riga della tabella
         const row = document.createElement('tr');
+        
+        // Aggiungi attributi dataset per il filtraggio e l'ordinamento
         row.dataset.entity = item.entity.toLowerCase();
         row.dataset.rank = item.rank;
         row.dataset.discoverScore = item.discover_score;
@@ -52,16 +55,10 @@ function renderTrendsTable(data) {
         row.dataset.score4h = item.score_4h;
         row.dataset.score7d = item.score_7d;
         
-        // Verifica se l'entità è "hot" (aumento significativo con buona base)
+        // Verifica se l'entità è "hot" (aumento significativo)
         const isHot = isEntityHot(item.score_1h, item.score_4h, item.score_7d);
-        const isSuperHot = isSuperHotEntity(item.score_1h, item.score_4h, item.score_7d);
-        
         if (isHot) {
             row.classList.add('hot-trend');
-            // Per trend particolarmente esplosivi aggiungiamo una classe extra
-            if (isSuperHot) {
-                row.classList.add('super-hot-trend');
-            }
         }
         
         // Determina la classe del badge in base al rank originale
@@ -69,17 +66,17 @@ function renderTrendsTable(data) {
         if (item.rank <= 10) rankBadgeClass = 'top-10';
         else if (item.rank <= 25) rankBadgeClass = 'top-25';
         
-        // Calcola l'indicatore di tendenza in base alla differenza tra 4h e 1h
+        // Calcola l'indicatore di tendenza 
         const trendIndicator = calculateTrendIndicator(item.score_1h, item.score_4h);
         
-        // Crea il contenuto della riga
+        // Crea il contenuto HTML della riga
         row.innerHTML = `
             <td>${index + 1}</td>
             <td><span class="rank-badge ${rankBadgeClass}">${item.rank}</span></td>
             <td>${item.entity}</td>
             <td class="score">
                 ${item.discover_score.toFixed(3)} ${trendIndicator}
-                ${isHot ? '<span class="hot-badge"><i class="fas fa-fire"></i>HOT</span>' : ''}
+                ${isHot ? '<span class="hot-badge">HOT</span>' : ''}
             </td>
             <td>${item.score_1h.toFixed(1)}</td>
             <td>${item.score_4h.toFixed(1)}</td>
@@ -89,6 +86,7 @@ function renderTrendsTable(data) {
             </td>
         `;
         
+        // Aggiungi la riga alla tabella
         tableBody.appendChild(row);
     });
     
@@ -100,38 +98,27 @@ function renderTrendsTable(data) {
     }, 100);
 }
 
-// Verifica se un'entità è "hot" (aumento significativo ma con buona base)
+// Verifica se un'entità è "hot" - SEMPLIFICATA
 function isEntityHot(score1h, score4h, score7d) {
     // Un trend è considerato "hot" se:
+    // Ha un volume significativo a 1h e un aumento notevole
     
-    // Caso 1: Volumi molto alti (esplosione immediata)
-    if (score1h > 30 && score1h > score4h * 2) {
+    // Caso 1: Volume alto e crescita notevole rispetto a 4h
+    if (score1h > 30 && score1h > score4h * 1.8) {
         return true;
     }
     
-    // Caso 2: Crescita sostenuta con base decente
-    if (score1h > 15 && 
-        score1h > score4h * 1.8 && 
-        score1h > score7d * 1.5) {
+    // Caso 2: Volume medio e crescita molto forte
+    if (score1h > 15 && score1h > score4h * 2.5) {
         return true;
     }
     
-    // Caso 3: Trend emergente con accelerazione
-    if (score1h > 10 && 
-        score4h > 5 &&
-        score1h > score4h * 1.5 && 
-        score4h > score7d * 1.5) {
+    // Caso 3: Volume decente e crescita estrema
+    if (score1h > 10 && score1h > score4h * 3) {
         return true;
     }
     
     return false;
-}
-
-// Verifica se un'entità è "super-hot" (trend particolarmente esplosivo)
-function isSuperHotEntity(score1h, score4h, score7d) {
-    // Per aggiungere fiamme più intense (super-hot)
-    // deve avere un punteggio 1h estremamente alto rispetto ai precedenti
-    return score1h > 50 && (score1h > score4h * 3 || score1h > score7d * 4);
 }
 
 // Crea un grafico di tendenza per una entità
