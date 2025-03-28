@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-# 🚀 Script Ottimizzato per Google Trends TV (Hot Trends) - V7.3 (Heuristic Modificata)
-#    Implementa Heuristic Discover Score: (1 + V4h + V7d + sqrt(V4h*V7d)) / log(Rank+1)
-#    Obiettivo: Bilanciare esplosioni recenti con storico, penalizzando fuochi di paglia senza storico.
+# 🚀 Script Ottimizzato per Google Trends TV (Hot Trends) - V7.4 (Heuristic Moltiplicativa)
+#    Implementa Heuristic Discover Score in funzione dedicata per facile modifica.
+#    Formula V7.4: (1 + V4h * (1 + log1p(V7d))) / log1p(Rank)
+#    Obiettivo: Validare forza recente con storico (log1p(V7d)) senza penalizzare troppo Rank.
 #    Ordina per Discover_Score decrescente. Contesto per Top N.
-#    Output in HTML anzichè CSV
+#    Output in HTML.
 
 # --- Import Librerie Essenziali ---
 import requests
@@ -15,7 +16,7 @@ import warnings
 import os
 import hashlib
 import pandas as pd
-import numpy as np # Necessario per log e sqrt
+import numpy as np # Necessario per log, log1p, sqrt, power etc.
 import re
 import traceback
 import concurrent.futures
@@ -77,7 +78,7 @@ TEMPLATE_DIR = "templates" # Directory template HTML
 # --- Parametri Contesto di Volume ---
 FETCH_VOLUME_CONTEXT = True
 N_PROCESS_FOR_CONTEXT = 50
-CONTEXT_TIMEFRAMES = ['now 1-H', 'now 4-H', 'now 7-d'] # Manteniamo 1H per dati grezzi, anche se non in formula finale
+CONTEXT_TIMEFRAMES = ['now 1-H', 'now 4-H', 'now 7-d']
 CONTEXT_N_RUNS = 2
 
 # --- Parametri Gestione Proxy e Concorrenza ---
@@ -105,12 +106,58 @@ ENTITY_EXTRACTION_READ_TIMEOUT = 25
 PYTRENDS_CONNECT_TIMEOUT = 10
 PYTRENDS_READ_TIMEOUT = 25
 
-# --- Parametri Interni Pytrends (Non modificare) ---
+# --- Parametri Interni Pytrends (Non modificare se non sai cosa fai) ---
 PYTRENDS_RETRIES = 1
 PYTRENDS_BACKOFF_FACTOR = 0.2
 
 # ==============================================================================
 # ================== FINE SEZIONE PARAMETRI CONFIGURABILI ======================
+# ==============================================================================
+
+
+# ==============================================================================
+# ==================== FUNZIONE CALCOLO DISCOVER SCORE (V7.4) ==================
+# ==============================================================================
+# Modifica questa funzione per cambiare la logica di calcolo dello score.
+# Riceve Series Pandas per rank, score_4h, score_7d (già pulite: numeriche, >=0, rank>=1)
+# Restituisce una Series Pandas con i punteggi calcolati.
+# ------------------------------------------------------------------------------
+
+def calculate_discover_score(rank_series, score_4h, score_7d):
+    """
+    Calcola l'Heuristic Discover Score basato su rank, volume 4h e volume 7d.
+    Formula V7.4: (1 + V4h * (1 + log1p(V7d))) / log1p(Rank)
+    - V4h: Score medio ultime 4 ore
+    - V7d: Score medio ultimi 7 giorni
+    - Rank: Rank iniziale estratto da Google Trends TV
+    - log1p(x) calcola log(1+x) in modo numericamente stabile.
+    Logica: Amplifica il volume recente (V4h) basandosi sulla presenza di
+            uno storico (V7d) tramite un "fattore di fiducia" (1+log1p(V7d)).
+            Mantiene la penalità logaritmica per il Rank.
+    """
+    print("        Applicando Formula V7.4: (1 + V4h * (1 + log1p(V7d))) / log1p(Rank)")
+
+    # Fattore di fiducia basato sullo storico 7d (vale 1 se V7d=0)
+    trust_factor_7d = 1 + np.log1p(score_7d)
+
+    # Numeratore: Base 1 + Volume 4h moltiplicato per il fattore di fiducia
+    numerator = 1 + score_4h * trust_factor_7d
+
+    # Denominatore: log(Rank + 1)
+    denominator = np.log1p(rank_series)
+    # Assicura che il denominatore non sia mai zero per evitare errori
+    denominator = np.maximum(denominator, 1e-9) # Usa un valore piccolo positivo se log1p è 0
+
+    # Calcola lo score
+    discover_score = numerator / denominator
+
+    # Riempi eventuali NaN risultanti (dovuti a input imprevisti) con 0
+    discover_score = discover_score.fillna(0)
+
+    return discover_score
+
+# ==============================================================================
+# ================== FINE FUNZIONE CALCOLO DISCOVER SCORE ======================
 # ==============================================================================
 
 
@@ -155,8 +202,8 @@ COUNTRY_LOCALE_MAP = {
 }
 def get_locale_for_geo(geo_code): return COUNTRY_LOCALE_MAP.get(geo_code.upper(), COUNTRY_LOCALE_MAP['DEFAULT'])
 
-# --- Classi AdvancedProxyManager e ConsistentBrowserProfile (Invariate da V7) ---
-# (Codice delle classi omesso per brevità - è identico alla versione precedente)
+# --- Classi AdvancedProxyManager e ConsistentBrowserProfile ---
+# (Codice omesso per brevità - invariato rispetto a V7.3)
 class AdvancedProxyManager:
     def __init__(self, proxy_geo_list, max_concurrent, cooldown_seconds): self.max_concurrent=max_concurrent; self.cooldown_seconds=cooldown_seconds; self.lock=threading.Lock(); self.all_proxies={i['proxy']: i['geo'] for i in proxy_geo_list}; self.available_proxies=deque(self.all_proxies.keys()); random.shuffle(list(self.available_proxies)); self.active_proxies={}; self.cooldown_proxies={}; self.proxy_consecutive_failures=defaultdict(int); self.proxy_stats=defaultdict(lambda: {"success":0,"fail_429":0,"fail_5xx":0,"fail_other":0,"fail_timeout":0,"fail_proxy_error":0,"fail_parse":0}); self.active_sessions={}; print(f"AdvProxyManager: {len(self.all_proxies)} proxies, MaxConc: {self.max_concurrent}, CD: {self.cooldown_seconds}s")
     def _check_cooldown(self): ct=time.time(); reactivate=[]; [reactivate.append(p) for p, et in list(self.cooldown_proxies.items()) if ct >= et]; [self.available_proxies.append(p) for p in reactivate if self.cooldown_proxies.pop(p,None)]
@@ -213,18 +260,19 @@ class ConsistentBrowserProfile:
 # --- Inizializzazione Manager Globale ---
 proxy_manager = AdvancedProxyManager(proxies_list_with_geo, MAX_CONCURRENT_PROXIES, PROXY_USE_COOLDOWN)
 
-# --- Funzione Utilità get_proxy_url (CORRETTA v6.3) ---
+# --- Funzione Utilità get_proxy_url ---
 def get_proxy_url(proxy_str):
     """Converte la stringa proxy nel formato URL http://user:pass@host:port."""
     if not proxy_str: return None
-    parts = proxy_str.split(':') # <-- CORREZIONE ERA QUI
+    parts = proxy_str.split(':')
     if len(parts) == 4:
         host, port, user, pwd = parts
         if port.isdigit(): return f"http://{user}:{pwd}@{host}:{port}"
         else: warnings.warn(f"Porta non valida: {proxy_str}", UserWarning); return None
     else: warnings.warn(f"Formato proxy non valido (attese 4 parti): {proxy_str}", UserWarning); return None
 
-# --- Estrazione Entità ORDINATA (Invariato da V6.1) ---
+# --- Estrazione Entità ORDINATA ---
+# (Codice omesso per brevità - invariato rispetto a V7.3)
 def extract_ordered_entities(max_retries=ENTITY_EXTRACTION_MAX_RETRIES, initial_wait=ENTITY_EXTRACTION_INITIAL_WAIT):
     attempts = 0; current_wait = initial_wait; proxy_info, geo_code = None, None; print(f"Avvio estrazione lista entità ORDINATA (max {max_retries} tentativi)...")
     while attempts < max_retries:
@@ -271,7 +319,8 @@ def extract_ordered_entities(max_retries=ENTITY_EXTRACTION_MAX_RETRIES, initial_
             if proxy_info: proxy_manager.release_proxy(proxy_info[0], success=release_success, status_code=status_code, error_type=error_type_str); proxy_info = None
     print(f"!!! Estrazione entità ORDINATE fallita dopo {max_retries} tentativi. !!!"); return None
 
-# --- Funzione get_trends_scores (CORRETTA v6.3) ---
+# --- Funzione get_trends_scores ---
+# (Codice omesso per brevità - invariato rispetto a V7.3)
 def get_trends_scores(keywords, timeframe):
     # Contiene la CORREZIONE V6.2 al blocco except ProxyError
     attempts = 0; current_backoff_429 = INITIAL_BACKOFF_SECONDS_429; current_backoff_other = 3.0; start_time = time.time()
@@ -320,7 +369,8 @@ def get_trends_scores(keywords, timeframe):
     print(f"!!! [CTX KW:{kw_hash}] Failed {attempts} ctx attempts for {kw_list_str} ({timeframe}). Scores 0.")
     return {kw: 0 for kw in keywords}
 
-# --- Funzione get_all_context_scores (Invariato da V6) ---
+# --- Funzione get_all_context_scores ---
+# (Codice omesso per brevità - invariato rispetto a V7.3)
 def get_all_context_scores(entities_subset, timeframe):
     all_scores = {}; entity_list = list(set(entities_subset)); random.shuffle(entity_list)
     group_size = 4; groups = [entity_list[i:i+group_size] for i in range(0, len(entity_list), group_size)]
@@ -356,7 +406,9 @@ def get_all_context_scores(entities_subset, timeframe):
     print(f"--- Raccolta score CONTESTO {timeframe} completata. ({total_tasks} task, {failed_count} falliti) ---")
     return {entity: all_scores.get(entity, 0) for entity in entity_list}
 
+
 # --- Creazione dei file base statici (HTML, CSS, JS) ---
+# (Codice omesso per brevità - invariato rispetto a V7.3)
 def create_static_files():
     """Crea i file HTML, CSS e JS di base nella directory output."""
     try:
@@ -378,7 +430,8 @@ def create_static_files():
         traceback.print_exc()
         return False
 
-# --- FUNZIONE: Generazione output HTML (Invariata) ---
+# --- FUNZIONE: Generazione output HTML ---
+# (Codice omesso per brevità - invariato rispetto a V7.3)
 def generate_html_output(df_final, runtime_info=None):
     """Genera l'output HTML."""
     try:
@@ -439,7 +492,7 @@ def generate_html_output(df_final, runtime_info=None):
 
 
 # ==============================================================================
-# ==================== SCRIPT PRINCIPALE (Heuristic Modificata v7.3) ===========
+# ==================== SCRIPT PRINCIPALE (Heuristic V7.4 Funzione Dedicata) ====
 # ==============================================================================
 if __name__ == "__main__":
     main_start_time = time.time()
@@ -450,7 +503,8 @@ if __name__ == "__main__":
         if not CONTEXT_TIMEFRAMES: warnings.warn("FETCH_VOLUME_CONTEXT=True ma CONTEXT_TIMEFRAMES vuoto.", UserWarning)
         if CONTEXT_N_RUNS <= 0: raise ValueError("CONTEXT_N_RUNS >= 1")
 
-    print(f"Avvio script V7.3: Heuristic Discover Score V=(1+V4h+V7d+sqrt(V4h*V7d))/log(R+1)")
+    print(f"Avvio script V7.4: Heuristic Discover Score via funzione dedicata")
+    print(f"Formula attuale: Vedi definizione funzione 'calculate_discover_score'")
     print(f"Obiettivo: Bilanciare esplosioni con storico (Contesto Top {N_PROCESS_FOR_CONTEXT}, N_RUNS={CONTEXT_N_RUNS})")
     print(f"MAX_CONCURRENT_PROXIES={MAX_CONCURRENT_PROXIES}, THREADS={MAX_THREADS}")
     print(f"Output HTML: {os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)}")
@@ -504,69 +558,58 @@ if __name__ == "__main__":
             print("\n    Calcolo Score Medi di Contesto...")
             for tf_agg in CONTEXT_TIMEFRAMES:
                 sc_avg_col = f'Score_Avg_{tf_agg}';
-                # Calcola media, gestendo il caso di liste vuote per un'entità
                 avg_s = {e: sum(s)/len(s) if s else 0 for e, s in timeframe_context_results[tf_agg].items()}
-                # Aggiorna o crea la colonna nel DataFrame
                 df_final[sc_avg_col] = df_final['Entita'].map(avg_s).fillna(0);
                 print(f"       Calcolata media contesto per {tf_agg}.")
             print("--- Fine Raccolta Score Contesto ---")
         else:
              print("\n--- Raccolta Score Contesto Saltata ---")
-             # Assicurati comunque che le colonne esistano con valore 0.0
              for tf in CONTEXT_TIMEFRAMES:
                  if f'Score_Avg_{tf}' not in df_final.columns: df_final[f'Score_Avg_{tf}'] = 0.0
 
         # ========================================================================
-        # --- 3. Calcolo Heuristic Discover Score (NUOVA FORMULA v7.3) ---
-        # Formula: (1 + V4h + V7d + sqrt(V4h*V7d)) / log(Rank+1)
-        # Obiettivo: Premiare coerenza tra volume recente (4h) e storico (7d),
-        #            penalizzando implicitamente picchi senza storico (sqrt=0 se V7d=0).
-        #            Mantenere log(Rank+1) per non seppellire troppo le esplosioni.
+        # --- 3. Calcolo Heuristic Discover Score (Tramite Funzione Dedicata) ---
         # ========================================================================
-        print("\n    Calcolo Heuristic Discover Score V7.3...")
+        print("\n    Calcolo Heuristic Discover Score V7.4 (via funzione)...")
         discover_score_col = 'Discover_Score'
         score_4h_col = 'Score_Avg_now 4-H'
         score_7d_col = 'Score_Avg_now 7-d'
 
+        # Verifica presenza colonne necessarie
         if score_4h_col in df_final.columns and score_7d_col in df_final.columns and 'Rank' in df_final.columns:
-            # Estrai le serie, assicurandoti che siano numeriche e non negative
+            # Estrai le serie, assicurandoti che siano numeriche e nei range corretti
             score_4h = pd.to_numeric(df_final[score_4h_col], errors='coerce').fillna(0).clip(lower=0)
             score_7d = pd.to_numeric(df_final[score_7d_col], errors='coerce').fillna(0).clip(lower=0)
-            rank_series = pd.to_numeric(df_final['Rank'], errors='coerce').fillna(1).clip(lower=1) # Rank deve essere >= 1
+            rank_series = pd.to_numeric(df_final['Rank'], errors='coerce').fillna(1).clip(lower=1) # Rank >= 1
 
-            # Calcola Numeratore: 1 + V4h + V7d + bonus coerenza (sqrt(V4h*V7d))
-            consistency_bonus = np.sqrt(score_4h * score_7d)
-            numerator = 1 + score_4h + score_7d + consistency_bonus
+            # --- CHIAMA LA FUNZIONE DEDICATA PER IL CALCOLO ---
+            df_final[discover_score_col] = calculate_discover_score(rank_series, score_4h, score_7d)
+            # ----------------------------------------------------
 
-            # Calcola Denominatore: log(Rank + 1) usando log1p per stabilità numerica
-            denominator = np.log1p(rank_series)
-            # Evita divisione per zero (anche se log1p(rank>=1) > 0)
-            denominator = np.maximum(denominator, 1e-9)
-
-            # Calcola lo score finale
-            df_final[discover_score_col] = numerator / denominator
-            df_final[discover_score_col] = df_final[discover_score_col].fillna(0) # Riempi eventuali NaN con 0
-
-            print(f"       Colonna '{discover_score_col}' calcolata con formula: (1 + V4h + V7d + sqrt(V4h*V7d)) / log(Rank+1)")
+            print(f"       Colonna '{discover_score_col}' calcolata tramite funzione 'calculate_discover_score'.")
         else:
             missing_cols = [col for col in [score_4h_col, score_7d_col, 'Rank'] if col not in df_final.columns]
-            warnings.warn(f"Colonne necessarie ({', '.join(missing_cols)}) mancanti, impossibile calcolare Discover_Score V7.3.", UserWarning)
-            df_final[discover_score_col] = 0.0
+            warnings.warn(f"Colonne necessarie ({', '.join(missing_cols)}) mancanti, impossibile calcolare Discover_Score V7.4.", UserWarning)
+            # Assicurati che la colonna esista anche in caso di errore
+            if discover_score_col not in df_final.columns:
+                 df_final[discover_score_col] = 0.0
         # ========================================================================
         # --- Fine Sezione Calcolo Heuristic Discover Score ---
         # ========================================================================
 
         # --- 4. Ordinamento Finale per Discover Score ---
         if discover_score_col in df_final.columns:
-             df_final = df_final.sort_values(by=discover_score_col, ascending=False) # Ordina per il nuovo score!
+             df_final = df_final.sort_values(by=discover_score_col, ascending=False)
              print(f"\n    DataFrame ordinato per '{discover_score_col}'.")
         else:
              print(f"\n    ATTENZIONE: Colonna '{discover_score_col}' non trovata per l'ordinamento.")
 
         # --- 5. Salva il DataFrame finale come CSV (per backup) ---
         try:
-            df_final.to_csv(os.path.join(CHECKPOINT_DIR, "final_data_v7.3.csv"), index=False, encoding='utf-8-sig') # Nome file aggiornato
-            print(f"\nDataFrame finale salvato come backup in: {os.path.join(CHECKPOINT_DIR, 'final_data_v7.3.csv')}")
+            # Aggiorna nome file per riflettere la versione
+            backup_filename = "final_data_v7.4.csv"
+            df_final.to_csv(os.path.join(CHECKPOINT_DIR, backup_filename), index=False, encoding='utf-8-sig')
+            print(f"\nDataFrame finale salvato come backup in: {os.path.join(CHECKPOINT_DIR, backup_filename)}")
         except Exception as e:
             print(f"\n!!! Errore salvataggio CSV finale: {e} !!!")
 
@@ -580,8 +623,7 @@ if __name__ == "__main__":
             print("\n!!! Errore durante la generazione dell'output HTML. !!!")
 
         # --- 7. Stampa Top N Finale (Ordinato per Discover Score) ---
-        print(f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score Heuristico V7.3) ---")
-        # Definisci le colonne da mostrare, assicurandoti che esistano
+        print(f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score Heuristico V7.4) ---")
         cols_to_show = []
         if discover_score_col in df_final.columns: cols_to_show.append(discover_score_col)
         if 'Rank' in df_final.columns: cols_to_show.append('Rank')
@@ -594,8 +636,7 @@ if __name__ == "__main__":
                     cols_to_show.append(col_name)
 
         try:
-            pd.set_option('display.max_rows', TOP_N_FINAL_DISPLAY + 5); pd.set_option('display.width', 180); pd.set_option('display.float_format', '{:.3f}'.format) # Aumentato width
-            # Seleziona solo le colonne esistenti prima di stampare
+            pd.set_option('display.max_rows', TOP_N_FINAL_DISPLAY + 5); pd.set_option('display.width', 180); pd.set_option('display.float_format', '{:.3f}'.format)
             print(df_final[cols_to_show].head(TOP_N_FINAL_DISPLAY).to_string(index=False))
         except KeyError as ke: print(f"Errore colonne stampa finale: {ke}. Disponibili: {df_final.columns.tolist()}")
         except Exception as e_print: print(f"Errore imprevisto durante la stampa finale: {e_print}")
