@@ -54,8 +54,14 @@ function renderTrendsTable(data) {
         
         // Verifica se l'entità è "hot" (aumento significativo con buona base)
         const isHot = isEntityHot(item.score_1h, item.score_4h, item.score_7d);
+        const isSuperHot = isSuperHotEntity(item.score_1h, item.score_4h, item.score_7d);
+        
         if (isHot) {
             row.classList.add('hot-trend');
+            // Per trend particolarmente esplosivi aggiungiamo una classe extra
+            if (isSuperHot) {
+                row.classList.add('super-hot-trend');
+            }
         }
         
         // Determina la classe del badge in base al rank originale
@@ -73,7 +79,7 @@ function renderTrendsTable(data) {
             <td>${item.entity}</td>
             <td class="score">
                 ${item.discover_score.toFixed(3)} ${trendIndicator}
-                ${isHot ? createFlameEffectHTML() : ''}
+                ${isHot ? '<span class="hot-badge"><i class="fas fa-fire"></i>HOT</span>' : ''}
             </td>
             <td>${item.score_1h.toFixed(1)}</td>
             <td>${item.score_4h.toFixed(1)}</td>
@@ -94,46 +100,38 @@ function renderTrendsTable(data) {
     }, 100);
 }
 
-// Crea l'HTML per l'effetto fiamme
-function createFlameEffectHTML() {
-    return `
-        <div class="flame-effect">
-            <div class="flame-wrapper">
-                <div class="flame"></div>
-            </div>
-        </div>
-    `;
-}
-
 // Verifica se un'entità è "hot" (aumento significativo ma con buona base)
 function isEntityHot(score1h, score4h, score7d) {
     // Un trend è considerato "hot" se:
-    // 1. Ha un volume significativo a 1h (almeno 5)
-    // 2. Ha almeno il doppio del volume rispetto a 4h
-    // 3. Ha una crescita significativa rispetto a 7d
-
+    
     // Caso 1: Volumi molto alti (esplosione immediata)
-    if (score1h > 30 && score1h > score4h * 3 && score1h > score7d * 3) {
+    if (score1h > 30 && score1h > score4h * 2) {
         return true;
     }
     
     // Caso 2: Crescita sostenuta con base decente
     if (score1h > 15 && 
-        score1h > score4h * 2 && 
-        score1h > score7d * 1.5 && 
-        score7d > 1) {
+        score1h > score4h * 1.8 && 
+        score1h > score7d * 1.5) {
         return true;
     }
     
     // Caso 3: Trend emergente con accelerazione
     if (score1h > 10 && 
         score4h > 5 &&
-        score1h > score4h * 1.8 && 
-        score4h > score7d * 1.8) {
+        score1h > score4h * 1.5 && 
+        score4h > score7d * 1.5) {
         return true;
     }
     
     return false;
+}
+
+// Verifica se un'entità è "super-hot" (trend particolarmente esplosivo)
+function isSuperHotEntity(score1h, score4h, score7d) {
+    // Per aggiungere fiamme più intense (super-hot)
+    // deve avere un punteggio 1h estremamente alto rispetto ai precedenti
+    return score1h > 50 && (score1h > score4h * 3 || score1h > score7d * 4);
 }
 
 // Crea un grafico di tendenza per una entità
