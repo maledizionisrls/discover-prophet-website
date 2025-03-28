@@ -38,7 +38,7 @@ function setupEventListeners() {
     document.getElementById('sortOrder').addEventListener('change', sortTable);
 }
 
-// Renderizza la tabella delle tendenze - ULTRA SEMPLIFICATA
+// Renderizza la tabella delle tendenze
 function renderTrendsTable(data) {
     const tableBody = document.getElementById('trendsTableBody');
     tableBody.innerHTML = '';
@@ -69,14 +69,14 @@ function renderTrendsTable(data) {
         // Calcola l'indicatore di tendenza 
         const trendIndicator = calculateTrendIndicator(item.score_1h, item.score_4h);
         
-        // Crea il contenuto HTML della riga
+        // Crea il contenuto HTML della riga - INTEGRAZIONE HOT NON INVASIVA
         row.innerHTML = `
             <td>${index + 1}</td>
             <td><span class="rank-badge ${rankBadgeClass}">${item.rank}</span></td>
             <td>${item.entity}</td>
             <td class="score">
                 ${item.discover_score.toFixed(3)} ${trendIndicator}
-                ${isHot ? '<span class="hot-badge">HOT</span>' : ''}
+                ${isHot ? '<span class="hot-indicator">HOT</span>' : ''}
             </td>
             <td>${item.score_1h.toFixed(1)}</td>
             <td>${item.score_4h.toFixed(1)}</td>
@@ -98,22 +98,21 @@ function renderTrendsTable(data) {
     }, 100);
 }
 
-// Verifica se un'entità è "hot" - SEMPLIFICATA
+// Verifica se un'entità è "hot" (aumento significativo ma con buona base)
 function isEntityHot(score1h, score4h, score7d) {
-    // Un trend è considerato "hot" se:
-    // Ha un volume significativo a 1h e un aumento notevole
+    // Un trend è considerato "hot" se: 
     
-    // Caso 1: Volume alto e crescita notevole rispetto a 4h
-    if (score1h > 30 && score1h > score4h * 1.8) {
+    // Caso 1: Volume alto e crescita rispetto a 4h
+    if (score1h > 30 && score1h > score4h * 1.5) {
         return true;
     }
     
-    // Caso 2: Volume medio e crescita molto forte
-    if (score1h > 15 && score1h > score4h * 2.5) {
+    // Caso 2: Volume medio e crescita notevole
+    if (score1h > 15 && score1h > score4h * 2) {
         return true;
     }
     
-    // Caso 3: Volume decente e crescita estrema
+    // Caso 3: Volume decente e crescita molto forte
     if (score1h > 10 && score1h > score4h * 3) {
         return true;
     }
