@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discover Prophet - Google Trends Dashboard</title>
+    
+    <!-- Font Awesome per le icone -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js per i grafici -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- CSS personalizzato -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -63,28 +69,31 @@
             </div>
         </div>
 
-        <table class="trends-table" id="trendsTable">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Rank</th>
-                    <th>Trend</th>
-                    <th>Discover Score</th>
-                    <th>1h</th>
-                    <th>4h</th>
-                    <th>7d</th>
-                    <th>Trend Chart</th>
-                </tr>
-            </thead>
-            <tbody id="trendsTableBody">
-                <!-- Righe della tabella generate da JavaScript -->
-            </tbody>
-        </table>
+        <!-- Wrapper per la tabella con scroll orizzontale -->
+        <div class="table-container">
+            <table class="trends-table" id="trendsTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Rank</th>
+                        <th>Trend</th>
+                        <th>Discover Score</th>
+                        <th>1h</th>
+                        <th>4h</th>
+                        <th>7d</th>
+                        <th>Trend Chart</th>
+                    </tr>
+                </thead>
+                <tbody id="trendsTableBody">
+                    <!-- Righe della tabella generate da JavaScript -->
+                </tbody>
+            </table>
+        </div>
     </main>
 
     <footer>
         <p>&copy; <span id="currentYear"></span> Discover Prophet - Powered by Google Trends</p>
-        <p class="version">Version 7.2</p>
+        <p class="version">Version 7.4 - Flames Edition</p>
     </footer>
 
     <!-- Dati JSON generati dallo script Python -->
