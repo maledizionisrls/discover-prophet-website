@@ -10,9 +10,10 @@
     --trending-up: #27ae60;
     --trending-down: #e74c3c;
     --trending-neutral: #f39c12;
-    --flame-color-1: #ff9900;
-    --flame-color-2: #ff5500;
-    --flame-color-3: #ff3300;
+    --flame-color-1: #ffdd33;
+    --flame-color-2: #ff9500;
+    --flame-color-3: #ff5500;
+    --flame-color-4: #ff3300;
 }
 
 body {
@@ -159,7 +160,7 @@ select {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
-    white-space: nowrap;
+    position: relative;
 }
 
 .trends-table th {
@@ -177,11 +178,6 @@ select {
 
 .trends-table tr:hover {
     background-color: rgba(0,0,0,0.02);
-}
-
-.trends-table td:nth-child(3) {
-    white-space: normal; /* Solo la colonna del trend può andare a capo */
-    max-width: 200px;
 }
 
 .rank-badge {
@@ -272,153 +268,141 @@ footer {
     display: none;
 }
 
-/* ============ NUOVE CLASSI FIAMME ============ */
+/* =============== EFFETTO FIAMME TOTALMENTE RIFATTO =============== */
 
-/* Container per fiamme - impostato direttamente sulla riga */
-.hot-trend {
+/* CASELLA CHE VA A FUOCO (effetto fuoco su tutta la riga) */
+.hot-trend td {
     position: relative;
+    overflow: hidden; /* Contiene l'animazione */
+    z-index: 1; /* Per posizionamento appropriato dell'effetto */
 }
 
-/* Indicatore visivo di trend a fuoco */
-.hot-trend td:first-child {
-    position: relative;
-}
-
-.hot-trend td:first-child::before {
+/* Bordo sinistro fiamme super visibile e animato */
+.hot-trend::before {
     content: "";
     position: absolute;
     left: 0;
     top: 0;
     bottom: 0;
-    width: 3px;
-    background: linear-gradient(to bottom, var(--flame-color-1), var(--flame-color-2), var(--flame-color-3));
-    box-shadow: 0 0 8px 1px rgba(255, 153, 0, 0.6);
-    animation: flamePulse 2s infinite;
+    width: 6px; /* Bordo più spesso e visibile */
+    background: linear-gradient(to bottom, var(--flame-color-2), var(--flame-color-3), var(--flame-color-4));
+    box-shadow: 0 0 10px 2px rgba(255, 85, 0, 0.8);
+    z-index: 2;
+    animation: flameBorder 1.5s infinite alternate ease-in-out;
 }
 
-/* Effetto di fuoco sul punteggio */
-.hot-trend .score {
+@keyframes flameBorder {
+    0% { opacity: 0.85; width: 6px; }
+    100% { opacity: 1; width: 8px; }
+}
+
+/* Sfondo fiamme animato per tutta la riga */
+.hot-trend {
     position: relative;
-    padding-right: 30px; /* Spazio per l'emoji di fuoco */
+    background: linear-gradient(90deg, 
+        rgba(255, 153, 0, 0.12), 
+        rgba(255, 153, 0, 0.05) 70%, 
+        rgba(255, 153, 0, 0) 100%);
+    animation: rowFlame 3s infinite alternate;
 }
 
-.hot-trend .score::after {
-    content: "🔥";
-    font-size: 16px;
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    filter: drop-shadow(0 0 2px rgba(255, 165, 0, 0.7));
-    animation: flameShake 0.3s infinite alternate;
+@keyframes rowFlame {
+    0% {
+        background: linear-gradient(90deg, 
+            rgba(255, 153, 0, 0.12), 
+            rgba(255, 153, 0, 0.05) 70%, 
+            rgba(255, 153, 0, 0) 100%);
+    }
+    100% {
+        background: linear-gradient(90deg, 
+            rgba(255, 85, 0, 0.15), 
+            rgba(255, 85, 0, 0.08) 70%, 
+            rgba(255, 85, 0, 0) 100%);
+    }
 }
 
-/* Effetto fiamme avanzato */
-.flame-effect {
-    position: absolute;
-    width: 18px;
-    height: 18px;
-    right: 20px;
-    bottom: -5px;
-    transform-origin: center bottom;
-    z-index: 5;
-}
-
-.flame-wrapper {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    transform: scaleY(0.8) translateY(15%);
-    filter: blur(0.5px) contrast(1.5);
-    animation: flicker 0.8s infinite alternate;
-}
-
-.flame {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50% 50% 20% 20%;
-    background: radial-gradient(ellipse at center, rgba(255, 247, 130, 0.7) 0%, 
-                                                 rgba(255, 153, 0, 0.7) 50%, 
-                                                 rgba(255, 51, 0, 0.5) 100%);
-    transform-origin: center bottom;
-    animation: flame 0.5s infinite alternate;
-}
-
-.flame::before {
+/* Pseudo-elemento per l'ombra inferiore delle fiamme */
+.hot-trend::after {
     content: "";
     position: absolute;
-    bottom: 0;
     left: 0;
-    width: 90%;
-    height: 90%;
-    border-radius: 50% 50% 20% 20%;
-    background: radial-gradient(ellipse at center, rgba(255, 247, 130, 0.5) 0%, 
-                                                  rgba(255, 153, 0, 0.5) 50%, 
-                                                  rgba(255, 51, 0, 0.3) 100%);
-    transform: translateX(5%) translateY(5%) scale(0.9);
-    filter: blur(1px);
-    animation: flame 0.7s 0.1s infinite alternate;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        rgba(255, 69, 0, 0.4), 
+        rgba(255, 69, 0, 0.2) 40%, 
+        rgba(255, 69, 0, 0) 80%);
+    z-index: 3;
 }
 
-.flame::after {
+/* Badge HOT con fiamme per il punteggio */
+.hot-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+    height: 20px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--flame-color-2), var(--flame-color-3));
+    color: white;
+    padding: 0 8px;
+    font-size: 0.8em;
+    font-weight: bold;
+    position: relative;
+    box-shadow: 0 0 6px 1px rgba(255, 85, 0, 0.4);
+    animation: hotBadgePulse 1.5s infinite alternate;
+}
+
+@keyframes hotBadgePulse {
+    0% { 
+        box-shadow: 0 0 6px 1px rgba(255, 85, 0, 0.4);
+        transform: scale(1);
+    }
+    100% { 
+        box-shadow: 0 0 10px 2px rgba(255, 85, 0, 0.6);
+        transform: scale(1.05);
+    }
+}
+
+.hot-badge i {
+    margin-right: 4px;
+    animation: flameIconShake 0.3s infinite alternate;
+}
+
+@keyframes flameIconShake {
+    0% { transform: rotate(-5deg) scale(1); }
+    100% { transform: rotate(5deg) scale(1.1); }
+}
+
+/* Aggiunta di fiamme che salgono verso l'alto per le tendenze HOT più esplosive */
+.super-hot-trend::before {
     content: "";
     position: absolute;
+    left: 2px;
     bottom: 0;
-    left: 0;
-    width: 80%;
-    height: 80%;
-    border-radius: 50% 50% 20% 20%;
-    background: radial-gradient(ellipse at center, rgba(255, 247, 130, 0.3) 0%, 
-                                                 rgba(255, 153, 0, 0.3) 50%, 
-                                                 rgba(255, 51, 0, 0.2) 100%);
-    transform: translateX(10%) translateY(10%) scale(0.8);
-    filter: blur(2px);
-    animation: flame 0.6s 0.2s infinite alternate;
+    width: 20px;
+    height: 60%;
+    background: 
+        radial-gradient(
+            ellipse at center bottom, 
+            rgba(255, 221, 51, 0.2) 0%, 
+            rgba(255, 153, 0, 0.15) 40%, 
+            rgba(255, 51, 0, 0.1) 70%,
+            rgba(255, 51, 0, 0) 100%
+        );
+    z-index: 1;
+    transform-origin: center bottom;
+    animation: flameRise 3s infinite alternate;
 }
 
-/* Animazioni fiamme */
-@keyframes flame {
+@keyframes flameRise {
     0% {
-        transform: scaleY(1) scaleX(1);
+        transform: scaleY(0.8) translateY(0);
+        opacity: 0.7;
     }
     100% {
-        transform: scaleY(1.1) scaleX(0.9);
-    }
-}
-
-@keyframes flameShake {
-    0% {
-        transform: translateY(-50%) rotate(-2deg);
-    }
-    100% {
-        transform: translateY(-50%) rotate(2deg);
-    }
-}
-
-@keyframes flicker {
-    0% {
-        opacity: 0.8;
-        transform: scaleY(0.8) translateY(15%);
-    }
-    100% {
-        opacity: 1;
-        transform: scaleY(0.85) translateY(12%);
-    }
-}
-
-@keyframes flamePulse {
-    0%, 100% {
-        opacity: 0.8;
-        box-shadow: 0 0 8px 1px rgba(255, 153, 0, 0.6);
-    }
-    50% {
-        opacity: 1;
-        box-shadow: 0 0 12px 2px rgba(255, 153, 0, 0.8);
+        transform: scaleY(1) translateY(-10px);
+        opacity: 0.9;
     }
 }
 
