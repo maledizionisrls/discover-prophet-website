@@ -34,7 +34,6 @@ import shutil
 import openai # Libreria OpenAI
 
 # --- Patch per errore method_whitelist vs allowed_methods ---
-# (Invariato)
 import urllib3
 from urllib3.util import Retry
 original_init = Retry.__init__
@@ -46,7 +45,6 @@ Retry.__init__ = patched_init
 # --- Fine patch ---
 
 # --- Gestione Import Opzionale (FakeUserAgent) ---
-# (Invariato)
 try: from fake_useragent import UserAgent, FakeUserAgentError
 except ImportError:
     print("FakeUserAgentError non trovato, FakeUserAgent potrebbe non funzionare come previsto.")
@@ -61,7 +59,6 @@ except ImportError:
 # --- Fine Gestione ---
 
 # --- Ignora Warning Specifici ---
-# (Invariato)
 warnings.filterwarnings("ignore", category=FutureWarning, module='pytrends')
 warnings.filterwarnings("ignore", category=UserWarning, message='Setting null property')
 warnings.filterwarnings("ignore", message="urllib3 v2 only supports OpenSSL 1.1.1+")
@@ -92,7 +89,6 @@ OPENAI_REQUEST_TIMEOUT = 30
 MAX_OPENAI_THREADS = 10
 
 # --- Chiave API OpenAI (LEGGI DA VARIABILE D'AMBIENTE!) ---
-# (Logica invariata)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = None
 if FETCH_OPENAI_ENTITIES:
@@ -146,7 +142,6 @@ PYTRENDS_BACKOFF_FACTOR = 0.2
 
 # ==============================================================================
 # ==================== FUNZIONE CALCOLO DISCOVER SCORE (V7.5) ==================
-# (Invariata)
 # ==============================================================================
 def calculate_discover_score(rank_series, score_4h, score_7d, k_penalty=V7D_PENALTY_K, epsilon=V7D_PENALTY_EPSILON):
     """Calcola l'Heuristic Discover Score V7.5."""
@@ -163,7 +158,6 @@ def calculate_discover_score(rank_series, score_4h, score_7d, k_penalty=V7D_PENA
 # ==============================================================================
 
 # --- Definizione Stringa Base Proxy e Rimozione Proxy Problematici ---
-# (Invariato)
 proxy_base_string = "v2.proxyempire.io:5000:r_46aa61f010-country-{geo}:8186bbae3e"
 original_country_codes = ['af', 'al', 'dz', 'as', 'ad', 'ao', 'ai', 'aq', 'ag', 'ar', 'am', 'aw', 'au', 'at', 'az', 'bs', 'bh', 'bd', 'bb', 'by', 'be', 'bz', 'bj', 'bm', 'bt', 'bo', 'ba', 'bw', 'br', 'io', 'bn', 'bg', 'bf', 'bi', 'kh', 'cm', 'ca', 'cv', 'ky', 'cf', 'td', 'cl', 'cn', 'co', 'km', 'cg', 'ck', 'cr', 'hr', 'cu', 'cy', 'cz', 'dk', 'dj', 'dm', 'do', 'ec', 'eg', 'sv', 'gq', 'er', 'ee', 'et', 'fk', 'fo', 'fj', 'fi', 'fr', 'gf', 'pf', 'ga', 'gm', 'ge', 'de', 'gh', 'gi', 'gr', 'gl', 'gd', 'gp', 'gu', 'gt', 'gg', 'gn', 'gw', 'gy', 'ht', 'va', 'hn', 'hk', 'hu', 'is', 'in', 'id', 'ir', 'iq', 'ie', 'im', 'il', 'it', 'ci', 'jm', 'jp', 'je', 'jo', 'kz', 'ke', 'ki', 'kw', 'kg', 'la', 'lv', 'lb', 'ls', 'lr', 'ly', 'li', 'lt', 'lu', 'mo', 'mk', 'mg', 'mw', 'my', 'mv', 'ml', 'mt', 'mh', 'mq', 'mr', 'mu', 'yt', 'mx', 'fm', 'md', 'mc', 'mn', 'me', 'ms', 'ma', 'mz', 'mm', 'na', 'nr', 'np', 'nl', 'nc', 'nz', 'ni', 'ne', 'ng', 'nu', 'nf', 'kp', 'gb', 'mp', 'no', 'om', 'pk', 'pw', 'ps', 'pa', 'pg', 'py', 'pe', 'ph', 'pl', 'pt', 'pr', 'qa', 're', 'ro', 'ru', 'rw', 'sh', 'kn', 'lc', 'vc', 'ws', 'sm', 'st', 'sa', 'sn', 'rs', 'sc', 'sl', 'sg', 'sk', 'si', 'sb', 'so', 'za', 'kr', 'ss', 'es', 'lk', 'sd', 'sr', 'sz', 'se', 'ch', 'sy', 'tj', 'tw', 'tz', 'th', 'cd', 'tl', 'tg', 'tk', 'to', 'tt', 'tn', 'tr', 'tm', 'tc', 'tv', 'ug', 'ua', 'ae', 'us', 'uy', 'uz', 'vu', 've', 'vn', 'vg', 'vi', 'wf', 'eh', 'ye', 'zm', 'zw']
 proxies_to_remove_geo = {'aq', 'io', 'cf', 'bi', 'td', 'km', 'fk', 'cn', 'gw', 'va', 'ki', 'nr', 'nu', 'nf', 'kp', 'pg', 'sh', 'ws', 'tl', 'tk', 'tv', 'wf', 'eh', 'dj', 'gl', 'al'}
@@ -180,13 +174,11 @@ if not proxies_list_with_geo: raise ValueError("!!! Lista proxy VUOTA dopo filtr
 print(f"Generati {len(proxies_list_with_geo)} proxy con geo.")
 
 # --- Mapping Geo -> Lingua/Timezone ---
-# (Invariato)
 COUNTRY_LOCALE_MAP = {'IT': {'hl': 'it-IT', 'tz': 60}, 'US': {'hl': 'en-US', 'tz': -300}, 'GB': {'hl': 'en-GB', 'tz': 0}, 'FR': {'hl': 'fr-FR', 'tz': 60}, 'DE': {'hl': 'de-DE', 'tz': 60}, 'ES': {'hl': 'es-ES', 'tz': 60}, 'JP': {'hl': 'ja-JP', 'tz': 540}, 'AU': {'hl': 'en-AU', 'tz': 600}, 'CA': {'hl': 'en-CA', 'tz': -300}, 'BR': {'hl': 'pt-BR', 'tz': -180}, 'IN': {'hl': 'en-IN', 'tz': 330}, 'MA': {'hl': 'fr-MA', 'tz': 0}, 'HN': {'hl': 'es-HN', 'tz': -360}, 'BS': {'hl': 'en-BS', 'tz': -300}, 'TO': {'hl': 'en-TO', 'tz': 780}, 'BE': {'hl': 'fr-BE', 'tz': 60}, 'OM': {'hl': 'ar-OM', 'tz': 240}, 'GM': {'hl': 'en-GM', 'tz': 0}, 'LU': {'hl': 'fr-LU', 'tz': 60}, 'BN': {'hl': 'ms-BN', 'tz': 480}, 'SZ': {'hl': 'en-SZ', 'tz': 120}, 'MN': {'hl': 'mn-MN', 'tz': 480}, 'EG': {'hl': 'ar-EG', 'tz': 120}, 'AT': {'hl': 'de-AT', 'tz': 60}, 'IE': {'hl': 'en-IE', 'tz': 0}, 'KW': {'hl': 'ar-KW', 'tz': 180}, 'MM': {'hl': 'my-MM', 'tz': 390}, 'LV': {'hl': 'lv-LV', 'tz': 120}, 'RW': {'hl': 'rw-RW', 'tz': 120}, 'KR': {'hl': 'ko-KR', 'tz': 540}, 'TJ': {'hl': 'tg-TJ', 'tz': 300}, 'MH': {'hl': 'en-MH', 'tz': 720}, 'ZA': {'hl': 'en-ZA', 'tz': 120}, 'FI': {'hl': 'fi-FI', 'tz': 120}, 'DEFAULT': {'hl': 'en-US', 'tz': 0}}
 def get_locale_for_geo(geo_code): return COUNTRY_LOCALE_MAP.get(geo_code.upper(), COUNTRY_LOCALE_MAP['DEFAULT'])
 
 # --- Classi AdvancedProxyManager e ConsistentBrowserProfile ---
-# (Invariate - omesse per brevità)
-class AdvancedProxyManager: # ... (codice identico a V7.6) ...
+class AdvancedProxyManager:
     def __init__(self, proxy_geo_list, max_concurrent, cooldown_seconds): self.max_concurrent=max_concurrent; self.cooldown_seconds=cooldown_seconds; self.lock=threading.Lock(); self.all_proxies={i['proxy']: i['geo'] for i in proxy_geo_list}; self.available_proxies=deque(self.all_proxies.keys()); random.shuffle(list(self.available_proxies)); self.active_proxies={}; self.cooldown_proxies={}; self.proxy_consecutive_failures=defaultdict(int); self.proxy_stats=defaultdict(lambda: {"success":0,"fail_429":0,"fail_5xx":0,"fail_other":0,"fail_timeout":0,"fail_proxy_error":0,"fail_parse":0}); self.active_sessions={}; print(f"AdvProxyManager: {len(self.all_proxies)} proxies, MaxConc: {self.max_concurrent}, CD: {self.cooldown_seconds}s")
     def _check_cooldown(self): ct=time.time(); reactivate=[]; [reactivate.append(p) for p, et in list(self.cooldown_proxies.items()) if ct >= et]; [self.available_proxies.append(p) for p in reactivate if self.cooldown_proxies.pop(p,None)]
     def get_proxy(self):
@@ -225,7 +217,8 @@ class AdvancedProxyManager: # ... (codice identico a V7.6) ...
             for p, s in self.proxy_stats.items(): geo=self.all_proxies.get(p,'N/A'); f429=s.get("fail_429",0); fp=s.get("fail_proxy_error",0)+s.get("fail_5xx",0)+s.get("fail_timeout",0); fo=s.get("fail_other",0)+s.get("fail_parse",0); tf=f429+fp+fo;
             if tf>0: fpd[f"{geo} ({p[-10:]})"]={"success":s.get("success",0),"fail_429":f429,"fail_proxy/timeout":fp,"fail_other/parse":fo,"consecutive_fails":self.proxy_consecutive_failures.get(p,0)}
             sfp=dict(sorted(fpd.items(),key=lambda i:sum(i[1][k] for k in i[1] if k.startswith('fail')),reverse=True)); return {"total_success":ts,"total_fail_429":tf429,"total_fail_proxy_timeout":tfp,"total_fail_other_parse":tfo,"top_failing_proxies":dict(list(sfp.items())[:15])}
-class ConsistentBrowserProfile: # ... (codice identico a V7.6) ...
+
+class ConsistentBrowserProfile:
     BROWSER_TYPES=['chrome'];OS_MAP={'WINDOWS':['windows'],'MACOS':['darwin'],'LINUX':['linux']};GEO_OS_PREFERENCE={'US':['WINDOWS','MACOS'],'CA':['WINDOWS','MACOS'],'GB':['WINDOWS','MACOS'],'FR':['WINDOWS','MACOS'],'DE':['WINDOWS','MACOS'],'IT':['WINDOWS','MACOS'],'ES':['WINDOWS','MACOS'],'AU':['WINDOWS','MACOS'],'JP':['WINDOWS','MACOS'],'BR':['WINDOWS'],'IN':['WINDOWS'],'DEFAULT':['WINDOWS','MACOS','LINUX']};FALLBACK_USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
     def __init__(self,geo_code):
         if not geo_code or not isinstance(geo_code,str): geo_code='DEFAULT'
@@ -241,8 +234,8 @@ class ConsistentBrowserProfile: # ... (codice identico a V7.6) ...
 proxy_manager = AdvancedProxyManager(proxies_list_with_geo, MAX_CONCURRENT_PROXIES, PROXY_USE_COOLDOWN)
 
 # --- Funzione Utilità get_proxy_url ---
-# (Invariata)
 def get_proxy_url(proxy_str):
+    """Converte la stringa proxy nel formato URL http://user:pass@host:port."""
     if not proxy_str: return None
     parts = proxy_str.split(':')
     if len(parts) == 4:
@@ -252,9 +245,8 @@ def get_proxy_url(proxy_str):
     return None
 
 # --- Estrazione Entità ORDINATA ---
-# (Invariata - omessa per brevità)
 def extract_ordered_entities(max_retries=ENTITY_EXTRACTION_MAX_RETRIES, initial_wait=ENTITY_EXTRACTION_INITIAL_WAIT):
-    # ... (codice identico a V7.6) ...
+    """Estrae la lista ORDINATA di entità da Google Trends TV."""
     attempts = 0; current_wait = initial_wait; proxy_info, geo_code = None, None; print(f"Avvio estrazione lista entità ORDINATA (max {max_retries} tentativi)...")
     while attempts < max_retries:
         attempts += 1; print(f"Tentativo {attempts}/{max_retries} per estrarre entità ordinate...")
@@ -302,9 +294,8 @@ def extract_ordered_entities(max_retries=ENTITY_EXTRACTION_MAX_RETRIES, initial_
     print(f"!!! Estrazione entità ORDINATE fallita dopo {max_retries} tentativi. !!!"); return None
 
 # --- Funzione get_trends_scores ---
-# (Invariata - omessa per brevità)
 def get_trends_scores(keywords, timeframe):
-    # ... (codice identico a V7.6) ...
+    """Ottiene i punteggi medi da Pytrends per un gruppo di keyword e timeframe."""
     attempts = 0; current_backoff_429 = INITIAL_BACKOFF_SECONDS_429; current_backoff_other = 3.0; start_time = time.time()
     proxy_info, pytrends, geo_code = None, None, None
     max_proxy_attempts = min(len(proxy_manager.all_proxies) // 2, MAX_RETRIES_PYTRENDS_CONTEXT * 2); proxy_attempts_set = set()
@@ -347,11 +338,9 @@ def get_trends_scores(keywords, timeframe):
     print(f"!!! [CTX KW:{kw_hash}] Failed {attempts} context attempts for {kw_list_str} ({timeframe}). Returning scores as 0.")
     return {kw: 0 for kw in keywords}
 
-
 # --- Funzione get_all_context_scores ---
-# (Invariata - omessa per brevità)
 def get_all_context_scores(entities_subset, timeframe, max_threads=MAX_THREADS_PYTRENDS):
-    # ... (codice identico a V7.6) ...
+    """Ottiene i punteggi per tutte le entità in parallelo per un dato timeframe."""
     all_scores = {}; entity_list = list(set(entities_subset)); random.shuffle(entity_list)
     group_size = 4; groups = [entity_list[i:i+group_size] for i in range(0, len(entity_list), group_size)]
     print(f"\n--- Raccolta score CONTESTO: {timeframe} ({len(groups)} gruppi / {len(entity_list)} entità / {max_threads} threads) ---")
@@ -390,53 +379,124 @@ def get_all_context_scores(entities_subset, timeframe, max_threads=MAX_THREADS_P
 
 # ==============================================================================
 # ==================== FUNZIONI INTEGRAZIONE OPENAI ==========================
-# (Invariate - omesse per brevità)
 # ==============================================================================
 def get_single_entity_openai(trend_string, model=OPENAI_MODEL, max_retries=OPENAI_MAX_RETRIES, request_timeout=OPENAI_REQUEST_TIMEOUT):
-    # ... (codice identico a V7.6) ...
-    if not client: return None
+    """
+    Chiama l'API OpenAI per estrarre entità da una singola stringa di trend.
+    Restituisce una stringa di entità separate da ' - ' o None in caso di fallimento.
+    """
+    if not client: # Verifica se il client è stato inizializzato
+         # print("      [OpenAI SKIP] Client non inizializzato.") # Debug
+         return None
+
+    # Prompt ottimizzato per estrarre 3-5 entità chiave separate da ' - '
     prompt = f"""Data la seguente query di ricerca Google Trends, estrai le 3-5 entità o concetti chiave più importanti (persone, luoghi, eventi, organizzazioni, temi principali). Elencali separati da " - " (spazio trattino spazio). Sii conciso e pertinente alla query. Non aggiungere introduzioni, spiegazioni o virgolette attorno alla lista. Esempio: Se la query è "Meteo Roma prossimi giorni", la risposta dovrebbe essere "Meteo - Roma - Previsioni". Query di input: "{trend_string}" """
+
     attempts = 0
     while attempts < max_retries:
         attempts += 1
         try:
-            response = client.chat.completions.create(model=model, messages=[{"role": "system", "content": "Sei un assistente AI esperto nell'identificare e estrarre le entità e i concetti chiave principali da brevi query di ricerca, formattandoli come richiesto."}, {"role": "user", "content": prompt}], temperature=0.1, max_tokens=60, n=1, stop=None, timeout=request_timeout)
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": "Sei un assistente AI esperto nell'identificare e estrarre le entità e i concetti chiave principali da brevi query di ricerca, formattandoli come richiesto."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.1, # Molto bassa per risposte consistenti
+                max_tokens=60,   # Leggermente aumentato per sicurezza
+                n=1,             # Chiedi una sola risposta
+                stop=None,       # Nessun stop token specifico
+                timeout=request_timeout
+            )
+            # Estrai il contenuto della risposta
             entities_text = response.choices[0].message.content.strip()
+
+            # Pulizia robusta della risposta
             entities_text = re.sub(r"^(Ecco le entità estratte:|Le entità chiave sono:|Entità estratte:|Risposta:)\s*", "", entities_text, flags=re.IGNORECASE)
             entities_text = entities_text.strip('\'" ')
             if entities_text.endswith('.'): entities_text = entities_text[:-1].strip()
-            if entities_text and len(entities_text) > 1: return entities_text
-            else: return None
-        except openai.APITimeoutError: print(f"  !! [OpenAI Timeout] T{attempts}/{max_retries} '{trend_string}'. Wait..."); time.sleep(3 * attempts)
-        except openai.APIConnectionError as e: print(f"  !! [OpenAI Conn Err] T{attempts}/{max_retries} '{trend_string}': {e}. Wait..."); time.sleep(5 * attempts)
-        except openai.RateLimitError: print(f"  !! [OpenAI Rate Limit] T{attempts}/{max_retries} '{trend_string}'. Wait long..."); time.sleep(15 * attempts)
-        except openai.APIStatusError as e: print(f"  !! [OpenAI Status Err {e.status_code}] T{attempts}/{max_retries} '{trend_string}': {e.message}. Wait..."); if e.status_code >= 500 or e.status_code in [401, 403]: return None; time.sleep(5 * attempts)
-        except Exception as e: print(f"  !! [OpenAI Generic Err] T{attempts}/{max_retries} '{trend_string}': {type(e).__name__} - {e}"); time.sleep(3 * attempts)
-        if attempts >= max_retries: print(f"  !! [OpenAI FAIL] Max retries ({max_retries}) reached for '{trend_string}'."); return None
-    return None
+
+            if entities_text and len(entities_text) > 1: # Assicura che non sia solo un carattere residuo
+                # print(f"      [OpenAI OK] '{trend_string}' -> '{entities_text}' (Tentativo {attempts})") # Debug
+                return entities_text
+            else:
+                # print(f"      [OpenAI WARN] Risposta vuota o troppo corta per '{trend_string}' dopo pulizia (Tentativo {attempts})") # Debug
+                return None # Nessuna entità significativa trovata o estratta
+
+        except openai.APITimeoutError:
+            print(f"  !! [OpenAI Timeout] Tentativo {attempts}/{max_retries} per '{trend_string}'. Attesa...")
+            if attempts >= max_retries: print(f"  !! [OpenAI Timeout] Fallito dopo {max_retries} tentativi per '{trend_string}'."); return None
+            time.sleep(3 * attempts) # Backoff più aggressivo per Timeout
+        except openai.APIConnectionError as e:
+             print(f"  !! [OpenAI Connection Err] Tentativo {attempts}/{max_retries} per '{trend_string}': {e}. Attesa...")
+             if attempts >= max_retries: print(f"  !! [OpenAI Connection Err] Fallito dopo {max_retries} tentativi per '{trend_string}'."); return None
+             time.sleep(5 * attempts) # Backoff più lungo per errori di connessione
+        except openai.RateLimitError:
+             print(f"  !! [OpenAI Rate Limit] Tentativo {attempts}/{max_retries} per '{trend_string}'. Attesa lunga...")
+             if attempts >= max_retries: print(f"  !! [OpenAI Rate Limit] Fallito dopo {max_retries} tentativi per '{trend_string}'."); return None
+             time.sleep(15 * attempts) # Backoff molto lungo
+        except openai.APIStatusError as e:
+             print(f"  !! [OpenAI Status Err {e.status_code}] Tentativo {attempts}/{max_retries} per '{trend_string}': {e.message}. Attesa...")
+             if attempts >= max_retries: print(f"  !! [OpenAI Status Err] Fallito dopo {max_retries} tentativi per '{trend_string}'."); return None
+             if e.status_code >= 500 or e.status_code in [401, 403]:
+                  print(f"  !! Errore {e.status_code} non recuperabile. Interruzione tentativi per '{trend_string}'.")
+                  return None
+             time.sleep(5 * attempts)
+        except Exception as e:
+            print(f"  !! [OpenAI Generic Err] Tentativo {attempts}/{max_retries} per '{trend_string}': {type(e).__name__} - {e}")
+            if attempts >= max_retries: print(f"  !! [OpenAI Generic Err] Fallito dopo {max_retries} tentativi per '{trend_string}'."); return None
+            time.sleep(3 * attempts)
+
+    print(f"!!! [OpenAI FAIL] Falliti tutti i {max_retries} tentativi per '{trend_string}'")
+    return None # Fallito dopo tutti i tentativi
 
 def get_entities_with_openai(trend_list, max_workers=MAX_OPENAI_THREADS):
-    # ... (codice identico a V7.6) ...
-    if not client or not FETCH_OPENAI_ENTITIES: print("\n--- Estrazione Entità OpenAI Saltata ---"); return {}
+    """
+    Ottiene le entità estratte da OpenAI per una lista di trend in parallelo.
+    Restituisce un dizionario {trend_string: extracted_entities_string}.
+    """
+    if not client or not FETCH_OPENAI_ENTITIES:
+         print("\n--- Estrazione Entità OpenAI Saltata ---")
+         return {}
+
     print(f"\n--- Avvio Estrazione Entità OpenAI ({len(trend_list)} trends, Max Workers: {max_workers}, Modello: {OPENAI_MODEL}) ---")
-    extracted_entities_map = {}; futures = {}; sem = threading.Semaphore(max_workers)
+    extracted_entities_map = {}
+    futures = {}
+    sem = threading.Semaphore(max_workers)
+
     def call_openai_safe(trend):
-        with sem: return get_single_entity_openai(trend)
+        with sem:
+            result = get_single_entity_openai(trend)
+            return result
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         print(f"  Sottomissione {len(trend_list)} task a OpenAI...")
-        for trend in trend_list: future = executor.submit(call_openai_safe, trend); futures[future] = trend; time.sleep(random.uniform(0.02, 0.08))
+        for trend in trend_list:
+            future = executor.submit(call_openai_safe, trend)
+            futures[future] = trend
+            time.sleep(random.uniform(0.02, 0.08))
+
         print("  Attesa completamento task OpenAI...")
-        successful_count = 0; total_tasks = len(trend_list)
+        successful_count = 0
+        total_tasks = len(trend_list)
+
         for future in tqdm(concurrent.futures.as_completed(futures), total=total_tasks, desc="Estrazione Entità OpenAI", unit="trend", ncols=100):
-            trend = futures[future]; result = ''
+            trend = futures[future]
+            result = '' # Default a stringa vuota
             try:
                 result_raw = future.result(timeout=OPENAI_REQUEST_TIMEOUT * (OPENAI_MAX_RETRIES + 2))
-                if result_raw: result = result_raw; successful_count += 1
-            except concurrent.futures.TimeoutError: print(f"\n!!! Timeout globale OpenAI per '{trend}' !!!")
-            except Exception as exc: print(f"\n!!! Errore recupero risultato OpenAI per '{trend}': {exc} !!!")
+                if result_raw:
+                    result = result_raw
+                    successful_count += 1
+            except concurrent.futures.TimeoutError:
+                 print(f"\n!!! Timeout globale OpenAI per '{trend}' !!!")
+            except Exception as exc:
+                print(f"\n!!! Errore recupero risultato OpenAI per '{trend}': {exc} !!!")
             extracted_entities_map[trend] = result # Mappa sempre, vuoto se fallito/non trovato
+
     print(f"--- Estrazione Entità OpenAI completata ({successful_count}/{total_tasks} con successo) ---")
     return extracted_entities_map
+
 # ==============================================================================
 
 # --- Funzione create_static_files ---
@@ -513,7 +573,6 @@ def generate_html_output(df_final, runtime_info=None):
         traceback.print_exc()
         return False
 
-
 # ==============================================================================
 # ==================== SCRIPT PRINCIPALE (V7.7 - Docs Only) ===================
 # ==============================================================================
@@ -521,13 +580,13 @@ if __name__ == "__main__":
     main_start_time = time.time()
     runtime_info = {'start_time': main_start_time}
 
-    # Validazioni iniziali parametri (invariate)
+    # Validazioni iniziali parametri
     if FETCH_VOLUME_CONTEXT:
         if not CONTEXT_TIMEFRAMES: warnings.warn("CONTEXT_TIMEFRAMES vuoto. Contesto disattivato.", UserWarning); FETCH_VOLUME_CONTEXT = False
         if CONTEXT_N_RUNS <= 0: raise ValueError("CONTEXT_N_RUNS >= 1")
     if FETCH_OPENAI_ENTITIES:
-         if N_PROCESS_FOR_OPENAI <= 0: warnings.warn("N_PROCESS_FOR_OPENAI <= 0. OpenAI disattivato.", UserWarning); FETCH_OPENAI_ENTITIES = False
-         if not client: warnings.warn("Client OpenAI non inizializzato. OpenAI disattivato.", UserWarning); FETCH_OPENAI_ENTITIES = False
+        if N_PROCESS_FOR_OPENAI <= 0: warnings.warn("N_PROCESS_FOR_OPENAI <= 0. OpenAI disattivato.", UserWarning); FETCH_OPENAI_ENTITIES = False
+        if not client: warnings.warn("Client OpenAI non inizializzato. OpenAI disattivato.", UserWarning); FETCH_OPENAI_ENTITIES = False
 
     print(f"--- Avvio script Discover Prophet V7.7 (Docs Only & OpenAI) ---")
     print(f"Formula Discover Score: V7.5 (K={V7D_PENALTY_K}, epsilon={V7D_PENALTY_EPSILON})")
@@ -545,10 +604,8 @@ if __name__ == "__main__":
         # Crea directory necessarie (solo output e checkpoint)
         os.makedirs(CHECKPOINT_DIR, exist_ok=True); print(f"Directory checkpoint: '{CHECKPOINT_DIR}'")
         os.makedirs(OUTPUT_DIR, exist_ok=True); print(f"Directory output: '{OUTPUT_DIR}'")
-        # Non crea più TEMPLATE_DIR
 
         # --- 1. Estrazione Lista Ordinata ---
-        # (Invariato)
         ordered_entities = extract_ordered_entities()
         if not ordered_entities: raise Exception("Estrazione iniziale fallita.")
         print(f"\nLista Ordinata Iniziale Estratta ({len(ordered_entities)} entità).")
@@ -565,9 +622,7 @@ if __name__ == "__main__":
         df_final['Discover_Score'] = 0.0
 
         # --- 2. Raccolta Score di Contesto (se attivo) ---
-        # (Invariato - omesso per brevità)
         if FETCH_VOLUME_CONTEXT and N_PROCESS_FOR_CONTEXT > 0 and CONTEXT_TIMEFRAMES:
-            # ... (stesso codice di V7.6 per get_all_context_scores, medie, checkpoint 02 e 03) ...
             print(f"\n--- Avvio Raccolta Score Contesto per Top {N_PROCESS_FOR_CONTEXT} Entità ---")
             entities_for_context = ordered_entities[:N_PROCESS_FOR_CONTEXT]
             timeframe_context_results = defaultdict(lambda: defaultdict(list))
@@ -604,9 +659,7 @@ if __name__ == "__main__":
                  if f'Score_Avg_{tf}' not in df_final.columns: df_final[f'Score_Avg_{tf}'] = 0.0
 
         # --- 2.B Estrazione Entità con OpenAI (se attiva) ---
-        # (Invariato - omesso per brevità)
         if FETCH_OPENAI_ENTITIES:
-            # ... (stesso codice di V7.6 per chiamare get_entities_with_openai e salvare checkpoint 04) ...
             entities_to_process_openai = ordered_entities[:N_PROCESS_FOR_OPENAI]
             extracted_entities_map = get_entities_with_openai(entities_to_process_openai)
             df_final['Extracted_Entities'] = df_final['Entita'].map(extracted_entities_map).fillna('')
@@ -618,7 +671,6 @@ if __name__ == "__main__":
             except Exception as e: print(f"  Errore salvataggio checkpoint entità OpenAI: {e}")
 
         # --- 3. Calcolo Heuristic Discover Score ---
-        # (Invariato - omesso per brevità)
         print("\n  Calcolo Heuristic Discover Score V7.5...")
         discover_score_col = 'Discover_Score'; score_4h_col = 'Score_Avg_now 4-H'; score_7d_col = 'Score_Avg_now 7-d'
         if score_4h_col in df_final.columns and score_7d_col in df_final.columns and 'Rank' in df_final.columns:
@@ -633,14 +685,12 @@ if __name__ == "__main__":
             df_final[discover_score_col] = 0.0
 
         # --- 4. Ordinamento Finale per Discover Score ---
-        # (Invariato)
         if discover_score_col in df_final.columns:
             df_final = df_final.sort_values(by=discover_score_col, ascending=False).reset_index(drop=True)
             print(f"\n  DataFrame finale ordinato per '{discover_score_col}'.")
         else: print(f"\n  ATTENZIONE: Colonna '{discover_score_col}' non trovata per l'ordinamento.")
 
         # --- 5. Salva il DataFrame finale completo come CSV ---
-        # (Invariato)
         try:
             backup_filename = "05_final_sorted_data_v7.7.csv" # Aggiorna versione nel nome file
             df_final.to_csv(os.path.join(CHECKPOINT_DIR, backup_filename), index=False, encoding='utf-8-sig')
@@ -653,7 +703,6 @@ if __name__ == "__main__":
         # Non serve controllare html_result qui perché genera solo data.js
 
         # --- 7. Stampa Top N Finale ---
-        # (Invariato - omesso per brevità)
         print(f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score Heuristico V7.7) ---")
         cols_to_show = [c for c in ['Discover_Score', 'Rank', 'Entita', 'Extracted_Entities', 'Score_Avg_now 1-H', 'Score_Avg_now 4-H', 'Score_Avg_now 7-d'] if c in df_final.columns]
         try:
@@ -663,12 +712,10 @@ if __name__ == "__main__":
         finally: pd.reset_option('all')
 
     except Exception as main_exc:
-        # (Gestione errore invariata)
         print(f"\n\n!!! ERRORE CRITICO SCRIPT: {type(main_exc).__name__} - {main_exc} !!!"); traceback.print_exc()
     finally:
-        # (Stampa statistiche proxy invariata - omessa per brevità)
         print("\n--- Statistiche Proxy Rilevate (Fine Esecuzione) ---")
-        try: # ... (stesso codice V7.6 per statistiche proxy) ...
+        try:
             if 'proxy_manager' in locals() and proxy_manager:
                 ps = proxy_manager.get_proxy_stats_summary(); total_requests = ps.get('total_success', 0) + ps.get('total_fail_429', 0) + ps.get('total_fail_proxy_timeout', 0) + ps.get('total_fail_other_parse', 0); success_rate = (ps.get('total_success', 0) / total_requests * 100) if total_requests > 0 else 0
                 print(f"Req Tot Proxy: {total_requests}, Successi: {ps.get('total_success', 0)} ({success_rate:.1f}%)"); print(f"  Fail: 429={ps.get('total_fail_429', 0)}, Proxy/Timeout={ps.get('total_fail_proxy_timeout', 0)}, Altri/Parse={ps.get('total_fail_other_parse', 0)}")
