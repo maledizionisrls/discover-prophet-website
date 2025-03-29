@@ -1,69 +1,63 @@
-name: Discover Prophet Daily Update
+name: Discover Prophet Daily Update (Docs Only)
 
 on:
   schedule:
-    # Esegui ogni ora dalle 9:30 alle 17:30 (Roma)
-    # Convertito in UTC (che è il fuso usato da GitHub Actions):
-    # - In inverno (UTC+1): dalle 8:30 alle 16:30 UTC
-    # - In estate (UTC+2): dalle 7:30 alle 15:30 UTC
-    # Quindi usiamo un intervallo che copre entrambi i periodi: 7:30-16:30 UTC
+    # Esegue alle 30 min di ogni ora tra le 7:00 e le 16:00 UTC (Roma 9:30-17:30 +/- DST).
     - cron: '30 7-16 * * *'
-  
-  # Permette l'esecuzione manuale dal tab Actions
+
+  # Permette l'esecuzione manuale
   workflow_dispatch:
 
 jobs:
   update-trends:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-      
+        uses: actions/checkout@v4
+
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
-      
+          python-version: '3.9' # O successiva
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas numpy requests bs4 tqdm cloudscraper fake-useragent
-          pip install urllib3==1.26.15
-          pip install pytrends==4.9.2
-          pip install anthropic==0.18.0  # Aggiunto per l'integrazione Claude
-      
-      - name: Create required directories
+          # Installa librerie necessarie per script V7.7
+          pip install pandas numpy requests beautifulsoup4 tqdm cloudscraper fake-useragent openai pytrends==4.9.2
+          # urllib3 non più pinnato, installa versione compatibile con pytrends
+
+      - name: Create required directories (docs & checkpoint)
         run: |
-          mkdir -p templates
           mkdir -p docs
           mkdir -p checkpoint_data
-      
-      - name: Copy template files
-        run: |
-          cp templates/index.html templates/index.html.bak || echo "No previous template to backup"
-          cp index.html templates/index.html || echo "Using default template"
-          cp style.css templates/style.css || echo "Using default style"
-          cp script.js templates/script.js || echo "Using default script"
-      
-      - name: Run Discover Prophet script
+          # Non crea più la cartella 'templates'
+
+      # --- Nessuno step per copiare template ---
+
+      - name: Run Discover Prophet script (V7.7 Docs Only)
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Passa il secret OpenAI alla variabile d'ambiente attesa dallo script
+          OPENAI_API_KEY: ${{ secrets.OpenAI_API }}
+        # Aggiorna il nome del file .py!
         run: python discover_prophet.py
-      
+
       - name: Configure Git
         run: |
-          git config --global user.name "GitHub Actions"
+          git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
-      
+
       - name: Commit and push changes
         run: |
-          # Aggiungi tutti i file generati
+          # Controlla se ci sono cambiamenti in docs/ o checkpoint_data/
+          if [[ -z $(git status --porcelain docs checkpoint_data) ]]; then
+            echo "No changes detected in docs/ or checkpoint_data/. Nothing to commit."
+            exit 0
+          fi
+
+          echo "Changes detected. Committing and pushing..."
           git add docs/
           git add checkpoint_data/
-          
-          # Commit con timestamp
-          git commit -m "Update trends data: $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
-          
-          # Push dei cambiamenti
-          git push
+          git commit -m "Update trends data [skip ci]: $(date +'%Y-%m-%d %H:%M:%S UTC')"
+          git push || exit 1 # Fallisce lo step se il push non va a buon fine
