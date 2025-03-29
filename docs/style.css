@@ -1,446 +1,395 @@
-:root {
-    --primary-color: #2c3e50; /* Blu scuro */
-    --secondary-color: #3498db; /* Blu chiaro */
-    --accent-color: #e74c3c; /* Rosso */
-    --hot-color: #ff6600; /* Arancione per HOT */
-    --background-color: #f8f9fa; /* Grigio molto chiaro */
-    --card-color: #ffffff; /* Bianco */
-    --text-color: #212529; /* Nero leggermente più morbido */
-    --text-light: #6c757d; /* Grigio */
-    --border-color: #dee2e6; /* Grigio chiaro per bordi */
-    --trending-up: #28a745; /* Verde successo */
-    --trending-down: #dc3545; /* Rosso pericolo */
-    --trending-neutral: #ffc107; /* Giallo warning */
-    --link-color: #007bff; /* Blu link standard */
-    --header-text: #ffffff;
-    --badge-text: #ffffff;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    line-height: 1.6;
-    font-size: 16px;
-}
-
-header {
-    background-color: var(--primary-color);
-    color: var(--header-text);
-    padding: 1rem 2rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.header-content {
-    max-width: 1600px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-h1 {
-    margin: 0;
-    font-size: 1.7rem;
-    font-weight: 600;
-}
-
-h1 i {
-    margin-right: 0.6rem;
-    color: var(--secondary-color);
-}
-
-.update-info {
-    font-size: 0.85rem;
-    opacity: 0.9;
-    margin-top: 0.2rem;
-    margin-bottom: 0;
-    line-height: 1.4;
-}
-
-.openai-info {
-    font-size: 0.8rem;
-}
-.openai-info #openaiStatus {
-    font-weight: bold;
-}
-
-
-.header-badge {
-    background-color: rgba(255, 255, 255, 0.15);
-    padding: 0.4rem 0.8rem;
-    border-radius: 15px;
-    font-size: 0.85rem;
-    white-space: nowrap;
-}
-.header-badge i {
-    margin-right: 0.3rem;
-}
-
-.dashboard {
-    max-width: 1600px;
-    margin: 1.5rem auto;
-    padding: 0 1.5rem;
-}
-
-.stats-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.stat-card {
-    background-color: var(--card-color);
-    border-radius: 6px;
-    padding: 1.2rem;
-    border: 1px solid var(--border-color);
-    text-align: center;
-    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.06);
-}
-
-.stat-card .icon {
-    font-size: 1.8rem;
-    margin-bottom: 0.4rem;
-    color: var(--secondary-color);
-}
-
-.stat-card .number {
-    font-size: 1.7rem;
-    font-weight: 600;
-    color: var(--primary-color);
-    margin-bottom: 0.4rem;
-    line-height: 1.2;
-}
-
-.stat-card .label {
-    color: var(--text-light);
-    font-size: 0.85rem;
-}
-
-.controls {
-    margin-bottom: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding: 0.8rem;
-    background-color: var(--card-color);
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-
-.search-box {
-    padding: 0.5rem 0.8rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    flex-grow: 1;
-    max-width: 350px;
-    font-size: 0.9rem;
-}
-.search-box:focus {
-    outline: none;
-    border-color: var(--secondary-color);
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-}
-
-
-.sorting {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-.sorting label {
-    font-size: 0.9rem;
-    color: var(--text-light);
-    white-space: nowrap;
-}
-
-select {
-    padding: 0.4rem 0.6rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: white;
-    font-size: 0.9rem;
-}
-
-/* Responsive table container */
-.table-container {
-    width: 100%;
-    overflow-x: auto;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    background-color: var(--card-color);
-}
-
-.trends-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 900px;
-}
-
-.trends-table th,
-.trends-table td {
-    padding: 0.75rem 0.8rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-    white-space: nowrap;
-    vertical-align: middle;
-}
-
-.trends-table .trend-cell {
-    white-space: normal;
-    vertical-align: top;
-    min-width: 250px;
-}
-.main-entity {
-    font-weight: 500;
-    display: block;
-}
-
-
-.trends-table th {
-    background-color: #f8f9fa;
-    color: var(--primary-color);
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    border-bottom-width: 2px;
-}
-
-.trends-table tr:last-child td {
-    border-bottom: none;
-}
-
-.trends-table tbody tr:hover {
-    background-color: #e9f5ff;
-}
-
-.rank-badge {
-    display: inline-block;
-    min-width: 1.8rem;
-    padding: 0.15rem 0.4rem;
-    text-align: center;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 0.85rem;
-    background-color: var(--secondary-color);
-    color: var(--badge-text);
-    line-height: 1.4;
-}
-
-.top-10 { background-color: var(--accent-color); }
-.top-25 { background-color: var(--trending-neutral); }
-
-.trend-chart-container {
-    width: 100px;
-    height: 35px;
-    min-width: 100px;
-}
-.chart-fallback {
-    font-size: 10px;
-    color: #aaa;
-    text-align: center;
-    display: block;
-    line-height: 35px;
-}
-
-.score {
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.trend-indicator {
-    margin-left: 0.4rem;
-    font-size: 0.8rem;
-    display: inline-block;
-    width: 1.2em;
-    text-align: center;
-}
-.trend-indicator i {
-     opacity: 0.8;
-}
-
-.trend-stable { color: var(--text-light); }
-.trend-small-up { color: var(--trending-up); opacity: 0.7; }
-.trend-medium-up { color: var(--trending-up); }
-.trend-strong-up { color: var(--trending-up); font-weight: bold; }
-.trend-small-down { color: var(--trending-down); opacity: 0.7; }
-.trend-medium-down { color: var(--trending-down); }
-.trend-strong-down { color: var(--trending-down); font-weight: bold; }
-
-
-footer {
-    text-align: center;
-    padding: 1.5rem;
-    margin-top: 2rem;
-    color: var(--text-light);
-    font-size: 0.85rem;
-    border-top: 1px solid var(--border-color);
-}
-.version {
-    font-size: 0.75rem;
-    margin-top: 0.3rem;
-}
-
-/* Stile per trend HOT */
-.hot-trend {
-    background-color: #fff8e1;
-}
-.hot-trend td:first-child {
-    border-left: 3px solid var(--hot-color);
-}
-
-.hot-indicator {
-    display: inline-block;
-    background-color: var(--hot-color);
-    color: white;
-    font-weight: bold;
-    font-size: 0.7rem;
-    padding: 1px 4px;
-    border-radius: 3px;
-    margin-left: 5px;
-    vertical-align: middle;
-    line-height: 1;
-}
-
-/* --- Stili per Entità AI + Scorrimento --- */
-.extracted-entities {
-    font-size: 0.8rem;
-    color: #555;
-    margin-top: 4px;
-    line-height: 1.4; /* Aumentato leggermente per scorrimento */
-    display: block;
-    /* Rimosso font-style: italic; per migliore leggibilità nello scorrimento */
-
-    /* --- Stili per SCORRIMENTO --- */
-    white-space: nowrap; /* Impedisce al testo di andare a capo */
-    overflow: hidden;    /* Nasconde il testo che esce dal box */
-    box-sizing: border-box;
-    width: 100%;         /* Occupa tutta la larghezza della cella */
-    padding: 3px 0;      /* Aggiunge padding verticale */
-    cursor: default;     /* Cursore normale */
-
-    /* Applica l'animazione */
-    /* Durata lunga (es. 30s) - potrebbe essere adattata via JS alla lunghezza testo */
-    animation: marquee-scroll 30s linear infinite;
-}
-
-/* Definisce l'animazione di scorrimento */
-@keyframes marquee-scroll {
-  0% {
-    transform: translateX(100%); /* Parte da fuori a destra */
-    /* opacity: 0; */ /* Opzionale: effetto fade-in */
-  }
-  10%, 90% { /* Aggiunge una pausa visibile all'inizio e alla fine */
-      /* opacity: 1; */
-  }
-  100% {
-    transform: translateX(-115%); /* Finisce fuori a sinistra (un po' più in là per separare) */
-    /* opacity: 0; */ /* Opzionale: effetto fade-out */
-  }
-}
-
-/* Opzionale: Metti in pausa l'animazione al passaggio del mouse */
-.extracted-entities:hover {
-  animation-play-state: paused;
-}
-/* --- Fine Stili Scorrimento --- */
-
-
-.no-results-message {
-    text-align: center;
-    padding: 20px;
-    color: var(--text-light);
-    font-style: italic;
-    background-color: var(--card-color);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    margin-top: 1rem;
-}
-
-
-/* Responsive design */
-@media (max-width: 1200px) {
-    .trends-table th,
-    .trends-table td {
-        padding: 0.7rem 0.6rem;
+// Inizializzazione della dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    // Verifica caricamento dati prima di procedere
+    if (typeof trendData === 'undefined' || typeof runMetadata === 'undefined') {
+        console.error('Errore critico: file data.js non caricato o vuoto.');
+        displayErrorMessage("Errore nel caricamento dei dati (data.js mancante o non valido). Impossibile visualizzare la dashboard.");
+        return; // Interrompi esecuzione se i dati mancano
     }
-    .trend-chart-container {
-        width: 90px;
-        height: 30px;
+    if (typeof trendData !== 'object' || !Array.isArray(trendData)) {
+         console.error('Errore critico: trendData in data.js non è un array valido.');
+         displayErrorMessage("Errore nel formato dei dati (trendData non è un array). Impossibile visualizzare la dashboard.");
+         return;
     }
-    .trends-table .trend-cell {
-        min-width: 200px;
+
+
+    // Inizializza anno corrente nel footer
+    const currentYearEl = document.getElementById('currentYear');
+    if (currentYearEl) {
+        currentYearEl.textContent = new Date().getFullYear();
+    }
+
+    // Carica i metadati
+    loadMetadata();
+
+    // Carica e visualizza i dati delle tendenze
+    renderTrendsTable(trendData); // Usa i dati da data.js
+
+    // Configura gli ascoltatori per la ricerca e l'ordinamento
+    setupEventListeners();
+
+    // Rimuovi messaggio di caricamento iniziale (se presente)
+    const loadingRow = document.querySelector('.loading-row');
+    if (loadingRow) {
+        loadingRow.remove();
+    }
+});
+
+// Mostra un messaggio di errore generale nella tabella
+function displayErrorMessage(message) {
+    const tableBody = document.getElementById('trendsTableBody');
+    if(tableBody) {
+        tableBody.innerHTML = `<tr class="error-row"><td colspan="8" style="text-align: center; padding: 30px; color: red;">${message}</td></tr>`;
+    }
+    // Nascondi altri elementi se necessario
+    const controls = document.querySelector('.controls');
+    if(controls) controls.style.display = 'none';
+    const stats = document.querySelector('.stats-container');
+    if(stats) stats.style.display = 'none';
+}
+
+
+// Carica i metadati nella dashboard
+function loadMetadata() {
+    // Verifica che runMetadata esista e sia un oggetto
+    if (typeof runMetadata === 'object' && runMetadata !== null) {
+        document.getElementById('updateTimestamp').textContent = runMetadata.timestamp || 'N/A';
+        document.getElementById('trendsCount').textContent = runMetadata.trends_count !== undefined ? runMetadata.trends_count : '?';
+        document.getElementById('topScore').textContent = (runMetadata.top_score || 0).toFixed(2);
+        document.getElementById('runtimeMinutes').textContent = (runMetadata.runtime_minutes || 0).toFixed(1) + 'm';
+        document.getElementById('proxiesUsed').textContent = runMetadata.proxies_used !== undefined ? runMetadata.proxies_used : '?';
+
+        // Info OpenAI
+        const openaiStatusEl = document.getElementById('openaiStatus');
+        const openaiModelEl = document.getElementById('openaiModel');
+        const openaiInfoP = document.querySelector('.openai-info');
+
+        if (openaiStatusEl && openaiModelEl && openaiInfoP) {
+            if (runMetadata.openai_enabled) {
+                openaiStatusEl.textContent = 'ATTIVA';
+                openaiStatusEl.style.color = '#27ae60'; // Verde
+                openaiModelEl.textContent = runMetadata.openai_model || 'N/A';
+                openaiInfoP.style.display = ''; // Assicura sia visibile
+            } else {
+                openaiStatusEl.textContent = 'DISATTIVATA';
+                openaiStatusEl.style.color = '#e74c3c'; // Rosso
+                openaiModelEl.textContent = 'N/A';
+                openaiInfoP.style.display = 'none'; // Nascondi se disattivato
+            }
+        }
+
+    } else {
+        console.error('Dati metadati (runMetadata) non disponibili o non validi in data.js');
+        // Imposta valori di fallback visibili all'utente
+        document.getElementById('updateTimestamp').textContent = 'Errore';
+        document.getElementById('trendsCount').textContent = 'Errore';
+        document.getElementById('topScore').textContent = 'Errore';
+        document.getElementById('runtimeMinutes').textContent = 'Errore';
+        document.getElementById('proxiesUsed').textContent = 'Errore';
+        const openaiInfoP = document.querySelector('.openai-info');
+        if(openaiInfoP) openaiInfoP.style.display = 'none';
     }
 }
 
-@media (max-width: 992px) {
-    .header-content {
-        flex-direction: column;
-        align-items: flex-start;
+// Configura gli ascoltatori degli eventi per la ricerca e l'ordinamento
+function setupEventListeners() {
+    const searchBox = document.getElementById('searchBox');
+    if (searchBox) {
+        searchBox.addEventListener('input', function() {
+            filterTable(this.value.trim().toLowerCase());
+        });
     }
-    .header-badge { margin-top: 0.8rem; }
-    .stats-container { grid-template-columns: repeat(2, 1fr); }
 
-    .trends-table th:nth-child(6), /* Colonna 4h */
-    .trends-table td:nth-child(6),
-    .trends-table th:nth-child(7), /* Colonna 7d */
-    .trends-table td:nth-child(7) {
-        display: none;
-    }
-    .trend-chart-container { width: 80px; height: 28px; }
+    const sortBy = document.getElementById('sortBy');
+    const sortOrder = document.getElementById('sortOrder');
+    if (sortBy) sortBy.addEventListener('change', sortTable);
+    if (sortOrder) sortOrder.addEventListener('change', sortTable);
 }
 
-@media (max-width: 768px) {
-    body { font-size: 15px; }
-    header { padding: 0.8rem 1rem; }
-    h1 { font-size: 1.5rem; }
-    .dashboard { padding: 0 1rem; }
-    .controls { flex-direction: column; align-items: stretch; }
-    .search-box { max-width: 100%; }
-    .stats-container { grid-template-columns: 1fr; gap: 0.8rem;}
-    .stat-card { padding: 1rem; }
-    .stat-card .number { font-size: 1.5rem; }
-
-    .trends-table th:nth-child(5), /* Colonna 1h */
-    .trends-table td:nth-child(5),
-    .trends-table th:nth-child(8), /* Colonna Grafico */
-    .trends-table td:nth-child(8) {
-        display: none;
+// Renderizza la tabella delle tendenze
+function renderTrendsTable(data) {
+    const tableBody = document.getElementById('trendsTableBody');
+    if (!tableBody) {
+        console.error("Elemento 'trendsTableBody' non trovato nel DOM.");
+        return;
     }
-     .trends-table th,
-     .trends-table td {
-         padding: 0.6rem 0.5rem;
-         font-size: 0.85rem;
+    tableBody.innerHTML = ''; // Pulisci prima di renderizzare
+
+    if (!data || data.length === 0) {
+         tableBody.innerHTML = `<tr class="no-data-row"><td colspan="8" style="text-align: center; padding: 30px;">Nessun dato di tendenza disponibile.</td></tr>`;
+         return;
+    }
+
+    data.forEach((item, index) => {
+        const row = document.createElement('tr');
+
+        row.dataset.entity = String(item.entity || '').toLowerCase();
+        row.dataset.rank = String(item.rank || 0);
+        row.dataset.discoverScore = String(item.discover_score || 0);
+        row.dataset.score1h = String(item.score_1h || 0);
+        row.dataset.score4h = String(item.score_4h || 0);
+        row.dataset.score7d = String(item.score_7d || 0);
+        row.dataset.aiEntities = String(item.extracted_entities || '').toLowerCase();
+
+        const isHot = isEntityHot(item.score_1h, item.score_4h, item.score_7d);
+        if (isHot) {
+            row.classList.add('hot-trend');
+        }
+
+        let rankBadgeClass = '';
+        if (item.rank <= 10) rankBadgeClass = 'top-10';
+        else if (item.rank <= 25) rankBadgeClass = 'top-25';
+
+        const trendIndicator = calculateTrendIndicator(item.score_1h, item.score_4h);
+        let entityDisplay = item.entity || 'N/A';
+
+        // --- NUOVA PARTE: Aggiungi Entità Estratte da OpenAI ---
+        let extractedEntitiesHtml = '';
+        if (item.extracted_entities && typeof item.extracted_entities === 'string' && item.extracted_entities.trim() !== '') {
+             const entitiesCleaned = item.extracted_entities.trim();
+             // Usa la funzione escapeHtml per sicurezza!
+             extractedEntitiesHtml = `<div class="extracted-entities" title="Entità suggerite da AI">${escapeHtml(entitiesCleaned)}</div>`;
+        }
+        // --- FINE NUOVA PARTE ---
+
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td><span class="rank-badge ${rankBadgeClass}">${item.rank || 0}</span></td>
+            <td class="trend-cell">
+                 <div class="main-entity">${escapeHtml(entityDisplay)}</div>
+                 ${extractedEntitiesHtml}
+            </td>
+            <td class="score">
+                ${(item.discover_score || 0).toFixed(3)} ${trendIndicator}
+                ${isHot ? '<span class="hot-indicator" title="Trend in forte crescita recente">HOT</span>' : ''}
+            </td>
+            <td>${(item.score_1h || 0).toFixed(1)}</td>
+            <td>${(item.score_4h || 0).toFixed(1)}</td>
+            <td>${(item.score_7d || 0).toFixed(1)}</td>
+            <td>
+                <div class="trend-chart-container" id="chart-${index}"></div>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    requestAnimationFrame(() => {
+        data.forEach((item, index) => {
+            createTrendChart(
+                `chart-${index}`,
+                [Number(item.score_7d) || 0, Number(item.score_4h) || 0, Number(item.score_1h) || 0]
+            );
+        });
+    });
+}
+
+// Verifica se un'entità è "hot"
+function isEntityHot(score1h, score4h, score7d) {
+    const s1h = Number(score1h) || 0;
+    const s4h = Number(score4h) || 0;
+    if (s4h === 0) { return s1h > 10; }
+    if (s1h > 30 && s1h > s4h * 1.3) return true;
+    if (s1h > 15 && s1h > s4h * 1.6) return true;
+    if (s1h > 8 && s1h > s4h * 2.0) return true;
+    return false;
+}
+
+// Crea un grafico di tendenza
+function createTrendChart(containerId, dataPoints) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+    const canvas = document.createElement('canvas');
+    canvas.style.display = 'block';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    container.appendChild(canvas);
+
+    const chartContext = canvas.getContext('2d');
+    if (!chartContext) {
+        console.error(`Impossibile ottenere il contesto 2D per ${containerId}`);
+        container.innerHTML = `<span class="chart-fallback">N/A</span>`;
+        return;
+    }
+
+    try {
+        const lineColor = determineTrendColor(dataPoints);
+        const gradient = chartContext.createLinearGradient(0, 0, 0, container.clientHeight || 35);
+        gradient.addColorStop(0, lineColor + '60');
+        gradient.addColorStop(1, lineColor + '05');
+
+        new Chart(chartContext, {
+            type: 'line',
+            data: {
+                labels: ['7d Avg', '4h Avg', '1h Avg'],
+                datasets: [{
+                    data: dataPoints,
+                    borderColor: lineColor,
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    pointRadius: 2.5,
+                    pointBackgroundColor: lineColor,
+                    pointHoverRadius: 4,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        titleFont: { size: 10 },
+                        bodyFont: { size: 10 },
+                        padding: 6,
+                        displayColors: false,
+                        callbacks: {
+                            title: (tooltipItems) => tooltipItems[0].label,
+                            label: (context) => `Score: ${context.parsed.y.toFixed(1)}`
+                        }
+                    }
+                },
+                scales: {
+                    x: { display: false },
+                    y: { display: false, beginAtZero: true }
+                },
+                animation: false,
+                parsing: false,
+            }
+        });
+    } catch (error) {
+        console.error(`Errore creazione grafico ${containerId}:`, error);
+        container.innerHTML = `<span class="chart-fallback">${dataPoints.map(p => p.toFixed(0)).join('→')}</span>`;
+    }
+}
+
+// Determina colore della linea in base all'andamento
+function determineTrendColor(dataPoints) {
+    const score4h = dataPoints[1];
+    const score1h = dataPoints[2];
+    if (score1h > score4h * 1.3) { return '#27ae60'; } // verde
+    else if (score1h < score4h * 0.7) { return '#e74c3c'; } // rosso
+    else { return '#f39c12'; } // arancione
+}
+
+// Calcola l'indicatore di tendenza
+function calculateTrendIndicator(score1h, score4h) {
+    const s1h = Number(score1h) || 0;
+    const s4h = Number(score4h) || 0;
+    if (s1h === 0 && s4h === 0) { return '<span class="trend-indicator trend-stable" title="Nessun dato recente"><i class="fas fa-minus"></i></span>'; }
+    const diff = s1h - s4h;
+    const absDiff = Math.abs(diff);
+    let percentChange = 0;
+    if (s4h > 0.5) { percentChange = (diff / s4h) * 100; }
+    else if (s1h > s4h) { percentChange = 1000; }
+    if (absDiff < 2 && Math.abs(percentChange) < 25) { return '<span class="trend-indicator trend-stable" title="Stabile"><i class="fas fa-equals"></i></span>'; }
+    if (diff > 0) {
+        if (percentChange > 100 || (s4h < 1 && s1h > 5)) { return '<span class="trend-indicator trend-strong-up" title="Forte aumento"><i class="fas fa-angles-up"></i></span>'; }
+        else if (percentChange > 40) { return '<span class="trend-indicator trend-medium-up" title="Aumento"><i class="fas fa-arrow-up"></i></span>'; }
+        else { return '<span class="trend-indicator trend-small-up" title="Leggero aumento"><i class="fas fa-arrow-up"></i></span>'; }
+    } else {
+        if (percentChange < -60) { return '<span class="trend-indicator trend-strong-down" title="Forte calo"><i class="fas fa-angles-down"></i></span>'; }
+        else if (percentChange < -30) { return '<span class="trend-indicator trend-medium-down" title="Calo"><i class="fas fa-arrow-down"></i></span>'; }
+        else { return '<span class="trend-indicator trend-small-down" title="Leggero calo"><i class="fas fa-arrow-down"></i></span>'; }
+    }
+}
+
+// Filtra la tabella
+function filterTable(searchText) {
+    const tableBody = document.getElementById('trendsTableBody');
+    const rows = tableBody.querySelectorAll('tr');
+    const noResultsMessage = document.getElementById('noResultsMessage');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        if (row.classList.contains('loading-row') || row.classList.contains('no-data-row') || row.classList.contains('error-row')) return;
+        const entityText = row.dataset.entity || '';
+        const aiEntitiesText = row.dataset.aiEntities || '';
+        if (entityText.includes(searchText) || aiEntitiesText.includes(searchText)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    let currentIndex = 1;
+    rows.forEach(row => {
+        if (row.classList.contains('loading-row') || row.classList.contains('no-data-row') || row.classList.contains('error-row')) return;
+        if (row.style.display !== 'none') {
+            const cellIndex = row.querySelector('td:first-child');
+            if (cellIndex) cellIndex.textContent = currentIndex++;
+        }
+    });
+
+    if (noResultsMessage) {
+        if (visibleCount === 0 && searchText) {
+            noResultsMessage.textContent = `Nessun risultato trovato per "${escapeHtml(searchText)}"`;
+            noResultsMessage.style.display = 'block';
+        } else {
+            noResultsMessage.style.display = 'none';
+        }
+    }
+}
+
+// Ordina la tabella
+function sortTable() {
+    const sortBy = document.getElementById('sortBy').value;
+    const sortOrder = document.getElementById('sortOrder').value;
+    const isAsc = sortOrder === 'asc';
+
+    const tableBody = document.getElementById('trendsTableBody');
+    const rows = Array.from(tableBody.querySelectorAll('tr:not(.loading-row):not(.no-data-row):not(.error-row)'));
+    const noResultsMessage = document.getElementById('noResultsMessage');
+    if (noResultsMessage) noResultsMessage.style.display = 'none';
+
+    rows.sort((a, b) => {
+        let valueA, valueB;
+        switch (sortBy) {
+            case 'discover_score': valueA = parseFloat(a.dataset.discoverScore || 0); valueB = parseFloat(b.dataset.discoverScore || 0); break;
+            case 'rank': valueA = parseInt(a.dataset.rank || 0); valueB = parseInt(b.dataset.rank || 0); break;
+            case 'score_1h': valueA = parseFloat(a.dataset.score1h || 0); valueB = parseFloat(b.dataset.score1h || 0); break;
+            case 'score_4h': valueA = parseFloat(a.dataset.score4h || 0); valueB = parseFloat(b.dataset.score4h || 0); break;
+            case 'score_7d': valueA = parseFloat(a.dataset.score7d || 0); valueB = parseFloat(b.dataset.score7d || 0); break;
+            default: valueA = parseFloat(a.dataset.discoverScore || 0); valueB = parseFloat(b.dataset.discoverScore || 0);
+        }
+        if (valueA < valueB) return isAsc ? -1 : 1;
+        if (valueA > valueB) return isAsc ? 1 : -1;
+        return 0;
+    });
+
+    rows.forEach(row => tableBody.removeChild(row));
+    rows.forEach((row, index) => {
+        const cellIndex = row.querySelector('td:first-child');
+        if(cellIndex) cellIndex.textContent = index + 1;
+        tableBody.appendChild(row);
+    });
+
+     const searchBox = document.getElementById('searchBox');
+     if (searchBox && searchBox.value) {
+         filterTable(searchBox.value.trim().toLowerCase());
      }
-     .rank-badge { font-size: 0.75rem; padding: 0.1rem 0.3rem; min-width: 1.5rem;}
-     .score { font-size: 0.9rem; }
-     .extracted-entities { font-size: 0.75rem; animation-duration: 20s; } /* Riduci durata animazione su mobile */
-     .hot-indicator { font-size: 0.65rem; }
 }
 
-@media (max-width: 480px) {
-     /* .trends-table th:nth-child(2), */ /* Nascondi Rank opzionale */
-     /* .trends-table td:nth-child(2) { display: none; } */
-     .trends-table th,
-     .trends-table td {
-         padding: 0.5rem 0.4rem;
-     }
-     .trends-table .trend-cell { min-width: 150px; }
-     .extracted-entities { animation-duration: 15s; } /* Riduci ancora durata */
-}
+// *** IMPORTANTE: Funzione escapeHtml ***
+// Assicurati che questa funzione sia presente!
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') {
+        // Se non è una stringa, prova a convertirla, altrimenti restituisci stringa vuota
+        try {
+            unsafe = String(unsafe);
+        } catch (e) {
+            return '';
+        }
+    }
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
