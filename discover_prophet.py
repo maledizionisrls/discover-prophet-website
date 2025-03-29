@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# 🚀 Script Ottimizzato per Google Trends TV (Hot Trends) - V7.5 (Rank Penalty Dinamica)
-#    Implementa Heuristic Discover Score in funzione dedicata per facile modifica.
+# 🚀 Script Ottimizzato per Google Trends TV (Hot Trends) - V8.0 (Con Integrazione Claude AI)
+#    Analisi semantica avanzata e gestione entità via Claude AI
 #    Formula V7.5: (1 + V4h + V7d) / log1p(Rank * max(1, K / (V7d + epsilon)))
 #    Obiettivo: Penalizzare Rank alto se V7d è basso, validando esplosioni con storico.
 #    Ordina per Discover_Score decrescente. Contesto per Top N.
@@ -31,8 +31,8 @@ from tqdm import tqdm
 from datetime import datetime
 import shutil
 
-# --- Import Integrazione Claude ---
-from claude_integration import integrate_claude_analysis
+# Import del modulo Claude Integration
+import claude_integration
 
 # --- Patch per errore method_whitelist vs allowed_methods ---
 import urllib3
@@ -114,17 +114,38 @@ ENTITY_EXTRACTION_READ_TIMEOUT = 25
 PYTRENDS_CONNECT_TIMEOUT = 10
 PYTRENDS_READ_TIMEOUT = 25
 
+# --- Parametri Claude AI ---
+ANTHROPIC_API_KEY = "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"  # Sostituire con la tua API Key Claude
+CLAUDE_MODEL = "claude-3-sonnet-20240229"
+CLAUDE_CACHE_FILE = os.path.join(CHECKPOINT_DIR, "claude_analysis_cache.json")
+CLAUDE_BATCH_SIZE = 5  # Numero di query da analizzare in un batch
+
 # --- Parametri Interni Pytrends (Non modificare se non sai cosa fai) ---
 PYTRENDS_RETRIES = 1
 PYTRENDS_BACKOFF_FACTOR = 0.2
 
-# --- Parametri Integrazione Claude ---
-USE_CLAUDE_ANALYSIS = True    # Attiva/disattiva l'integrazione Claude
-CLAUDE_MAX_ENTITIES = 50      # Numero massimo di entità da analizzare con Claude
-
 # ==============================================================================
 # ================== FINE SEZIONE PARAMETRI CONFIGURABILI ======================
 # ==============================================================================
+
+# Inizializzazione Claude Analyzer
+print("Inizializzazione Claude Analyzer...")
+CLAUDE_ANALYZER = None
+
+def init_claude_analyzer():
+    global CLAUDE_ANALYZER
+    if CLAUDE_ANALYZER is None:
+        try:
+            CLAUDE_ANALYZER = claude_integration.ClaudeAnalyzer(
+                api_key=ANTHROPIC_API_KEY,
+                model=CLAUDE_MODEL,
+                cache_file=CLAUDE_CACHE_FILE
+            )
+            print(f"Claude Analyzer inizializzato con modello {CLAUDE_MODEL}")
+        except Exception as e:
+            print(f"ERRORE inizializzazione Claude Analyzer: {e}")
+            CLAUDE_ANALYZER = None
+    return CLAUDE_ANALYZER
 
 
 # ==============================================================================
@@ -135,20 +156,25 @@ CLAUDE_MAX_ENTITIES = 50      # Numero massimo di entità da analizzare con Clau
 # Restituisce una Series Pandas con i punteggi calcolati.
 # ------------------------------------------------------------------------------
 
-def calculate_discover_score(rank_series, score_4h, score_7d, k_penalty=V7D_PENALTY_K, epsilon=V7D_PENALTY_EPSILON):
+def calculate_discover_score(rank_series, score_4h, score_7d, k_penalty=V7D_PENALTY_K, epsilon=V7D_PENALTY_EPSILON, 
+                            entity_analysis=None):
     """
     Calcola l'Heuristic Discover Score basato su rank, volume 4h e volume 7d.
-    Formula V7.5: (1 + V4h + V7d) / log1p(Rank * max(1, K / (V7d + epsilon)))
+    Formula V8.0: (1 + V4h + V7d) * EntityFactor / log1p(Rank * max(1, K / (V7d + epsilon)))
     - V4h: Score medio ultime 4 ore
     - V7d: Score medio ultimi 7 giorni
     - Rank: Rank iniziale estratto da Google Trends TV
     - K, epsilon: Parametri per regolare la penalità del rank se V7d è basso.
+    - entity_analysis: Dizionario contenente l'analisi semantica delle query
+    
     Logica: Usa un numeratore semplice (somma volumi). Penalizza il Rank nel
             denominatore in modo dinamico: se V7d è basso, il Rank effettivo
             usato nel logaritmo viene aumentato, abbassando lo score finale.
+            
+            Ora include il fattore EntityFactor che considera l'analisi semantica Claude.
     """
-    formula_str = f"(1 + V4h + V7d) / log1p(Rank * max(1, {k_penalty:.1f} / (V7d + {epsilon:.1f})))"
-    print(f"        Applicando Formula V7.5: {formula_str}")
+    formula_str = f"(1 + V4h + V7d) * EntityFactor / log1p(Rank * max(1, {k_penalty:.1f} / (V7d + {epsilon:.1f})))"
+    print(f"        Applicando Formula V8.0: {formula_str}")
 
     # --- Calcolo Denominatore ---
     # Calcola il fattore di penalità basato su V7d basso
@@ -165,6 +191,38 @@ def calculate_discover_score(rank_series, score_4h, score_7d, k_penalty=V7D_PENA
     # --- Calcolo Numeratore ---
     # Semplice somma dei volumi + 1
     numerator = 1 + score_4h + score_7d
+    
+    # --- Incorpora l'analisi semantica se disponibile ---
+    entity_factor_series = pd.Series(1.0, index=rank_series.index)
+    
+    if entity_analysis is not None:
+        entity_factors = {}
+        
+        for index, query in enumerate(entity_analysis.keys()):
+            analysis = entity_analysis[query]
+            is_meta_query = analysis.get('is_meta_query', False)
+            confidence = analysis.get('confidence', 0.5)
+            
+            # Calcola fattore entità
+            # - Meta query hanno un fattore leggermente penalizzato
+            # - La confidence dell'analisi influisce sul fattore
+            base_factor = 0.9 if is_meta_query else 1.1
+            
+            # Moltiplica per la confidence (0.1-1.0)
+            entity_factor = base_factor * (0.5 + 0.5 * confidence)
+            
+            # Tronca i valori troppo estremi
+            entity_factor = max(0.7, min(1.3, entity_factor))
+            
+            entity_factors[query] = entity_factor
+        
+        # Applica i fattori entità
+        entity_factor_series = pd.Series(entity_factors).reindex(rank_series.index).fillna(1.0)
+        
+        print(f"        Analisi Claude applicata al Discover Score: {len(entity_factors)} query analizzate")
+        
+    # Moltiplica il numeratore per il fattore entità
+    numerator = numerator * entity_factor_series
 
     # --- Calcolo Score Finale ---
     discover_score = numerator / denominator
@@ -458,7 +516,7 @@ def create_static_files():
 
 # --- FUNZIONE: Generazione output HTML ---
 # (Codice omesso per brevità - invariato)
-def generate_html_output(df_final, runtime_info=None):
+def generate_html_output(df_final, runtime_info=None, entity_analysis=None):
     """Genera l'output HTML."""
     try:
         # Assicurati che la directory output esista
@@ -487,13 +545,17 @@ def generate_html_output(df_final, runtime_info=None):
                 'discover_score': float(row.get('Discover_Score', 0)), # Usa .get() per sicurezza
                 'score_1h': float(row.get('Score_Avg_now 1-H', 0)), # Usa .get()
                 'score_4h': float(row.get('Score_Avg_now 4-H', 0)), # Usa .get()
-                'score_7d': float(row.get('Score_Avg_now 7-d', 0)),  # Usa .get()
-                
-                # Aggiungi informazioni semantiche quando disponibili
-                'primary_entity': row.get('Primary_Entity', row.get('Entita', 'N/A')),
-                'is_meta_query': bool(row.get('Is_Meta_Query', False)),
-                'analysis_confidence': float(row.get('Analysis_Confidence', 0.1))
+                'score_7d': float(row.get('Score_Avg_now 7-d', 0))  # Usa .get()
             }
+            
+            # Aggiungi informazioni sull'analisi semantica se disponibili
+            if entity_analysis and trend_data['entity'] in entity_analysis:
+                analysis = entity_analysis[trend_data['entity']]
+                trend_data['primary_entity'] = analysis.get('primary_entity', trend_data['entity'])
+                trend_data['is_meta_query'] = analysis.get('is_meta_query', False)
+                trend_data['confidence'] = analysis.get('confidence', 0.5)
+                trend_data['secondary_entities'] = analysis.get('secondary_entities', [])
+            
             trend_list.append(trend_data)
 
         # Prepara i dati per il template
@@ -503,7 +565,8 @@ def generate_html_output(df_final, runtime_info=None):
                 'trends_count': len(trend_list),
                 'top_score': max([t['discover_score'] for t in trend_list]) if trend_list else 0,
                 'runtime_minutes': (runtime_info['end_time'] - runtime_info['start_time']) / 60 if runtime_info and 'start_time' in runtime_info and 'end_time' in runtime_info else 0,
-                'proxies_used': len(proxy_manager.all_proxies)
+                'proxies_used': len(proxy_manager.all_proxies),
+                'claude_analysis': entity_analysis is not None
             }
         }
 
@@ -523,7 +586,7 @@ def generate_html_output(df_final, runtime_info=None):
 
 
 # ==============================================================================
-# ==================== SCRIPT PRINCIPALE (Heuristic V7.5 Funzione Dedicata) ====
+# ==================== SCRIPT PRINCIPALE (Heuristic V8.0 con Claude) ===========
 # ==============================================================================
 if __name__ == "__main__":
     main_start_time = time.time()
@@ -534,14 +597,16 @@ if __name__ == "__main__":
         if not CONTEXT_TIMEFRAMES: warnings.warn("FETCH_VOLUME_CONTEXT=True ma CONTEXT_TIMEFRAMES vuoto.", UserWarning)
         if CONTEXT_N_RUNS <= 0: raise ValueError("CONTEXT_N_RUNS >= 1")
 
-    print(f"Avvio script V7.5: Heuristic Discover Score via funzione dedicata (Rank Penalty Dinamica)")
+    print(f"Avvio script V8.0: Heuristic Discover Score con Analisi Semantica Claude AI")
     print(f"Formula attuale: Vedi definizione funzione 'calculate_discover_score'")
     print(f"Parametri Penalità: K={V7D_PENALTY_K}, epsilon={V7D_PENALTY_EPSILON}")
-    print(f"Obiettivo: Penalizzare Rank alto se V7d è basso (Contesto Top {N_PROCESS_FOR_CONTEXT}, N_RUNS={CONTEXT_N_RUNS})")
+    print(f"Obiettivo: Calcolare Discover Score considerando semantica ed entità")
+    print(f"Analisi Claude: {CLAUDE_MODEL}")
     print(f"MAX_CONCURRENT_PROXIES={MAX_CONCURRENT_PROXIES}, THREADS={MAX_THREADS}")
     print(f"Output HTML: {os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)}")
 
     ordered_entities = None
+    entity_analysis = None
 
     try:
         os.makedirs(CHECKPOINT_DIR, exist_ok=True); print(f"Directory checkpoint: '{CHECKPOINT_DIR}'")
@@ -599,28 +664,67 @@ if __name__ == "__main__":
              for tf in CONTEXT_TIMEFRAMES:
                  if f'Score_Avg_{tf}' not in df_final.columns: df_final[f'Score_Avg_{tf}'] = 0.0
 
-        # --- INTEGRAZIONE CLAUDE PER ANALISI SEMANTICA ---
-        # Integrazione Claude per analisi semantica
-        if USE_CLAUDE_ANALYSIS:
-            print("\n--- Integrazione Analisi Semantica Claude ---")
-            try:
-                df_final, entity_analysis = integrate_claude_analysis(
-                    ordered_entities, 
-                    df_final, 
-                    checkpoint_dir=CHECKPOINT_DIR,
-                    max_entities=min(N_PROCESS_FOR_CONTEXT, CLAUDE_MAX_ENTITIES)
-                )
-                print("--- Integrazione Claude completata con successo ---")
-            except Exception as claude_e:
-                print(f"!!! Errore durante l'integrazione Claude: {claude_e} !!!")
-                traceback.print_exc()
-        else:
-            print("\n--- Integrazione Claude saltata (disattivata) ---")
+        # ========================================================================
+        # --- 3. Analisi Semantica con Claude AI ---
+        # ========================================================================
+        print("\n--- Avvio Analisi Semantica con Claude AI ---")
+        try:
+            # Inizializza Claude Analyzer
+            claude = init_claude_analyzer()
+            if claude:
+                # Prepara le query da analizzare (le prime N per contesto)
+                queries_to_analyze = ordered_entities[:N_PROCESS_FOR_CONTEXT]
+                print(f"Analisi di {len(queries_to_analyze)} query con Claude AI...")
+                
+                # Esegui l'analisi in batch
+                entity_analysis = claude.analyze_queries_batch(queries_to_analyze, batch_size=CLAUDE_BATCH_SIZE)
+                
+                # Salva i risultati dell'analisi
+                try:
+                    with open(os.path.join(CHECKPOINT_DIR, "claude_entity_analysis.json"), 'w', encoding='utf-8') as f:
+                        json.dump(entity_analysis, f, ensure_ascii=False, indent=2)
+                    print(f"Analisi Claude AI salvata in {os.path.join(CHECKPOINT_DIR, 'claude_entity_analysis.json')}")
+                except Exception as e:
+                    print(f"Errore salvataggio analisi Claude: {e}")
+                
+                # Stampa alcune statistiche sull'analisi
+                meta_queries = sum(1 for analysis in entity_analysis.values() if analysis.get('is_meta_query', False))
+                avg_confidence = sum(analysis.get('confidence', 0) for analysis in entity_analysis.values()) / len(entity_analysis) if entity_analysis else 0
+                
+                print(f"Analisi completata: {len(entity_analysis)} query analizzate")
+                print(f"Meta-query identificate: {meta_queries} ({(meta_queries/len(entity_analysis)*100):.1f}%)")
+                print(f"Confidenza media: {avg_confidence:.2f}")
+                
+                # Stampa alcuni esempi di analisi
+                print("\nEsempi di analisi semantica:")
+                sample_count = min(5, len(entity_analysis))
+                sample_keys = list(entity_analysis.keys())[:sample_count]
+                
+                for key in sample_keys:
+                    analysis = entity_analysis[key]
+                    print(f"Query: '{key}'")
+                    print(f"  → Entità principale: '{analysis.get('primary_entity', '?')}'")
+                    print(f"  → Meta-query: {'Sì' if analysis.get('is_meta_query', False) else 'No'}")
+                    if analysis.get('secondary_entities'):
+                        print(f"  → Entità secondarie: " + ", ".join([f"'{e['entity']}' ({e['weight']:.1f})" for e in analysis.get('secondary_entities', [])[:2]]))
+                    print()
+            else:
+                print("ATTENZIONE: Claude Analyzer non inizializzato correttamente. L'analisi semantica sarà saltata.")
+                entity_analysis = None
+        except Exception as claude_error:
+            print(f"Errore durante l'analisi semantica Claude: {claude_error}")
+            traceback.print_exc()
+            entity_analysis = None
+            
+        print("--- Fine Analisi Semantica ---")
+        # ========================================================================
+        # --- Fine Sezione Analisi Semantica con Claude AI ---
+        # ========================================================================
 
         # ========================================================================
-        # --- 3. Calcolo Heuristic Discover Score (Tramite Funzione Dedicata V7.5) ---
+        # --- 4. Calcolo Heuristic Discover Score (V8.0 con Claude AI) ---
         # ========================================================================
-        print("\n    Calcolo Heuristic Discover Score V7.5 (via funzione)...")
+        print("\n    Calcolo Heuristic Discover Score V8.0 (con analisi semantica Claude)...")
         discover_score_col = 'Discover_Score'
         score_4h_col = 'Score_Avg_now 4-H'
         score_7d_col = 'Score_Avg_now 7-d'
@@ -632,63 +736,57 @@ if __name__ == "__main__":
             score_7d = pd.to_numeric(df_final[score_7d_col], errors='coerce').fillna(0).clip(lower=0)
             rank_series = pd.to_numeric(df_final['Rank'], errors='coerce').fillna(1).clip(lower=1) # Rank >= 1
 
-            # --- CHIAMA LA FUNZIONE DEDICATA PER IL CALCOLO (V7.5) ---
-            # Passa i parametri K ed epsilon definiti all'inizio
-            # Se l'integrazione Claude è stata fatta e c'è Enhanced_Discover_Score, non sovrascrivere
-            if 'Enhanced_Discover_Score' not in df_final.columns:
-                df_final[discover_score_col] = calculate_discover_score(
-                    rank_series, score_4h, score_7d,
-                    k_penalty=V7D_PENALTY_K,
-                    epsilon=V7D_PENALTY_EPSILON
-                )
-                print(f"       Colonna '{discover_score_col}' calcolata tramite funzione 'calculate_discover_score'.")
-            else:
-                print(f"       Colonna '{discover_score_col}' già aggiornata dall'integrazione Claude, non sovrascritta.")
+            # --- CHIAMA LA FUNZIONE DEDICATA PER IL CALCOLO (V8.0) ---
+            # Passa i parametri K, epsilon e entity_analysis
+            df_final[discover_score_col] = calculate_discover_score(
+                rank_series, score_4h, score_7d,
+                k_penalty=V7D_PENALTY_K,
+                epsilon=V7D_PENALTY_EPSILON,
+                entity_analysis=entity_analysis
+            )
+            # ---------------------------------------------------------
+
+            print(f"       Colonna '{discover_score_col}' calcolata con formula V8.0 (con analisi semantica).")
         else:
             missing_cols = [col for col in [score_4h_col, score_7d_col, 'Rank'] if col not in df_final.columns]
-            warnings.warn(f"Colonne necessarie ({', '.join(missing_cols)}) mancanti, impossibile calcolare Discover_Score V7.5.", UserWarning)
+            warnings.warn(f"Colonne necessarie ({', '.join(missing_cols)}) mancanti, impossibile calcolare Discover_Score V8.0.", UserWarning)
             if discover_score_col not in df_final.columns:
                  df_final[discover_score_col] = 0.0
         # ========================================================================
         # --- Fine Sezione Calcolo Heuristic Discover Score ---
         # ========================================================================
 
-        # --- 4. Ordinamento Finale per Discover Score ---
+        # --- 5. Ordinamento Finale per Discover Score ---
         if discover_score_col in df_final.columns:
              df_final = df_final.sort_values(by=discover_score_col, ascending=False)
              print(f"\n    DataFrame ordinato per '{discover_score_col}'.")
         else:
              print(f"\n    ATTENZIONE: Colonna '{discover_score_col}' non trovata per l'ordinamento.")
 
-        # --- 5. Salva il DataFrame finale come CSV (per backup) ---
+        # --- 6. Salva il DataFrame finale come CSV (per backup) ---
         try:
             # Aggiorna nome file per riflettere la versione
-            backup_filename = "final_data_v7.5.csv"
+            backup_filename = "final_data_v8.0.csv"
             df_final.to_csv(os.path.join(CHECKPOINT_DIR, backup_filename), index=False, encoding='utf-8-sig')
             print(f"\nDataFrame finale salvato come backup in: {os.path.join(CHECKPOINT_DIR, backup_filename)}")
         except Exception as e:
             print(f"\n!!! Errore salvataggio CSV finale: {e} !!!")
 
-        # --- 6. Genera l'output HTML ---
+        # --- 7. Genera l'output HTML ---
         runtime_info['end_time'] = time.time()
-        html_result = generate_html_output(df_final, runtime_info)
+        html_result = generate_html_output(df_final, runtime_info, entity_analysis)
 
         if html_result:
             print("\nGenerazione output HTML completata con successo.")
         else:
             print("\n!!! Errore durante la generazione dell'output HTML. !!!")
 
-        # --- 7. Stampa Top N Finale (Ordinato per Discover Score) ---
-        print(f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score Heuristico V7.5) ---")
+        # --- 8. Stampa Top N Finale (Ordinato per Discover Score) ---
+        print(f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score Heuristico V8.0) ---")
         cols_to_show = []
         if discover_score_col in df_final.columns: cols_to_show.append(discover_score_col)
         if 'Rank' in df_final.columns: cols_to_show.append('Rank')
         if 'Entita' in df_final.columns: cols_to_show.append('Entita')
-
-        # Aggiungi colonne dell'analisi semantica
-        if USE_CLAUDE_ANALYSIS and 'Primary_Entity' in df_final.columns:
-            cols_to_show.append('Primary_Entity')
-            cols_to_show.append('Is_Meta_Query')
 
         if FETCH_VOLUME_CONTEXT:
             for tf in CONTEXT_TIMEFRAMES:
@@ -712,5 +810,14 @@ if __name__ == "__main__":
             if tfp: print("\nTop Proxy con Fallimenti:"); [print(f"    - {pid}: Succ:{d['success']}, Fails Cons:{d['consecutive_fails']} (429:{d['fail_429']}, P/T:{d['fail_proxy/timeout']}, O/P:{d['fail_other/parse']})") for pid, d in tfp.items()]
             else: print("\nNessun fallimento proxy.")
         except Exception as stats_exc: print(f"Errore stampa statistiche proxy: {stats_exc}")
+        
+        # Chiudi Claude Analyzer se è stato inizializzato
+        if CLAUDE_ANALYZER:
+            try:
+                CLAUDE_ANALYZER.close()
+                print("Claude Analyzer chiuso correttamente.")
+            except Exception as claude_close_err:
+                print(f"Errore chiusura Claude Analyzer: {claude_close_err}")
+                
         main_end_time = time.time(); total_duration = main_end_time - main_start_time
         print(f"\n--- Script completato in {total_duration:.2f} secondi ({total_duration/60:.2f} minuti) ---")
