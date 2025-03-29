@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function displayErrorMessage(message) {
     const tableBody = document.getElementById('trendsTableBody');
     if(tableBody) {
-        tableBody.innerHTML = `<tr class="error-row"><td colspan="8">${escapeHtml(message)}</td></tr>`; // Usa colspan 8 per sicurezza
+        tableBody.innerHTML = `<tr class="error-row"><td colspan="8">${escapeHtml(message)}</td></tr>`;
     }
     const controls = document.querySelector('.controls'); if(controls) controls.style.display = 'none';
     const stats = document.querySelector('.stats-container'); if(stats) stats.style.display = 'none';
@@ -88,7 +88,7 @@ function setupEventListeners() {
         if (sortBy) sortBy.addEventListener('change', sortTable);
         if (sortOrder) sortOrder.addEventListener('change', sortTable);
 
-        // NESSUN event listener per il toggle qui
+        // NESSUN listener per toggle
 
     } catch (error) {
         console.error("Errore durante setupEventListeners:", error);
@@ -117,9 +117,9 @@ function renderTrendsTable(data) {
         row.dataset.score7d = String(item.score_7d || 0);
         row.dataset.aiEntities = String(item.extracted_entities || '').toLowerCase();
 
-        // Applica classe .hot-trend se necessario (USA VERSIONE ORIGINALE/MENO RESTRITTIVA)
+        // Applica classe .hot-trend se necessario (USA VERSIONE ORIGINALE)
         const isHot = isEntityHotOriginal(item.score_1h, item.score_4h, item.score_7d);
-        if (isHot) row.classList.add('hot-trend'); // Questa classe applica lo sfondo giallo
+        if (isHot) row.classList.add('hot-trend');
 
         // Badge Rank
         let rankBadgeClass = '';
@@ -134,7 +134,6 @@ function renderTrendsTable(data) {
         let extractedEntitiesHtml = '';
         if (item.extracted_entities && typeof item.extracted_entities === 'string' && item.extracted_entities.trim() !== '') {
              const entitiesCleaned = item.extracted_entities.trim();
-             // Crea semplicemente il div, SENZA classi extra
              extractedEntitiesHtml = `<div class="extracted-entities" title="Entità suggerite da AI">${escapeHtml(entitiesCleaned)}</div>`;
         }
         // --- FINE LOGICA SEMPLIFICATA ---
@@ -159,15 +158,13 @@ function renderTrendsTable(data) {
         tableBody.appendChild(row);
     });
 
-    // Creazione grafici (assicurati che questa parte sia robusta)
+    // Creazione grafici
     console.log("Avvio creazione grafici...");
     requestAnimationFrame(() => {
         console.log(`Inizio loop creazione grafici per ${data.length} elementi.`);
         if (typeof Chart === 'undefined') {
-             console.error("Chart.js non è caricato!");
-             // Mostra errore all'utente nella prima cella grafico?
-             const firstChartContainer = document.getElementById('chart-0');
-             if (firstChartContainer) firstChartContainer.innerHTML = '<span class="chart-fallback" style="color:red;">ChartJS Err!</span>';
+             console.error("LIBRERIA CHART.JS NON CARICATA!");
+             displayErrorMessage("Errore: Impossibile caricare la libreria dei grafici (Chart.js).");
              return;
         }
         data.forEach((item, index) => {
@@ -176,16 +173,22 @@ function renderTrendsTable(data) {
              try {
                  const container = document.getElementById(containerId);
                  if(container) { // Controlla se il container esiste
+                    // Verifica se esiste già un grafico Chart.js associato a questo canvas
+                    let existingChart = Chart.getChart(containerId); // o Chart.getChart(canvas) se usi direttamente il canvas
+                    if (existingChart) {
+                        console.warn(`Distruzione grafico esistente per ${containerId}`);
+                        existingChart.destroy(); // Distruggi il vecchio grafico prima di crearne uno nuovo
+                    }
+                    // Procedi alla creazione del nuovo grafico
                     createTrendChart(containerId, chartData);
                  } else {
-                    // Non loggare warning per ogni grafico su mobile (colonna nascosta)
+                    // Non è un errore grave se il container non c'è (es. colonna nascosta su mobile)
+                    // console.warn(`Container ${containerId} non trovato.`);
                  }
             } catch (chartError) {
                  console.error(`Errore durante la chiamata a createTrendChart per ${containerId}:`, chartError);
                  const errorContainer = document.getElementById(containerId);
-                 if(errorContainer) {
-                     errorContainer.innerHTML = '<span class="chart-fallback" style="color:red;">Err!</span>';
-                 }
+                 if(errorContainer) { errorContainer.innerHTML = '<span class="chart-fallback" style="color:red;">Err!</span>'; }
             }
         });
         console.log("Fine loop creazione grafici.");
@@ -209,24 +212,30 @@ function isEntityHotOriginal(score1h, score4h, score7d) {
 // Crea un grafico di tendenza per una entità
 function createTrendChart(containerId, dataPoints) {
     const container = document.getElementById(containerId);
-    if (!container) return; // Esce se il container non esiste nel DOM
+    if (!container) return;
 
-    container.innerHTML = ''; // Pulisce container
+    // Pulisci eventuali contenuti precedenti (es. fallback di errore)
+    container.innerHTML = '';
     const canvas = document.createElement('canvas');
-    canvas.style.display = 'block'; canvas.style.width = '100%'; canvas.style.height = '100%';
+    // Applica stili direttamente per assicurare dimensioni corrette
+    canvas.style.display = 'block';
+    canvas.style.boxSizing = 'border-box'; // Include padding/border nel width/height
+    canvas.style.height = '100%';          // Occupa altezza container
+    canvas.style.width = '100%';           // Occupa larghezza container
     container.appendChild(canvas);
 
     const chartContext = canvas.getContext('2d');
     if (!chartContext) {
         console.error(`Impossibile ottenere il contesto 2D per ${containerId}`);
-        container.innerHTML = `<span class="chart-fallback">Ctx Err</span>`; // Fallback
+        container.innerHTML = `<span class="chart-fallback">Ctx Err</span>`;
         return;
     }
 
     try {
         const lineColor = determineTrendColor(dataPoints);
-        const gradient = chartContext.createLinearGradient(0, 0, 0, container.clientHeight || 35);
-        gradient.addColorStop(0, lineColor + '60'); gradient.addColorStop(1, lineColor + '05');
+        const gradient = chartContext.createLinearGradient(0, 0, 0, container.clientHeight || 35); // Usa altezza container
+        gradient.addColorStop(0, lineColor + '60');
+        gradient.addColorStop(1, lineColor + '05');
 
         // Configurazione Chart.js COMPLETA e CORRETTA
         new Chart(chartContext, {
@@ -234,6 +243,7 @@ function createTrendChart(containerId, dataPoints) {
             data: {
                 labels: ['7d Avg', '4h Avg', '1h Avg'],
                 datasets: [{
+                    label: 'Trend Score', // Aggiunto label per chiarezza (anche se legenda è nascosta)
                     data: dataPoints,
                     borderColor: lineColor,
                     backgroundColor: gradient,
@@ -247,7 +257,7 @@ function createTrendChart(containerId, dataPoints) {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: false, // Fondamentale!
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -267,8 +277,11 @@ function createTrendChart(containerId, dataPoints) {
                     x: { display: false },
                     y: { display: false, beginAtZero: true }
                 },
-                animation: false, // Disabilita animazioni
-                parsing: false   // Disabilita parsing dati
+                animation: false, // No animazioni
+                parsing: false,   // No parsing
+                layout: { // Assicurati che non ci sia padding interno al grafico
+                    padding: 0
+                }
             } // Fine options
         }); // Fine new Chart
     } catch (error) {
