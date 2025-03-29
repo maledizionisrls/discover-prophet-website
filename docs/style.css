@@ -43,412 +43,194 @@ header {
     gap: 1rem;
 }
 
-h1 {
-    margin: 0;
-    font-size: 1.7rem;
-    font-weight: 600;
-}
+h1 { margin: 0; font-size: 1.7rem; font-weight: 600; }
+h1 i { margin-right: 0.6rem; color: var(--secondary-color); }
+.update-info { font-size: 0.85rem; opacity: 0.9; margin-top: 0.2rem; margin-bottom: 0; line-height: 1.4; }
+.openai-info { font-size: 0.8rem; }
+.openai-info #openaiStatus { font-weight: bold; }
+.header-badge { background-color: rgba(255, 255, 255, 0.15); padding: 0.4rem 0.8rem; border-radius: 15px; font-size: 0.85rem; white-space: nowrap; }
+.header-badge i { margin-right: 0.3rem; }
 
-h1 i {
-    margin-right: 0.6rem;
-    color: var(--secondary-color);
-}
+.dashboard { max-width: 1600px; margin: 1.5rem auto; padding: 0 1.5rem; }
 
-.update-info {
-    font-size: 0.85rem;
-    opacity: 0.9;
-    margin-top: 0.2rem;
-    margin-bottom: 0;
-    line-height: 1.4;
-}
+.stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.stat-card { background-color: var(--card-color); border-radius: 6px; padding: 1.2rem; border: 1px solid var(--border-color); text-align: center; transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 3px 6px rgba(0,0,0,0.06); }
+.stat-card .icon { font-size: 1.8rem; margin-bottom: 0.4rem; color: var(--secondary-color); }
+.stat-card .number { font-size: 1.7rem; font-weight: 600; color: var(--primary-color); margin-bottom: 0.4rem; line-height: 1.2; }
+.stat-card .label { color: var(--text-light); font-size: 0.85rem; }
 
-.openai-info {
-    font-size: 0.8rem;
-}
-.openai-info #openaiStatus {
-    font-weight: bold;
-}
+.controls { margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 0.8rem; background-color: var(--card-color); border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.search-box { padding: 0.5rem 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; flex-grow: 1; max-width: 350px; font-size: 0.9rem; }
+.search-box:focus { outline: none; border-color: var(--secondary-color); box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); }
+.sorting { display: flex; gap: 0.5rem; align-items: center; }
+.sorting label { font-size: 0.9rem; color: var(--text-light); white-space: nowrap; }
+select { padding: 0.4rem 0.6rem; border: 1px solid var(--border-color); border-radius: 4px; background-color: white; font-size: 0.9rem; }
 
+/* Tabella */
+.table-container { width: 100%; overflow-x: auto; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.04); background-color: var(--card-color); }
+.trends-table { width: 100%; border-collapse: collapse; min-width: 800px; /* Riduci min-width ulteriormente */ table-layout: fixed; }
+.trends-table th, .trends-table td { padding: 0.75rem 0.8rem; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; }
 
-.header-badge {
-    background-color: rgba(255, 255, 255, 0.15);
-    padding: 0.4rem 0.8rem;
-    border-radius: 15px;
-    font-size: 0.85rem;
-    white-space: nowrap;
-}
-.header-badge i {
-    margin-right: 0.3rem;
-}
-
-.dashboard {
-    max-width: 1600px;
-    margin: 1.5rem auto;
-    padding: 0 1.5rem;
-}
-
-.stats-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.stat-card {
-    background-color: var(--card-color);
-    border-radius: 6px;
-    padding: 1.2rem;
-    border: 1px solid var(--border-color);
-    text-align: center;
-    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.06);
-}
-
-.stat-card .icon {
-    font-size: 1.8rem;
-    margin-bottom: 0.4rem;
-    color: var(--secondary-color);
-}
-
-.stat-card .number {
-    font-size: 1.7rem;
-    font-weight: 600;
-    color: var(--primary-color);
-    margin-bottom: 0.4rem;
-    line-height: 1.2;
-}
-
-.stat-card .label {
-    color: var(--text-light);
-    font-size: 0.85rem;
-}
-
-.controls {
-    margin-bottom: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding: 0.8rem;
-    background-color: var(--card-color);
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-
-.search-box {
-    padding: 0.5rem 0.8rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    flex-grow: 1;
-    max-width: 350px;
-    font-size: 0.9rem;
-}
-.search-box:focus {
-    outline: none;
-    border-color: var(--secondary-color);
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-}
-
-
-.sorting {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-.sorting label {
-    font-size: 0.9rem;
-    color: var(--text-light);
-    white-space: nowrap;
-}
-
-select {
-    padding: 0.4rem 0.6rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: white;
-    font-size: 0.9rem;
-}
-
-/* Responsive table container */
-.table-container {
-    width: 100%;
-    overflow-x: auto;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    background-color: var(--card-color);
-}
-
-.trends-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 900px; /* Larghezza minima tabella */
-    table-layout: fixed; /* IMPORTANTE: Fissa layout tabella per evitare che cella si allarghi */
-}
-
-.trends-table th,
-.trends-table td {
-    padding: 0.75rem 0.8rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-    /* Rimuovi white-space: nowrap; qui, gestito dove serve */
-    vertical-align: middle;
-    overflow: hidden; /* Nasconde overflow anche nelle celle normali se necessario */
-    text-overflow: ellipsis; /* Mostra ... se il contenuto non entra (non per trend-cell) */
-}
-
-/* Cella Trend: permette a capo per main-entity, contiene lo scroller */
+/* Cella Trend: permette a capo solo per main-entity */
 .trends-table .trend-cell {
-    white-space: normal; /* Permette a main-entity di andare a capo se necessario */
+    white-space: normal;
     vertical-align: top;
-    /* Definisci una larghezza fissa o percentuale per questa colonna */
-    width: 30%; /* Esempio: Adatta questa percentuale! */
-    min-width: 250px; /* Minimo per leggibilità */
-    text-overflow: initial; /* Disabilita ellipsis per questa cella specifica */
+    width: 35%; /* Aumenta leggermente % per più spazio */
+    min-width: 200px; /* Riduci ancora min-width */
+    text-overflow: initial;
 }
 .main-entity {
     font-weight: 500;
-    display: block;
-    margin-bottom: 3px;
-    /* Opzionale: Se il nome del trend è troppo lungo */
-    /* white-space: nowrap; */
-    /* overflow: hidden; */
-    /* text-overflow: ellipsis; */
+    display: inline; /* Metti inline per far stare bottone accanto */
+    margin-right: 5px; /* Spazio prima del bottone */
+    /* Rimuovi margin-bottom */
 }
+/* Bottone Mostra/Nascondi Entità AI */
+.toggle-ai-btn {
+    background: none;
+    border: none;
+    color: var(--secondary-color);
+    cursor: pointer;
+    padding: 0 3px;
+    font-size: 0.8em; /* Rendi piccolo */
+    vertical-align: middle; /* Allinea con testo main-entity */
+    display: inline-block; /* Deve essere inline-block per stare accanto */
+}
+.toggle-ai-btn:hover { color: var(--primary-color); }
 
 
-.trends-table th {
-    background-color: #f8f9fa;
-    color: var(--primary-color);
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    border-bottom-width: 2px;
-    white-space: nowrap; /* Header sempre su una riga */
-}
-/* Specifica larghezze colonne header se usi table-layout: fixed */
+/* Stili Header Tabella */
+.trends-table th { background-color: #f8f9fa; color: var(--primary-color); font-weight: 600; position: sticky; top: 0; z-index: 10; border-bottom-width: 2px; white-space: nowrap; }
 .trends-table th:nth-child(1) { width: 40px; } /* # */
-.trends-table th:nth-child(2) { width: 70px; } /* Rank */
-.trends-table th:nth-child(3) { width: 30%; } /* Trend & AI (come cella dati) */
-.trends-table th:nth-child(4) { width: 130px; } /* Discover Score */
+.trends-table th:nth-child(2) { width: 65px; } /* Rank */
+.trends-table th:nth-child(3) { width: 35%; } /* Trend & AI */
+.trends-table th:nth-child(4) { width: 120px; } /* Discover Score */
 .trends-table th:nth-child(5),
 .trends-table th:nth-child(6),
-.trends-table th:nth-child(7) { width: 60px; } /* 1h, 4h, 7d */
-.trends-table th:nth-child(8) { width: 110px; } /* Trend Chart */
+.trends-table th:nth-child(7) { width: 55px; } /* 1h, 4h, 7d */
+.trends-table th:nth-child(8) { width: 100px; } /* Trend Chart */
 
-
-.trends-table tr:last-child td {
-    border-bottom: none;
-}
-
-.trends-table tbody tr:hover {
-    background-color: #e9f5ff;
-}
-
-.rank-badge {
-    display: inline-block;
-    min-width: 1.8rem;
-    padding: 0.15rem 0.4rem;
-    text-align: center;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 0.85rem;
-    background-color: var(--secondary-color);
-    color: var(--badge-text);
-    line-height: 1.4;
-}
-
+/* Altri stili tabella */
+.trends-table tr:last-child td { border-bottom: none; }
+.trends-table tbody tr:hover { background-color: #e9f5ff; }
+.rank-badge { display: inline-block; min-width: 1.8rem; padding: 0.15rem 0.4rem; text-align: center; border-radius: 4px; font-weight: bold; font-size: 0.85rem; background-color: var(--secondary-color); color: var(--badge-text); line-height: 1.4; }
 .top-10 { background-color: var(--accent-color); }
 .top-25 { background-color: var(--trending-neutral); }
-
-.trend-chart-container {
-    width: 100px;
-    height: 35px;
-    min-width: 100px;
-}
-.chart-fallback {
-    font-size: 10px;
-    color: #aaa;
-    text-align: center;
-    display: block;
-    line-height: 35px;
-}
-
-.score {
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.trend-indicator {
-    margin-left: 0.4rem;
-    font-size: 0.8rem;
-    display: inline-block;
-    width: 1.2em;
-    text-align: center;
-}
-.trend-indicator i {
-     opacity: 0.8;
-}
-
+.trend-chart-container { width: 100px; height: 35px; min-width: 100px; }
+.chart-fallback { font-size: 10px; color: #aaa; text-align: center; display: block; line-height: 35px; }
+.score { font-weight: 600; white-space: nowrap; }
+.trend-indicator { margin-left: 0.4rem; font-size: 0.8rem; display: inline-block; width: 1.2em; text-align: center; }
+.trend-indicator i { opacity: 0.8; }
 .trend-stable { color: var(--text-light); }
-.trend-small-up { color: var(--trending-up); opacity: 0.7; }
-.trend-medium-up { color: var(--trending-up); }
-.trend-strong-up { color: var(--trending-up); font-weight: bold; }
-.trend-small-down { color: var(--trending-down); opacity: 0.7; }
-.trend-medium-down { color: var(--trending-down); }
-.trend-strong-down { color: var(--trending-down); font-weight: bold; }
+.trend-small-up, .trend-medium-up, .trend-strong-up { color: var(--trending-up); }
+.trend-small-down, .trend-medium-down, .trend-strong-down { color: var(--trending-down); }
+.trend-strong-up i, .trend-strong-down i { font-weight: bold; } /* Rende solo freccia bold */
 
+/* Trend HOT */
+.hot-trend { background-color: #fff8e1; }
+.hot-trend td:first-child { border-left: 3px solid var(--hot-color); }
+.hot-indicator { display: inline-block; background-color: var(--hot-color); color: white; font-weight: bold; font-size: 0.7rem; padding: 1px 4px; border-radius: 3px; margin-left: 5px; vertical-align: middle; line-height: 1; }
 
-footer {
-    text-align: center;
-    padding: 1.5rem;
-    margin-top: 2rem;
-    color: var(--text-light);
-    font-size: 0.85rem;
-    border-top: 1px solid var(--border-color);
-}
-.version {
-    font-size: 0.75rem;
-    margin-top: 0.3rem;
-}
+/* --- Stili per Entità AI Collapsible + Scorrimento Interno --- */
 
-/* Stile per trend HOT */
-.hot-trend {
-    background-color: #fff8e1;
-}
-.hot-trend td:first-child {
-    border-left: 3px solid var(--hot-color);
-}
-
-.hot-indicator {
-    display: inline-block;
-    background-color: var(--hot-color);
-    color: white;
-    font-weight: bold;
-    font-size: 0.7rem;
-    padding: 1px 4px;
-    border-radius: 3px;
-    margin-left: 5px;
-    vertical-align: middle;
-    line-height: 1;
-}
-
-/* --- Stili per Entità AI + Scorrimento (Logica Aggiornata) --- */
-
-/* 1. Contenitore Esterno: definisce la finestra visibile */
-.extracted-entities {
+/* 1. Contenitore Esterno Collapsible */
+.extracted-entities.collapsible {
     font-size: 0.8rem;
     color: #555;
-    margin-top: 4px;
+    margin-top: 6px; /* Più spazio sotto il bottone/trend */
     line-height: 1.4;
-    display: block; /* Occupa la larghezza disponibile sotto main-entity */
-    width: 100%;    /* Forza la larghezza al 100% della cella (importante con table-layout: fixed) */
-    overflow: hidden; /* Nasconde ciò che esce */
+    display: block;
+    width: 100%;
+    overflow: hidden; /* Nasconde scroller interno quando chiuso */
     box-sizing: border-box;
-    padding: 3px 0;
+    padding: 0; /* Rimuovi padding verticale qui */
     cursor: default;
-    /* Rimosso animation e white-space da qui */
+    /* Transizione per apertura/chiusura */
+    max-height: 0; /* Inizia chiuso */
+    transition: max-height 0.3s ease-out;
+}
+/* Stato visibile */
+.extracted-entities.collapsible.visible {
+    max-height: 40px; /* Altezza massima quando aperto (aggiusta se serve) */
+    padding: 3px 0; /* Ri-applica padding solo quando visibile */
 }
 
-/* 2. Contenitore Interno: contiene il testo e scorre */
+/* 2. Contenitore Interno per Scorrimento */
 .scrolling-text-inner {
-    display: inline-block; /* Si adatta alla larghezza del testo */
-    white-space: nowrap;   /* Mantiene il testo su una riga */
-    padding-left: 100%;   /* Spinge l'inizio del testo fuori a destra */
-    animation: marquee-scroll-inner 25s linear infinite; /* Applica animazione qui */
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100%; /* Spinge testo a destra */
+    /* Animazione applicata solo quando il contenitore è visibile */
+    animation: none; /* Disattiva animazione di default */
 }
+/* Applica animazione solo quando visibile */
+.extracted-entities.collapsible.visible .scrolling-text-inner {
+     animation: marquee-scroll-inner 25s linear infinite;
+}
+
 
 /* 3. Animazione per l'elemento interno */
 @keyframes marquee-scroll-inner {
-  0% {
-    transform: translateX(0%); /* Parte dalla posizione iniziale (spostata dal padding) */
-  }
-  100% {
-    /* Muove verso sinistra di una quantità sufficiente a far scomparire tutto il testo + il padding iniziale */
-    /* Un valore come -200% o -210% di solito funziona bene */
-    transform: translateX(-210%);
-  }
+  0%   { transform: translateX(0%); }
+  100% { transform: translateX(-210%); } /* Muove verso sinistra */
 }
 
 /* 4. Pausa su hover del contenitore esterno */
-.extracted-entities:hover .scrolling-text-inner {
+.extracted-entities.collapsible:hover .scrolling-text-inner {
   animation-play-state: paused;
 }
-/* --- Fine Stili Scorrimento Aggiornati --- */
+/* --- Fine Stili Collapsible --- */
 
 
-.no-results-message {
-    text-align: center;
-    padding: 20px;
-    color: var(--text-light);
-    font-style: italic;
-    background-color: var(--card-color);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    margin-top: 1rem;
-}
+/* Messaggi e Footer */
+.no-results-message { text-align: center; padding: 20px; color: var(--text-light); font-style: italic; background-color: var(--card-color); border: 1px solid var(--border-color); border-radius: 6px; margin-top: 1rem; }
+.loading-row td, .error-row td, .no-data-row td { text-align: center !important; white-space: normal !important; padding: 30px 15px !important; }
+.error-row td { color: var(--accent-color); font-weight: bold; }
+footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--text-light); font-size: 0.85rem; border-top: 1px solid var(--border-color); }
+.version { font-size: 0.75rem; margin-top: 0.3rem; }
 
-/* Righe speciali tabella */
-.loading-row td, .error-row td, .no-data-row td {
-    text-align: center !important;
-    white-space: normal !important;
-    padding: 30px 15px !important;
-}
-.error-row td {
-    color: var(--accent-color);
-    font-weight: bold;
-}
-
-
-/* Responsive design */
-@media (max-width: 1200px) {
-    .trends-table th,
-    .trends-table td { padding: 0.7rem 0.6rem; }
-    .trend-chart-container { width: 90px; height: 30px; }
-    .trends-table .trend-cell { min-width: 200px; width: 28%; } /* Adatta % */
-    .trends-table th:nth-child(3) { width: 28%; }
-}
-
+/* Responsive */
 @media (max-width: 992px) {
-    .header-content { flex-direction: column; align-items: flex-start; }
-    .header-badge { margin-top: 0.8rem; }
-    .stats-container { grid-template-columns: repeat(2, 1fr); }
-    .trends-table th:nth-child(6), .trends-table td:nth-child(6), /* Nascondi 4h */
-    .trends-table th:nth-child(7), .trends-table td:nth-child(7) { display: none; } /* Nascondi 7d */
-    .trend-chart-container { width: 80px; height: 28px; }
-    .trends-table .trend-cell { width: auto; } /* Rimuovi % fissa se nascondi colonne */
+    /* Nascondi 4h, 7d */
+    .trends-table th:nth-child(6), .trends-table td:nth-child(6),
+    .trends-table th:nth-child(7), .trends-table td:nth-child(7) { display: none; }
+    .trends-table .trend-cell { width: auto; min-width: 220px; } /* Rimuovi % fissa */
     .trends-table th:nth-child(3) { width: auto; }
+    .trend-chart-container { width: 90px; height: 30px; }
 }
 
 @media (max-width: 768px) {
-    body { font-size: 15px; }
+    body { font-size: 14px; } /* Riduci ulteriormente */
     header { padding: 0.8rem 1rem; }
-    h1 { font-size: 1.5rem; }
-    .dashboard { padding: 0 1rem; }
-    .controls { flex-direction: column; align-items: stretch; }
-    .search-box { max-width: 100%; }
-    .stats-container { grid-template-columns: 1fr; gap: 0.8rem;}
-    .stat-card { padding: 1rem; }
-    .stat-card .number { font-size: 1.5rem; }
-    .trends-table th:nth-child(5), .trends-table td:nth-child(5), /* Nascondi 1h */
-    .trends-table th:nth-child(8), .trends-table td:nth-child(8) { display: none; } /* Nascondi Grafico */
-     .trends-table th, .trends-table td { padding: 0.6rem 0.5rem; font-size: 0.85rem; }
-     .rank-badge { font-size: 0.75rem; padding: 0.1rem 0.3rem; min-width: 1.5rem;}
-     .score { font-size: 0.9rem; }
-     .extracted-entities .scrolling-text-inner { font-size: 0.75rem; animation-duration: 20s; } /* Riduci durata animazione */
-     .hot-indicator { font-size: 0.65rem; }
+    h1 { font-size: 1.4rem; }
+    .dashboard { padding: 0 0.8rem; }
+    .controls { flex-direction: column; align-items: stretch; gap: 0.8rem; padding: 0.6rem; }
+    .stats-container { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem;} /* Adatta cards */
+    .stat-card { padding: 0.8rem; }
+    .stat-card .number { font-size: 1.4rem; }
+    .stat-card .label { font-size: 0.8rem; }
+
+    /* Nascondi 1h e Grafico */
+    .trends-table th:nth-child(5), .trends-table td:nth-child(5),
+    .trends-table th:nth-child(8), .trends-table td:nth-child(8) { display: none; }
+    /* Riduci padding e font tabella */
+    .trends-table th, .trends-table td { padding: 0.5rem 0.4rem; font-size: 0.8rem; }
+    .rank-badge { font-size: 0.7rem; padding: 0.1rem 0.3rem; min-width: 1.4rem;}
+    .score { font-size: 0.85rem; }
+    .extracted-entities { font-size: 0.75rem; }
+    .extracted-entities.collapsible.visible .scrolling-text-inner { animation-duration: 20s; } /* Riduci durata */
+    .hot-indicator { font-size: 0.65rem; }
+    .trends-table .trend-cell { min-width: 180px; } /* Riduci ancora min-width */
+    .toggle-ai-btn { font-size: 0.75em; }
 }
 
 @media (max-width: 480px) {
-     .trends-table th, .trends-table td { padding: 0.5rem 0.4rem; }
+     /* Nascondi Rank su schermi molto piccoli */
+     .trends-table th:nth-child(2),
+     .trends-table td:nth-child(2) { display: none; }
+     .trends-table th, .trends-table td { padding: 0.4rem 0.3rem; font-size: 0.75rem; } /* Padding/Font minimi */
      .trends-table .trend-cell { min-width: 150px; }
-     .extracted-entities .scrolling-text-inner { animation-duration: 15s; } /* Riduci ancora durata */
+     .score { font-size: 0.8rem; }
+     .extracted-entities.collapsible.visible .scrolling-text-inner { animation-duration: 15s; }
 }
