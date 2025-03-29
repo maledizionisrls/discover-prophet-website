@@ -45,7 +45,7 @@ function loadMetadata() {
         if (typeof runMetadata === 'object' && runMetadata !== null) {
             document.getElementById('updateTimestamp').textContent = runMetadata.timestamp || 'N/A';
             document.getElementById('trendsCount').textContent = runMetadata.trends_count !== undefined ? runMetadata.trends_count : '?';
-            document.getElementById('topScore').textContent = (runMetadata.top_score || 0).toFixed(2);
+            document.getElementById('topScore').textContent = (runMetadata.top_score || 0).toFixed(1); // MODIFICATO: 1 decimale
             document.getElementById('runtimeMinutes').textContent = (runMetadata.runtime_minutes || 0).toFixed(1) + 'm';
             document.getElementById('proxiesUsed').textContent = runMetadata.proxies_used !== undefined ? runMetadata.proxies_used : '?';
             const openaiStatusEl = document.getElementById('openaiStatus');
@@ -75,7 +75,7 @@ function loadMetadata() {
     }
 }
 
-// Configura gli ascoltatori degli eventi (SENZA toggle AI)
+// Configura gli ascoltatori degli eventi
 function setupEventListeners() {
     try {
         const searchBox = document.getElementById('searchBox');
@@ -86,72 +86,57 @@ function setupEventListeners() {
         const sortOrder = document.getElementById('sortOrder');
         if (sortBy) sortBy.addEventListener('change', sortTable);
         if (sortOrder) sortOrder.addEventListener('change', sortTable);
-        // Nessun listener per toggle
     } catch (error) {
         console.error("Errore durante setupEventListeners:", error);
     }
 }
 
-// Renderizza la tabella delle tendenze (Versione basata sul tuo "Originale" + Modifiche)
+// Renderizza la tabella delle tendenze
 function renderTrendsTable(data) {
     const tableBody = document.getElementById('trendsTableBody');
     if (!tableBody) { console.error("Elemento 'trendsTableBody' non trovato."); return; }
-    tableBody.innerHTML = ''; // Pulisce il corpo della tabella
+    tableBody.innerHTML = '';
 
     if (!data || data.length === 0) {
-         tableBody.innerHTML = `<tr class="no-data-row"><td colspan="8">Nessun dato di tendenza disponibile.</td></tr>`;
+         tableBody.innerHTML = `<tr class="no-data-row"><td colspan="8">Nessun dato disponibile.</td></tr>`;
          return;
     }
 
     data.forEach((item, index) => {
         const row = document.createElement('tr');
-        // Popola gli attributi data-* per ordinamento/filtro
-        // Assicura che i valori siano stringhe o numeri validi prima di assegnarli
         row.dataset.entity = String(item.entity || '').toLowerCase();
         row.dataset.rank = String(item.rank || 0);
         row.dataset.discoverScore = String(item.discover_score || 0);
         row.dataset.score1h = String(item.score_1h || 0);
         row.dataset.score4h = String(item.score_4h || 0);
         row.dataset.score7d = String(item.score_7d || 0);
-        row.dataset.aiEntities = String(item.extracted_entities || '').toLowerCase(); // Aggiungi anche questo per il filtro
+        row.dataset.aiEntities = String(item.extracted_entities || '').toLowerCase();
 
-        // Applica classe .hot-trend se necessario (USA VERSIONE ORIGINALE isEntityHotOriginal)
         const isHot = isEntityHotOriginal(item.score_1h, item.score_4h, item.score_7d);
-        if (isHot) {
-            row.classList.add('hot-trend'); // Applica lo sfondo giallo
-        }
+        if (isHot) row.classList.add('hot-trend');
 
-        // Determina classe badge rank
         let rankBadgeClass = '';
         if (item.rank <= 10) rankBadgeClass = 'top-10';
         else if (item.rank <= 25) rankBadgeClass = 'top-25';
-
-        // Calcola indicatore trend (freccia su/giù/uguale)
         const trendIndicator = calculateTrendIndicator(item.score_1h, item.score_4h);
-
-        // Prepara visualizzazione entità principale (con escape di sicurezza)
         let entityDisplay = escapeHtml(item.entity || 'N/A');
 
-        // --- LOGICA SEMPLIFICATA PER VISUALIZZARE extracted_entities ---
         let extractedEntitiesHtml = '';
         if (item.extracted_entities && typeof item.extracted_entities === 'string' && item.extracted_entities.trim() !== '') {
              const entitiesCleaned = item.extracted_entities.trim();
-             // Crea semplicemente il div, che verrà stilato dal CSS per andare a capo
              extractedEntitiesHtml = `<div class="extracted-entities">${escapeHtml(entitiesCleaned)}</div>`;
         }
-        // --- FINE LOGICA SEMPLIFICATA ---
 
-        // Costruzione HTML interno della riga
-        // (Rimosso toggle button, rimosso span .hot-indicator)
+        // Costruzione HTML riga (con punteggi arrotondati a 1 decimale)
         row.innerHTML = `
             <td>${index + 1}</td>
             <td><span class="rank-badge ${rankBadgeClass}">${item.rank || 0}</span></td>
             <td class="trend-cell">
                  <div class="main-entity">${entityDisplay}</div>
-                 ${extractedEntitiesHtml} </td>
+                 ${extractedEntitiesHtml}
+            </td>
             <td class="score">
-                ${(item.discover_score || 0).toFixed(3)} ${trendIndicator}
-                </td>
+                ${(item.discover_score || 0).toFixed(1)} ${trendIndicator} </td>
             <td>${(item.score_1h || 0).toFixed(1)}</td>
             <td>${(item.score_4h || 0).toFixed(1)}</td>
             <td>${(item.score_7d || 0).toFixed(1)}</td>
@@ -159,191 +144,96 @@ function renderTrendsTable(data) {
                 <div class="trend-chart-container" id="chart-${index}"></div>
             </td>
         `;
-        tableBody.appendChild(row); // Aggiunge la riga al DOM
+        tableBody.appendChild(row);
     });
 
-    // Creazione grafici (usando setTimeout come nel tuo originale, per sicurezza)
-    // console.log("Avvio creazione grafici con setTimeout...");
-    setTimeout(() => {
-        // console.log(`Inizio loop creazione grafici per ${data.length} elementi.`);
+    // Creazione grafici
+    console.log("Avvio creazione grafici...");
+    requestAnimationFrame(() => {
+        console.log(`Inizio loop creazione grafici per ${data.length} elementi.`);
         if (typeof Chart === 'undefined') {
              console.error("Chart.js non è caricato!");
-             return; // Esce se ChartJS non è definito
+             const firstChartContainer = document.getElementById('chart-0');
+             if (firstChartContainer) firstChartContainer.innerHTML = '<span class="chart-fallback" style="color:red;">ChartJS Err!</span>';
+             return;
         }
         data.forEach((item, index) => {
             const containerId = `chart-${index}`;
             const chartData = [Number(item.score_7d) || 0, Number(item.score_4h) || 0, Number(item.score_1h) || 0];
              try {
                  const container = document.getElementById(containerId);
-                 if(container) { // Disegna solo se il container esiste nel DOM
+                 if(container) {
                     createTrendChart(containerId, chartData);
                  }
             } catch (chartError) {
                  console.error(`Errore durante la chiamata a createTrendChart per ${containerId}:`, chartError);
                  const errorContainer = document.getElementById(containerId);
                  if(errorContainer) {
-                     errorContainer.innerHTML = '<span class="chart-fallback" style="color:red;">ChartErr</span>';
+                     errorContainer.innerHTML = '<span class="chart-fallback" style="color:red;">Chart Err!</span>';
                  }
             }
         });
-        // console.log("Fine loop creazione grafici.");
-    }, 100); // Leggero ritardo come nell'originale
+        console.log("Fine loop creazione grafici.");
+    });
 }
 
-// --- FUNZIONE isEntityHot RIPRISTINATA (VERSIONE ORIGINALE MENO RESTRITTIVA) ---
-// Questa funzione determina solo se aggiungere la classe .hot-trend per lo sfondo
+// Funzione isEntityHot (ORIGINALE)
 function isEntityHotOriginal(score1h, score4h, score7d) {
-    const s1h = Number(score1h) || 0;
-    const s4h = Number(score4h) || 0;
+    const s1h = Number(score1h) || 0; const s4h = Number(score4h) || 0;
     if (s4h === 0) { return s1h > 10; }
-    if (s1h > 30 && s1h > s4h * 1.5) return true; // Soglie originali
-    if (s1h > 15 && s1h > s4h * 2) return true;   // Soglie originali
-    if (s1h > 10 && s1h > s4h * 3) return true;   // Soglie originali
+    if (s1h > 30 && s1h > s4h * 1.5) return true;
+    if (s1h > 15 && s1h > s4h * 2) return true;
+    if (s1h > 10 && s1h > s4h * 3) return true;
     return false;
 }
-// --- FINE FUNZIONE isEntityHot RIPRISTINATA ---
 
-
-// Crea un grafico di tendenza per una entità (Funzione completa dal tuo originale)
+// Crea un grafico di tendenza
 function createTrendChart(containerId, dataPoints) {
     const container = document.getElementById(containerId);
-    if (!container) return; // Esce se container non trovato
+    if (!container) return;
 
-    container.innerHTML = ''; // Pulisce
+    container.innerHTML = '';
     const canvas = document.createElement('canvas');
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+    canvas.style.display = 'block'; canvas.style.width = '100%'; canvas.style.height = '100%';
     container.appendChild(canvas);
-
     const chartContext = canvas.getContext('2d');
-    if (!chartContext) {
-        console.error(`Impossibile ottenere il contesto 2D per ${containerId}`);
-        container.innerHTML = `<span class="chart-fallback">Ctx Err</span>`;
-        return;
-    }
+    if (!chartContext) { console.error(`Ctx 2D non trovato per ${containerId}`); container.innerHTML = `<span class="chart-fallback">Ctx Err</span>`; return; }
 
     try {
         const lineColor = determineTrendColor(dataPoints);
-        const gradient = chartContext.createLinearGradient(0, 0, 0, 40); // Altezza fissa 40 come nell'originale
-        gradient.addColorStop(0, lineColor + '50'); // Opacità originale
-        gradient.addColorStop(1, lineColor + '10'); // Opacità originale
-
-        // Configurazione Chart.js COMPLETA basata sull'originale
-        new Chart(canvas, { // Usa canvas, non chartContext direttamente come primo arg
-            type: 'line',
-            data: {
-                labels: ['7d', '4h', '1h'], // Etichette originali
-                datasets: [{
-                    data: dataPoints,
-                    borderColor: lineColor,
-                    backgroundColor: gradient,
-                    borderWidth: 2,
-                    pointRadius: 3, // Raggio originale
-                    pointBackgroundColor: lineColor,
-                    tension: 0.4,   // Tension originale
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        enabled: true,
-                        callbacks: { // Callbacks originali
-                            label: function(context) {
-                                return `Score: ${context.parsed.y.toFixed(1)}`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: { display: false },
-                    y: { display: false, min: 0 } // min:0 originale
-                }
-                // Rimosse animation: false, parsing: false per tornare all'originale
-            } // Fine options
-        }); // Fine new Chart
+        const gradient = chartContext.createLinearGradient(0, 0, 0, container.clientHeight || 35);
+        gradient.addColorStop(0, lineColor + '60'); gradient.addColorStop(1, lineColor + '05');
+        new Chart(chartContext, { type: 'line', data: { labels: ['7d', '4h', '1h'], datasets: [{ data: dataPoints, borderColor: lineColor, backgroundColor: gradient, borderWidth: 2, pointRadius: 3, pointBackgroundColor: lineColor, tension: 0.4, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: true, callbacks: { label: function(context) { return `Score: ${context.parsed.y.toFixed(1)}`; } } } }, scales: { x: { display: false }, y: { display: false, min: 0 } } } });
     } catch (error) {
-        console.error(`Errore creazione grafico ${containerId}:`, error);
+        console.error(`Errore grafico ${containerId}:`, error);
         container.innerHTML = `<span class="chart-fallback">${dataPoints.map(p => p.toFixed(0)).join('→')}</span>`;
     }
 }
 
-
-// Determina colore della linea (Funzione originale)
+// Determina colore della linea
 function determineTrendColor(dataPoints) {
-    const score4h = dataPoints[1] || 0;
-    const score1h = dataPoints[2] || 0;
+    const score4h = dataPoints[1] || 0; const score1h = dataPoints[2] || 0;
     if (score1h > score4h * 1.2) { return '#27ae60'; }
     else if (score1h < score4h * 0.8) { return '#e74c3c'; }
     else { return '#f39c12'; }
 }
 
-// Calcola l'indicatore di tendenza (Funzione originale)
+// Calcola l'indicatore di tendenza
 function calculateTrendIndicator(score1h, score4h) {
-    const s1h = Number(score1h) || 0; const s4h = Number(score4h) || 0;
-    if (s1h === 0 && s4h === 0) { return '<span class="trend-indicator trend-stable" title="Stabile"><i class="fas fa-equals"></i></span>'; }
-    const diff = s1h - s4h; const percentChange = s4h ? (diff / s4h) * 100 : 0; const absDiff = Math.abs(diff);
-    if ((absDiff < 1 && Math.abs(percentChange) < 20) || Math.abs(percentChange) < 5) { return '<span class="trend-indicator trend-stable" title="Stabile"><i class="fas fa-equals"></i></span>'; }
-    if (diff > 0) { if (percentChange > 100 || (s4h < 1 && s1h > 5)) { return '<span class="trend-indicator trend-strong-up" title="Forte aumento"><i class="fas fa-arrow-up"></i></span>'; } else if (percentChange > 30) { return '<span class="trend-indicator trend-medium-up" title="Aumento medio"><i class="fas fa-arrow-up"></i></span>'; } else { return '<span class="trend-indicator trend-small-up" title="Leggero aumento"><i class="fas fa-arrow-up"></i></span>'; } }
-    else { if (percentChange < -50) { return '<span class="trend-indicator trend-strong-down" title="Forte calo"><i class="fas fa-arrow-down"></i></span>'; } else if (percentChange < -20) { return '<span class="trend-indicator trend-medium-down" title="Calo medio"><i class="fas fa-arrow-down"></i></span>'; } else { return '<span class="trend-indicator trend-small-down" title="Leggero calo"><i class="fas fa-arrow-down"></i></span>'; } }
+    const s1h = Number(score1h) || 0; const s4h = Number(score4h) || 0; if (s1h === 0 && s4h === 0) { return '<span class="trend-indicator trend-stable" title="Stabile"><i class="fas fa-equals"></i></span>'; } const diff = s1h - s4h; const percentChange = s4h ? (diff / s4h) * 100 : 0; const absDiff = Math.abs(diff); if ((absDiff < 1 && Math.abs(percentChange) < 20) || Math.abs(percentChange) < 5) { return '<span class="trend-indicator trend-stable" title="Stabile"><i class="fas fa-equals"></i></span>'; } if (diff > 0) { if (percentChange > 100 || (s4h < 1 && s1h > 5)) { return '<span class="trend-indicator trend-strong-up" title="Forte aumento"><i class="fas fa-arrow-up"></i></span>'; } else if (percentChange > 30) { return '<span class="trend-indicator trend-medium-up" title="Aumento medio"><i class="fas fa-arrow-up"></i></span>'; } else { return '<span class="trend-indicator trend-small-up" title="Leggero aumento"><i class="fas fa-arrow-up"></i></span>'; } } else { if (percentChange < -50) { return '<span class="trend-indicator trend-strong-down" title="Forte calo"><i class="fas fa-arrow-down"></i></span>'; } else if (percentChange < -20) { return '<span class="trend-indicator trend-medium-down" title="Calo medio"><i class="fas fa-arrow-down"></i></span>'; } else { return '<span class="trend-indicator trend-small-down" title="Leggero calo"><i class="fas fa-arrow-down"></i></span>'; } }
 }
 
-
-// Filtra la tabella (Logica originale adattata per cercare anche in aiEntities)
+// Filtra la tabella
 function filterTable(searchText) {
-    const tableBody = document.getElementById('trendsTableBody'); const rows = tableBody.querySelectorAll('tr'); let visibleCount = 0;
-    const noResultsRow = document.querySelector('.no-results-row'); // Cerca se esiste già
-    if (noResultsRow) noResultsRow.remove(); // Rimuovilo prima di filtrare
-
-    rows.forEach(row => {
-        if (row.classList.contains('loading-row') || row.classList.contains('no-data-row') || row.classList.contains('error-row')) return;
-        const entityText = row.dataset.entity || '';
-        const aiEntitiesText = row.dataset.aiEntities || ''; // Usa dataset per entità AI
-        if (entityText.includes(searchText) || aiEntitiesText.includes(searchText)) {
-            row.style.display = ''; // Usa style.display invece di classe
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-
-    let currentIndex = 1;
-    rows.forEach(row => {
-        if (row.classList.contains('loading-row') || row.classList.contains('no-data-row') || row.classList.contains('error-row')) return;
-        if (row.style.display !== 'none') {
-            const cellIndex = row.querySelector('td:first-child');
-            if (cellIndex) cellIndex.textContent = currentIndex++;
-        }
-    });
-
-    if (visibleCount === 0 && searchText) {
-        // Crea e aggiungi riga "Nessun risultato" solo se non c'è e serve
-        let noResultRowInstance = tableBody.querySelector('.no-results-row'); // Ricerca di nuovo
-        if (!noResultRowInstance) {
-             noResultRowInstance = document.createElement('tr');
-             noResultRowInstance.className = 'no-results-row';
-             noResultRowInstance.innerHTML = `<td colspan="8" style="text-align: center; padding: 20px;">Nessun risultato trovato per "${escapeHtml(searchText)}"</td>`;
-             tableBody.appendChild(noResultRowInstance);
-         }
-    }
-    // Non serve else per rimuoverla perché lo facciamo all'inizio della funzione
+    const tableBody = document.getElementById('trendsTableBody'); const rows = tableBody.querySelectorAll('tr'); const noResultsMessage = document.getElementById('noResultsMessage'); let visibleCount = 0; const noResultsRow = document.querySelector('.no-results-row'); if (noResultsRow) noResultsRow.remove(); rows.forEach(row => { if (row.classList.contains('loading-row') || row.classList.contains('no-data-row') || row.classList.contains('error-row')) return; const entityText = row.dataset.entity || ''; const aiEntitiesText = row.dataset.aiEntities || ''; if (entityText.includes(searchText) || aiEntitiesText.includes(searchText)) { row.style.display = ''; visibleCount++; } else { row.style.display = 'none'; } }); let currentIndex = 1; rows.forEach(row => { if (row.classList.contains('loading-row') || row.classList.contains('no-data-row') || row.classList.contains('error-row')) return; if (row.style.display !== 'none') { const cellIndex = row.querySelector('td:first-child'); if (cellIndex) cellIndex.textContent = currentIndex++; } }); if (visibleCount === 0 && searchText) { let noResultRowInstance = tableBody.querySelector('.no-results-row'); if (!noResultRowInstance) { noResultRowInstance = document.createElement('tr'); noResultRowInstance.className = 'no-results-row'; noResultRowInstance.innerHTML = `<td colspan="8" style="text-align: center; padding: 20px;">Nessun risultato trovato per "${escapeHtml(searchText)}"</td>`; tableBody.appendChild(noResultRowInstance); } }
 }
 
-
-// Ordina la tabella (Logica originale)
+// Ordina la tabella
 function sortTable() {
-    const sortBy = document.getElementById('sortBy').value; const sortOrder = document.getElementById('sortOrder').value; const isAsc = sortOrder === 'asc'; const tableBody = document.getElementById('trendsTableBody'); const rows = Array.from(tableBody.querySelectorAll('tr:not(.loading-row):not(.no-data-row):not(.error-row):not(.no-results-row)')); const noResultRow = document.querySelector('.no-results-row'); if (noResultRow) noResultRow.remove();
-    rows.sort((a, b) => { let valueA, valueB; switch (sortBy) { case 'discover_score': valueA = parseFloat(a.dataset.discoverScore || 0); valueB = parseFloat(b.dataset.discoverScore || 0); break; case 'rank': valueA = parseInt(a.dataset.rank || 0); valueB = parseInt(b.dataset.rank || 0); break; case 'score_1h': valueA = parseFloat(a.dataset.score1h || 0); valueB = parseFloat(b.dataset.score1h || 0); break; case 'score_4h': valueA = parseFloat(a.dataset.score4h || 0); valueB = parseFloat(b.dataset.score4h || 0); break; case 'score_7d': valueA = parseFloat(a.dataset.score7d || 0); valueB = parseFloat(b.dataset.score7d || 0); break; default: valueA = parseFloat(a.dataset.discoverScore || 0); valueB = parseFloat(b.dataset.discoverScore || 0); } if (valueA < valueB) return isAsc ? -1 : 1; if (valueA > valueB) return isAsc ? 1 : -1; return 0; });
-    // Rimuovi solo le righe dati prima di riaggiungere quelle ordinate
-    rows.forEach(row => tableBody.removeChild(row)); // Rimuovi solo quelle che hai ordinato
-    rows.forEach((row, index) => { const cellIndex = row.querySelector('td:first-child'); if(cellIndex) cellIndex.textContent = index + 1; tableBody.appendChild(row); });
-    const searchBox = document.getElementById('searchBox'); if (searchBox && searchBox.value) { filterTable(searchBox.value.trim().toLowerCase()); }
+    const sortBy = document.getElementById('sortBy').value; const sortOrder = document.getElementById('sortOrder').value; const isAsc = sortOrder === 'asc'; const tableBody = document.getElementById('trendsTableBody'); const rows = Array.from(tableBody.querySelectorAll('tr:not(.loading-row):not(.no-data-row):not(.error-row):not(.no-results-row)')); const noResultRow = document.querySelector('.no-results-row'); if (noResultRow) noResultRow.remove(); rows.sort((a, b) => { let valueA, valueB; switch (sortBy) { case 'discover_score': valueA = parseFloat(a.dataset.discoverScore || 0); valueB = parseFloat(b.dataset.discoverScore || 0); break; case 'rank': valueA = parseInt(a.dataset.rank || 0); valueB = parseInt(b.dataset.rank || 0); break; case 'score_1h': valueA = parseFloat(a.dataset.score1h || 0); valueB = parseFloat(b.dataset.score1h || 0); break; case 'score_4h': valueA = parseFloat(a.dataset.score4h || 0); valueB = parseFloat(b.dataset.score4h || 0); break; case 'score_7d': valueA = parseFloat(a.dataset.score7d || 0); valueB = parseFloat(b.dataset.score7d || 0); break; default: valueA = parseFloat(a.dataset.discoverScore || 0); valueB = parseFloat(b.dataset.discoverScore || 0); } if (valueA < valueB) return isAsc ? -1 : 1; if (valueA > valueB) return isAsc ? 1 : -1; return 0; }); rows.forEach(row => tableBody.appendChild(row)); rows.forEach((row, index) => { const cellIndex = row.querySelector('td:first-child'); if(cellIndex) cellIndex.textContent = index + 1; }); const searchBox = document.getElementById('searchBox'); if (searchBox && searchBox.value) { filterTable(searchBox.value.trim().toLowerCase()); }
 }
 
-// Funzione escapeHtml (NECESSARIA)
+// Funzione escapeHtml
 function escapeHtml(unsafe) {
     if (unsafe === null || typeof unsafe === 'undefined') return '';
     if (typeof unsafe !== 'string') { try { unsafe = String(unsafe); } catch (e) { return ''; } }
