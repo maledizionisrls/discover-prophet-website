@@ -3,24 +3,35 @@ import anthropic
 import json
 import os
 import warnings
+# Import necessari per type hinting compatibile con Python < 3.10
+from typing import Union, List, Dict, Optional
 
 # !!! ATTENZIONE: API Key inserita direttamente nel codice come richiesto. !!!
 # !!! Per maggiore sicurezza, considera l'uso di variabili d'ambiente.  !!!
 API_KEY = "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"
 MODEL_NAME = "claude-3-5-sonnet-20240620"
-MAX_TOKENS_RESPONSE = 2048 # Aumentato per gestire potenzialmente 50 query * risposta JSON
+MAX_TOKENS_RESPONSE = 2048
 
 # Placeholder per indicare incertezza o fallimento nell'identificazione
 UNCERTAIN_ENTITY_PLACEHOLDER = "[UNCERTAIN]"
 
 # Inizializzazione client Anthropic
+# VERIFICA: Assicurati che non ci siano argomenti extra come 'proxies=' qui.
+# Se servono proxy, vanno configurati tramite variabili d'ambiente (HTTP_PROXY/HTTPS_PROXY)
+# o passando un client httpx configurato all'argomento 'http_client'.
 try:
     client = anthropic.Anthropic(api_key=API_KEY)
+    # Esempio (se servissero proxy e avessi installato httpx):
+    # import httpx
+    # proxies = {"http://": "http://user:pass@host:port", "https://": "http://user:pass@host:port"}
+    # http_client = httpx.Client(proxies=proxies)
+    # client = anthropic.Anthropic(api_key=API_KEY, http_client=http_client)
 except Exception as e:
+    # Gestisce sia l'errore specifico 'proxies' (se presente per errore) sia altri errori
     warnings.warn(f"Errore inizializzazione client Anthropic: {e}. Le chiamate API falliranno.", RuntimeWarning)
     client = None
 
-def _build_prompt(queries: list[str]) -> tuple[str, str]:
+def _build_prompt(queries: List[str]) -> tuple[str, str]: # Usato List invece di list
     """Costruisce il system prompt e lo user prompt per Claude."""
 
     system_prompt = """Sei un analista esperto nell'interpretare query di ricerca provenienti da Google Trends (Hot Searches). Il tuo obiettivo è identificare l'entità principale o il concetto centrale rappresentato da ogni query, considerando che lo scopo finale è trovare argomenti adatti a Google Discover (che predilige entità riconoscibili e con una certa persistenza/rilevanza).
@@ -53,7 +64,8 @@ Output JSON Atteso:
     return system_prompt, user_prompt
 
 
-def get_main_entities(queries: list[str]) -> dict[str, str | None]:
+# CORREZIONE TYPE HINT per compatibilità Python < 3.10
+def get_main_entities(queries: List[str]) -> Dict[str, Optional[str]]:
     """
     Usa Claude 3.5 Sonnet per identificare l'entità principale per una lista di query.
 
@@ -66,13 +78,13 @@ def get_main_entities(queries: list[str]) -> dict[str, str | None]:
     """
     if not client:
         warnings.warn("Client Anthropic non inizializzato. Impossibile chiamare l'API.", RuntimeWarning)
-        return {query: None for query in queries} # Fallback: None per tutte
+        return {query: None for query in queries}
 
     if not queries:
         return {}
 
     system_prompt, user_prompt = _build_prompt(queries)
-    result_map = {query: None for query in queries} # Inizializza con fallback None
+    result_map: Dict[str, Optional[str]] = {query: None for query in queries} # Inizializza con fallback None
 
     try:
         print(f"    Invio {len(queries)} query a Claude ({MODEL_NAME})...")
@@ -86,12 +98,9 @@ def get_main_entities(queries: list[str]) -> dict[str, str | None]:
         )
         print("    Risposta ricevuta da Claude.")
 
-        # Estrai il contenuto JSON dalla risposta
         json_response_str = None
         if message.content and isinstance(message.content, list) and len(message.content) > 0:
-             # Cerca il blocco JSON nella risposta testuale
              raw_text = message.content[0].text
-             # Trova l'inizio e la fine del JSON (può essere imperfetto)
              json_start = raw_text.find('{')
              json_end = raw_text.rfind('}') + 1
              if json_start != -1 and json_end != -1:
@@ -104,21 +113,17 @@ def get_main_entities(queries: list[str]) -> dict[str, str | None]:
 
         if json_response_str:
             try:
-                # Parsa il JSON estratto
                 ai_results = json.loads(json_response_str)
 
                 if isinstance(ai_results, dict):
-                    # Popola la mappa dei risultati, sostituendo UNCERTAIN con None
                     for query in queries:
-                        entity = ai_results.get(query) # Prende il risultato per la query
+                        entity = ai_results.get(query)
                         if entity == UNCERTAIN_ENTITY_PLACEHOLDER:
-                            result_map[query] = None # Mappa a None se incerto
-                            print(f"      AI incerta per: '{query}'")
+                            result_map[query] = None
+                            # print(f"      AI incerta per: '{query}'") # Rimosso per ridurre verbosità
                         elif isinstance(entity, str) and entity.strip():
-                             result_map[query] = entity.strip() # Usa l'entità trovata
-                             #print(f"      '{query}' -> '{result_map[query]}'") # Debug opzionale
+                             result_map[query] = entity.strip()
                         else:
-                            # Se l'AI non ha restituito una stringa valida per la query o l'ha omessa
                             result_map[query] = None
                             warnings.warn(f"Risultato mancante o non valido da AI per: '{query}'", RuntimeWarning)
                 else:
@@ -138,13 +143,12 @@ def get_main_entities(queries: list[str]) -> dict[str, str | None]:
     except Exception as e:
         warnings.warn(f"Errore generico chiamata API Anthropic: {type(e).__name__} - {e}", RuntimeWarning)
 
-    # Assicurati che tutte le query originali abbiano una voce (anche se None)
     final_map = {query: result_map.get(query) for query in queries}
     num_identified = sum(1 for entity in final_map.values() if entity is not None)
     print(f"    Identificate {num_identified}/{len(queries)} entità principali dall'AI.")
     return final_map
 
-# Esempio di utilizzo (può essere rimosso o commentato)
+# Esempio di utilizzo
 if __name__ == '__main__':
     sample_queries = [
         "meteo milano",
@@ -156,6 +160,10 @@ if __name__ == '__main__':
         "pilar fogliati"
     ]
     print("Esempio chiamata API Claude...")
-    entities = get_main_entities(sample_queries)
-    print("\nRisultato mappatura:")
-    print(json.dumps(entities, indent=2, ensure_ascii=False))
+    # Verifica che il client sia inizializzato prima di chiamare
+    if client:
+        entities = get_main_entities(sample_queries)
+        print("\nRisultato mappatura:")
+        print(json.dumps(entities, indent=2, ensure_ascii=False))
+    else:
+        print("Client Anthropic non utilizzabile. Impossibile eseguire l'esempio.")
