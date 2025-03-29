@@ -31,6 +31,9 @@ from tqdm import tqdm
 from datetime import datetime
 import shutil
 
+# --- Import Integrazione Claude ---
+from claude_integration import integrate_claude_analysis
+
 # --- Patch per errore method_whitelist vs allowed_methods ---
 import urllib3
 from urllib3.util import Retry
@@ -114,6 +117,10 @@ PYTRENDS_READ_TIMEOUT = 25
 # --- Parametri Interni Pytrends (Non modificare se non sai cosa fai) ---
 PYTRENDS_RETRIES = 1
 PYTRENDS_BACKOFF_FACTOR = 0.2
+
+# --- Parametri Integrazione Claude ---
+USE_CLAUDE_ANALYSIS = True    # Attiva/disattiva l'integrazione Claude
+CLAUDE_MAX_ENTITIES = 50      # Numero massimo di entità da analizzare con Claude
 
 # ==============================================================================
 # ================== FINE SEZIONE PARAMETRI CONFIGURABILI ======================
@@ -480,7 +487,12 @@ def generate_html_output(df_final, runtime_info=None):
                 'discover_score': float(row.get('Discover_Score', 0)), # Usa .get() per sicurezza
                 'score_1h': float(row.get('Score_Avg_now 1-H', 0)), # Usa .get()
                 'score_4h': float(row.get('Score_Avg_now 4-H', 0)), # Usa .get()
-                'score_7d': float(row.get('Score_Avg_now 7-d', 0))  # Usa .get()
+                'score_7d': float(row.get('Score_Avg_now 7-d', 0)),  # Usa .get()
+                
+                # Aggiungi informazioni semantiche quando disponibili
+                'primary_entity': row.get('Primary_Entity', row.get('Entita', 'N/A')),
+                'is_meta_query': bool(row.get('Is_Meta_Query', False)),
+                'analysis_confidence': float(row.get('Analysis_Confidence', 0.1))
             }
             trend_list.append(trend_data)
 
@@ -587,6 +599,24 @@ if __name__ == "__main__":
              for tf in CONTEXT_TIMEFRAMES:
                  if f'Score_Avg_{tf}' not in df_final.columns: df_final[f'Score_Avg_{tf}'] = 0.0
 
+        # --- INTEGRAZIONE CLAUDE PER ANALISI SEMANTICA ---
+        # Integrazione Claude per analisi semantica
+        if USE_CLAUDE_ANALYSIS:
+            print("\n--- Integrazione Analisi Semantica Claude ---")
+            try:
+                df_final, entity_analysis = integrate_claude_analysis(
+                    ordered_entities, 
+                    df_final, 
+                    checkpoint_dir=CHECKPOINT_DIR,
+                    max_entities=min(N_PROCESS_FOR_CONTEXT, CLAUDE_MAX_ENTITIES)
+                )
+                print("--- Integrazione Claude completata con successo ---")
+            except Exception as claude_e:
+                print(f"!!! Errore durante l'integrazione Claude: {claude_e} !!!")
+                traceback.print_exc()
+        else:
+            print("\n--- Integrazione Claude saltata (disattivata) ---")
+
         # ========================================================================
         # --- 3. Calcolo Heuristic Discover Score (Tramite Funzione Dedicata V7.5) ---
         # ========================================================================
@@ -604,14 +634,16 @@ if __name__ == "__main__":
 
             # --- CHIAMA LA FUNZIONE DEDICATA PER IL CALCOLO (V7.5) ---
             # Passa i parametri K ed epsilon definiti all'inizio
-            df_final[discover_score_col] = calculate_discover_score(
-                rank_series, score_4h, score_7d,
-                k_penalty=V7D_PENALTY_K,
-                epsilon=V7D_PENALTY_EPSILON
-            )
-            # ---------------------------------------------------------
-
-            print(f"       Colonna '{discover_score_col}' calcolata tramite funzione 'calculate_discover_score'.")
+            # Se l'integrazione Claude è stata fatta e c'è Enhanced_Discover_Score, non sovrascrivere
+            if 'Enhanced_Discover_Score' not in df_final.columns:
+                df_final[discover_score_col] = calculate_discover_score(
+                    rank_series, score_4h, score_7d,
+                    k_penalty=V7D_PENALTY_K,
+                    epsilon=V7D_PENALTY_EPSILON
+                )
+                print(f"       Colonna '{discover_score_col}' calcolata tramite funzione 'calculate_discover_score'.")
+            else:
+                print(f"       Colonna '{discover_score_col}' già aggiornata dall'integrazione Claude, non sovrascritta.")
         else:
             missing_cols = [col for col in [score_4h_col, score_7d_col, 'Rank'] if col not in df_final.columns]
             warnings.warn(f"Colonne necessarie ({', '.join(missing_cols)}) mancanti, impossibile calcolare Discover_Score V7.5.", UserWarning)
@@ -652,6 +684,11 @@ if __name__ == "__main__":
         if discover_score_col in df_final.columns: cols_to_show.append(discover_score_col)
         if 'Rank' in df_final.columns: cols_to_show.append('Rank')
         if 'Entita' in df_final.columns: cols_to_show.append('Entita')
+
+        # Aggiungi colonne dell'analisi semantica
+        if USE_CLAUDE_ANALYSIS and 'Primary_Entity' in df_final.columns:
+            cols_to_show.append('Primary_Entity')
+            cols_to_show.append('Is_Meta_Query')
 
         if FETCH_VOLUME_CONTEXT:
             for tf in CONTEXT_TIMEFRAMES:
