@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# 🚀 Script Ottimizzato per Google Trends TV (Hot Trends) - V7.6 (Integrazione Claude AI)
-#    Implementa estrazione entità principali tramite Claude AI
+# 🚀 Script Ottimizzato per Google Trends TV (Hot Trends) - V7.5 (Rank Penalty Dinamica)
+#    Implementa Heuristic Discover Score in funzione dedicata per facile modifica.
 #    Formula V7.5: (1 + V4h + V7d) / log1p(Rank * max(1, K / (V7d + epsilon)))
 #    Obiettivo: Penalizzare Rank alto se V7d è basso, validando esplosioni con storico.
 #    Ordina per Discover_Score decrescente. Contesto per Top N.
@@ -30,9 +30,6 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 from datetime import datetime
 import shutil
-
-# --- Importa il modulo di integrazione Claude ---
-from claude_integration import extract_entities_from_trends
 
 # --- Patch per errore method_whitelist vs allowed_methods ---
 import urllib3
@@ -88,27 +85,6 @@ CONTEXT_N_RUNS = 2
 # Puoi modificare K ed epsilon per regolare la penalità per V7d basso
 V7D_PENALTY_K = 5.0      # Costante K: valore più alto = penalità maggiore per V7d basso
 V7D_PENALTY_EPSILON = 0.1 # Valore piccolo per evitare divisione per zero
-
-# --- Parametri Estrazione Entità con Claude ---
-USE_CLAUDE_ENTITY_EXTRACTION = True
-# Leggi l'API key dalla variabile d'ambiente (o da file .env se esiste)
-try:
-    if os.path.exists(".env"):
-        with open(".env", "r") as f:
-            for line in f:
-                if "=" in line:
-                    key, value = line.strip().split("=", 1)
-                    if key == "ANTHROPIC_API_KEY" and not os.environ.get("ANTHROPIC_API_KEY"):
-                        os.environ["ANTHROPIC_API_KEY"] = value
-except Exception as e:
-    print(f"Errore lettura .env: {e}")
-
-# Ottieni l'API key SOLO da variabile d'ambiente (nessun fallback in chiaro)
-CLAUDE_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-CLAUDE_MODEL = "claude-3-7-sonnet-20240229"
-CLAUDE_MIN_CONFIDENCE = 0.6
-CLAUDE_BATCH_SIZE = 10
-CLAUDE_BATCH_DELAY = 2.0
 
 # --- Parametri Gestione Proxy e Concorrenza ---
 MAX_CONCURRENT_PROXIES = 210
@@ -450,6 +426,7 @@ def get_all_context_scores(entities_subset, timeframe):
 
 
 # --- Creazione dei file base statici (HTML, CSS, JS) ---
+# (Codice omesso per brevità - invariato)
 def create_static_files():
     """Crea i file HTML, CSS e JS di base nella directory output."""
     try:
@@ -473,8 +450,9 @@ def create_static_files():
 
 
 # --- FUNZIONE: Generazione output HTML ---
+# (Codice omesso per brevità - invariato)
 def generate_html_output(df_final, runtime_info=None):
-    """Genera l'output HTML con entità principale e originale."""
+    """Genera l'output HTML."""
     try:
         # Assicurati che la directory output esista
         os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -486,39 +464,23 @@ def generate_html_output(df_final, runtime_info=None):
         # Prepara la lista di trend per il template
         trend_list = []
         # Assicurati che le colonne esistano prima di accedervi
-        required_cols = ['Rank', 'Entita', 'Entita_Principale', 'Entita_Originale', 'Discover_Score', 
-                          'Score_Avg_now 1-H', 'Score_Avg_now 4-H', 'Score_Avg_now 7-d']
+        required_cols = ['Rank', 'Entita', 'Discover_Score', 'Score_Avg_now 1-H', 'Score_Avg_now 4-H', 'Score_Avg_now 7-d']
         available_cols = df_final.columns
 
         for col in required_cols:
-             if col not in available_cols and col not in ['Entita_Principale', 'Entita_Originale']:
-                 warnings.warn(f"Colonna '{col}' mancante nel DataFrame finale per l'output HTML. Verrà usato 0 o 'N/A'.", UserWarning)
+             if col not in available_cols:
+                 warnings.warn(f"Colonna '{col}' mancante nel DataFrame finale per l'output HTML. Verrà usato 0.", UserWarning)
+
 
         for _, row in df_final.iterrows():
-            # Gestisci i casi in cui potrebbero mancare le colonne di entità principale/originale
-            if 'Entita_Principale' in available_cols:
-                entity_principal = row['Entita_Principale']
-            else:
-                entity_principal = row['Entita']
-
-            if 'Entita_Originale' in available_cols:
-                entity_original = row['Entita_Originale']
-            else:
-                entity_original = row['Entita']
-
-            # Se entità principale e originale sono uguali, non mostrare l'originale tra parentesi
-            show_original = entity_original != entity_principal
-            
             # Seleziona e formatta le colonne rilevanti, gestendo quelle mancanti
             trend_data = {
                 'rank': int(row['Rank']) if 'Rank' in available_cols else 0,
-                'entity': entity_principal,
-                'entity_original': entity_original,
-                'show_original': show_original,
-                'discover_score': float(row.get('Discover_Score', 0)),
-                'score_1h': float(row.get('Score_Avg_now 1-H', 0)),
-                'score_4h': float(row.get('Score_Avg_now 4-H', 0)),
-                'score_7d': float(row.get('Score_Avg_now 7-d', 0))
+                'entity': row['Entita'] if 'Entita' in available_cols else 'N/A',
+                'discover_score': float(row.get('Discover_Score', 0)), # Usa .get() per sicurezza
+                'score_1h': float(row.get('Score_Avg_now 1-H', 0)), # Usa .get()
+                'score_4h': float(row.get('Score_Avg_now 4-H', 0)), # Usa .get()
+                'score_7d': float(row.get('Score_Avg_now 7-d', 0))  # Usa .get()
             }
             trend_list.append(trend_data)
 
@@ -529,8 +491,7 @@ def generate_html_output(df_final, runtime_info=None):
                 'trends_count': len(trend_list),
                 'top_score': max([t['discover_score'] for t in trend_list]) if trend_list else 0,
                 'runtime_minutes': (runtime_info['end_time'] - runtime_info['start_time']) / 60 if runtime_info and 'start_time' in runtime_info and 'end_time' in runtime_info else 0,
-                'proxies_used': len(proxy_manager.all_proxies),
-                'entity_extraction': 'Claude AI' if USE_CLAUDE_ENTITY_EXTRACTION else 'Disabilitato'
+                'proxies_used': len(proxy_manager.all_proxies)
             }
         }
 
@@ -541,56 +502,6 @@ def generate_html_output(df_final, runtime_info=None):
         with open(os.path.join(OUTPUT_DIR, 'data.js'), 'w', encoding='utf-8') as f:
             f.write(js_data)
 
-        # Modifica lo script.js per mostrare l'entità originale
-        try:
-            script_js_path = os.path.join(OUTPUT_DIR, 'script.js')
-            if os.path.exists(script_js_path):
-                with open(script_js_path, 'r', encoding='utf-8') as f:
-                    script_content = f.read()
-                
-                # Modifica la funzione renderTrendsTable per mostrare l'entità originale
-                if "row.innerHTML = `" in script_content and "entityDisplay" not in script_content:
-                    # Aggiungi codice per mostrare l'entità originale
-                    modified_content = script_content.replace(
-                        "row.innerHTML = `",
-                        """
-        // Prepara la visualizzazione dell'entità con l'originale se necessario
-        let entityDisplay = item.entity;
-        if (item.show_original) {
-            entityDisplay = `${item.entity}<br><small class="original-query">(${item.entity_original})</small>`;
-        }
-        
-        row.innerHTML = `"""
-                    )
-                    
-                    # Cerca il punto in cui viene mostrata l'entità
-                    modified_content = modified_content.replace(
-                        "<td>${item.entity}</td>",
-                        "<td>${entityDisplay}</td>"
-                    )
-                    
-                    # Aggiungi stile CSS per l'entità originale
-                    if ".original-query {" not in modified_content:
-                        css_addition = """
-/* Stile per l'entità originale */
-.original-query {
-    color: #777;
-    font-size: 0.85rem;
-    font-style: italic;
-}
-"""
-                        # Aggiungi in un punto adatto nel file
-                        with open(os.path.join(OUTPUT_DIR, 'style.css'), 'a', encoding='utf-8') as css_file:
-                            css_file.write(css_addition)
-                    
-                    # Scrivi il file modificato
-                    with open(script_js_path, 'w', encoding='utf-8') as f:
-                        f.write(modified_content)
-                        print("Script.js modificato per mostrare entità originali.")
-        except Exception as e:
-            print(f"Avviso: Non è stato possibile modificare script.js: {e}")
-            # Non fallire l'intera operazione se non possiamo modificare lo script
-
         print(f"\nOutput HTML generato con successo: {os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)}")
         return True
     except Exception as e:
@@ -600,7 +511,7 @@ def generate_html_output(df_final, runtime_info=None):
 
 
 # ==============================================================================
-# ==================== SCRIPT PRINCIPALE (Heuristic V7.6 con Claude AI) ========
+# ==================== SCRIPT PRINCIPALE (Heuristic V7.5 Funzione Dedicata) ====
 # ==============================================================================
 if __name__ == "__main__":
     main_start_time = time.time()
@@ -611,22 +522,14 @@ if __name__ == "__main__":
         if not CONTEXT_TIMEFRAMES: warnings.warn("FETCH_VOLUME_CONTEXT=True ma CONTEXT_TIMEFRAMES vuoto.", UserWarning)
         if CONTEXT_N_RUNS <= 0: raise ValueError("CONTEXT_N_RUNS >= 1")
 
-    # Verifica se l'API key Claude è disponibile
-    if USE_CLAUDE_ENTITY_EXTRACTION and not CLAUDE_API_KEY:
-        print("\n⚠️ ATTENZIONE: API key di Claude mancante. Imposta la variabile d'ambiente ANTHROPIC_API_KEY.")
-        print("⚠️ L'estrazione di entità con Claude verrà disabilitata.\n")
-        USE_CLAUDE_ENTITY_EXTRACTION = False
-
-    print(f"Avvio script V7.6: Heuristic Discover Score con integrazione Claude AI per estrazione entità")
+    print(f"Avvio script V7.5: Heuristic Discover Score via funzione dedicata (Rank Penalty Dinamica)")
     print(f"Formula attuale: Vedi definizione funzione 'calculate_discover_score'")
     print(f"Parametri Penalità: K={V7D_PENALTY_K}, epsilon={V7D_PENALTY_EPSILON}")
     print(f"Obiettivo: Penalizzare Rank alto se V7d è basso (Contesto Top {N_PROCESS_FOR_CONTEXT}, N_RUNS={CONTEXT_N_RUNS})")
     print(f"MAX_CONCURRENT_PROXIES={MAX_CONCURRENT_PROXIES}, THREADS={MAX_THREADS}")
     print(f"Output HTML: {os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)}")
-    print(f"Estrazione entità Claude: {'ATTIVA' if USE_CLAUDE_ENTITY_EXTRACTION else 'DISABILITATA'}")
 
     ordered_entities = None
-    entity_mapping = {}
 
     try:
         os.makedirs(CHECKPOINT_DIR, exist_ok=True); print(f"Directory checkpoint: '{CHECKPOINT_DIR}'")
@@ -648,89 +551,16 @@ if __name__ == "__main__":
 
         # Prepara DataFrame finale
         df_final = pd.DataFrame({'Rank': range(1, len(ordered_entities) + 1), 'Entita': ordered_entities})
-        
-        # 1.1 NUOVO: Estrazione entità principali con Claude AI
-        if USE_CLAUDE_ENTITY_EXTRACTION:
-            print(f"\n--- Avvio Estrazione Entità Principali con Claude AI ---")
-            try:
-                # Top N entità da analizzare con Claude
-                entities_for_claude = ordered_entities[:N_PROCESS_FOR_CONTEXT]
-                
-                # Chiama l'API di Claude
-                entity_mapping = extract_entities_from_trends(
-                    trend_queries=entities_for_claude,
-                    api_key=CLAUDE_API_KEY,
-                    model=CLAUDE_MODEL,
-                    min_confidence=CLAUDE_MIN_CONFIDENCE,
-                    batch_size=CLAUDE_BATCH_SIZE,
-                    delay=CLAUDE_BATCH_DELAY
-                )
-                
-                # Crea un DataFrame con le entità estratte
-                extracted_entities_data = []
-                for query, data in entity_mapping.items():
-                    extracted_entities_data.append({
-                        'Query': query,
-                        'Entita_Principale': data['entity'],
-                        'Confidenza': data['confidence'],
-                        'Status': data['status'],
-                        'Fallback': data['fallback_used']
-                    })
-                
-                extracted_df = pd.DataFrame(extracted_entities_data)
-                
-                # Salva le entità estratte come checkpoint
-                try:
-                    extracted_df.to_csv(os.path.join(CHECKPOINT_DIR, "extracted_entities.csv"), index=False, encoding='utf-8-sig')
-                    print(f"Entità estratte salvate come checkpoint.")
-                except Exception as e:
-                    print(f"Errore salvataggio entità estratte: {e}")
-                
-                # Aggiungi le entità estratte al DataFrame finale
-                df_final['Entita_Originale'] = df_final['Entita']
-                df_final['Entita_Principale'] = df_final['Entita'].map(lambda x: entity_mapping.get(x, {'entity': x})['entity'])
-                df_final['Confidenza_Entita'] = df_final['Entita'].map(lambda x: entity_mapping.get(x, {'confidence': 0.0})['confidence'])
-                
-                print(f"Estrazione entità completata. Estratte {len(entity_mapping)} entità.")
-                
-                # Statistiche
-                success_count = sum(1 for r in entity_mapping.values() if r["status"] == "success")
-                fallback_count = sum(1 for r in entity_mapping.values() if r["fallback_used"])
-                print(f"Statistiche: {success_count} successi, {fallback_count} fallback utilizzati.")
-                
-            except Exception as e:
-                print(f"Errore durante l'estrazione delle entità: {e}")
-                traceback.print_exc()
-                print("Continuo con le entità originali.")
-                
-                # Fallback: usa le entità originali
-                df_final['Entita_Originale'] = df_final['Entita']
-                df_final['Entita_Principale'] = df_final['Entita']
-                df_final['Confidenza_Entita'] = 0.0
-                
-                entity_mapping = {entity: {"entity": entity, "confidence": 0.0, "status": "system_error", "fallback_used": True} 
-                                 for entity in ordered_entities[:N_PROCESS_FOR_CONTEXT]}
-        else:
-            # Se non usiamo Claude, semplicemente copiamo le entità originali
-            print("Estrazione entità con Claude disabilitata, uso entità originali.")
-            df_final['Entita_Originale'] = df_final['Entita']
-            df_final['Entita_Principale'] = df_final['Entita']
-            df_final['Confidenza_Entita'] = 1.0
-
         # Assicurati che le colonne per i punteggi esistano
         for tf in CONTEXT_TIMEFRAMES:
              col_name = f'Score_Avg_{tf}'
              if col_name not in df_final.columns:
                  df_final[col_name] = 0.0
 
-        # 2. Raccolta Score di Contesto (MODIFICATO per usare entità principali)
+        # 2. Raccolta Score di Contesto
         if FETCH_VOLUME_CONTEXT and N_PROCESS_FOR_CONTEXT > 0 and CONTEXT_TIMEFRAMES:
             print(f"\n--- Avvio Raccolta Score Contesto per Top {N_PROCESS_FOR_CONTEXT} Entità ---")
-            
-            # Ottieni la lista di entità principali uniche da analizzare
-            entities_for_context = df_final.loc[:N_PROCESS_FOR_CONTEXT-1, 'Entita_Principale'].unique().tolist()
-            print(f"Analisi contesto per {len(entities_for_context)} entità principali uniche.")
-            
+            entities_for_context = ordered_entities[:N_PROCESS_FOR_CONTEXT]
             timeframe_context_results = defaultdict(lambda: defaultdict(list))
             for run in range(1, CONTEXT_N_RUNS + 1): # Loop N_RUNS
                 print(f"\n===== INIZIO RACCOLTA CONTESTO - RUN {run}/{CONTEXT_N_RUNS} ====="); rst = time.time()
@@ -744,16 +574,13 @@ if __name__ == "__main__":
                 print(f"===== FINE RACCOLTA CONTESTO - RUN {run}/{CONTEXT_N_RUNS} (Durata: {time.time() - rst:.2f}s) =====")
                 if run < CONTEXT_N_RUNS: time.sleep(random.uniform(10, 20))
 
-            # Calcola medie contesto e aggiorna df_final (MODIFICATO per mappare alle entità originali)
+            # Calcola medie contesto e aggiorna df_final
             print("\n    Calcolo Score Medi di Contesto...")
             for tf_agg in CONTEXT_TIMEFRAMES:
                 sc_avg_col = f'Score_Avg_{tf_agg}';
                 avg_s = {e: sum(s)/len(s) if s else 0 for e, s in timeframe_context_results[tf_agg].items()}
-                
-                # Mappa gli score delle entità principali alle entità originali
-                df_final[sc_avg_col] = df_final['Entita_Principale'].map(avg_s).fillna(0)
+                df_final[sc_avg_col] = df_final['Entita'].map(avg_s).fillna(0);
                 print(f"       Calcolata media contesto per {tf_agg}.")
-                
             print("--- Fine Raccolta Score Contesto ---")
         else:
              print("\n--- Raccolta Score Contesto Saltata ---")
@@ -804,7 +631,7 @@ if __name__ == "__main__":
         # --- 5. Salva il DataFrame finale come CSV (per backup) ---
         try:
             # Aggiorna nome file per riflettere la versione
-            backup_filename = "final_data_v7.6.csv"
+            backup_filename = "final_data_v7.5.csv"
             df_final.to_csv(os.path.join(CHECKPOINT_DIR, backup_filename), index=False, encoding='utf-8-sig')
             print(f"\nDataFrame finale salvato come backup in: {os.path.join(CHECKPOINT_DIR, backup_filename)}")
         except Exception as e:
@@ -820,12 +647,11 @@ if __name__ == "__main__":
             print("\n!!! Errore durante la generazione dell'output HTML. !!!")
 
         # --- 7. Stampa Top N Finale (Ordinato per Discover Score) ---
-        print(f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score Heuristico V7.6) ---")
+        print(f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score Heuristico V7.5) ---")
         cols_to_show = []
-        if 'Entita_Principale' in df_final.columns: cols_to_show.append('Entita_Principale')
-        if 'Entita_Originale' in df_final.columns: cols_to_show.append('Entita_Originale')
         if discover_score_col in df_final.columns: cols_to_show.append(discover_score_col)
         if 'Rank' in df_final.columns: cols_to_show.append('Rank')
+        if 'Entita' in df_final.columns: cols_to_show.append('Entita')
 
         if FETCH_VOLUME_CONTEXT:
             for tf in CONTEXT_TIMEFRAMES:
