@@ -18,135 +18,115 @@ document.addEventListener('DOMContentLoaded', function() {
     if (currentYearEl) {
         currentYearEl.textContent = new Date().getFullYear();
     }
-
-    // Carica i metadati
     loadMetadata();
-
-    // Carica e visualizza i dati delle tendenze
-    renderTrendsTable(trendData); // Usa i dati da data.js
-
-    // Configura gli ascoltatori per la ricerca e l'ordinamento (incluso toggle AI)
+    // Aggiungi un try-catch attorno a renderTrendsTable per sicurezza
+    try {
+        renderTrendsTable(trendData);
+    } catch (error) {
+        console.error("Errore durante renderTrendsTable:", error);
+        displayErrorMessage("Si è verificato un errore durante la visualizzazione dei dati della tabella.");
+    }
     setupEventListeners();
-
-    // Rimuovi messaggio di caricamento iniziale (se presente)
     const loadingRow = document.querySelector('.loading-row');
     if (loadingRow) {
         loadingRow.remove();
     }
 });
 
-// Mostra un messaggio di errore generale nella tabella
+// Mostra un messaggio di errore generale
 function displayErrorMessage(message) {
     const tableBody = document.getElementById('trendsTableBody');
     if(tableBody) {
-        // Sostituisce l'intero contenuto della tabella con il messaggio di errore
         tableBody.innerHTML = `<tr class="error-row"><td colspan="8" style="text-align: center; padding: 30px; color: red;">${escapeHtml(message)}</td></tr>`;
     }
-    // Nascondi altri elementi se necessario
-    const controls = document.querySelector('.controls');
-    if(controls) controls.style.display = 'none';
-    const stats = document.querySelector('.stats-container');
-    if(stats) stats.style.display = 'none';
+    const controls = document.querySelector('.controls'); if(controls) controls.style.display = 'none';
+    const stats = document.querySelector('.stats-container'); if(stats) stats.style.display = 'none';
 }
 
 // Carica i metadati nella dashboard
 function loadMetadata() {
-    // Verifica che runMetadata esista e sia un oggetto
-    if (typeof runMetadata === 'object' && runMetadata !== null) {
-        document.getElementById('updateTimestamp').textContent = runMetadata.timestamp || 'N/A';
-        document.getElementById('trendsCount').textContent = runMetadata.trends_count !== undefined ? runMetadata.trends_count : '?';
-        document.getElementById('topScore').textContent = (runMetadata.top_score || 0).toFixed(2);
-        document.getElementById('runtimeMinutes').textContent = (runMetadata.runtime_minutes || 0).toFixed(1) + 'm';
-        document.getElementById('proxiesUsed').textContent = runMetadata.proxies_used !== undefined ? runMetadata.proxies_used : '?';
-
-        // Info OpenAI
-        const openaiStatusEl = document.getElementById('openaiStatus');
-        const openaiModelEl = document.getElementById('openaiModel');
-        const openaiInfoP = document.querySelector('.openai-info');
-
-        if (openaiStatusEl && openaiModelEl && openaiInfoP) {
-            if (runMetadata.openai_enabled) {
-                openaiStatusEl.textContent = 'ATTIVA';
-                openaiStatusEl.style.color = '#27ae60'; // Verde
-                openaiModelEl.textContent = runMetadata.openai_model || 'N/A';
-                openaiInfoP.style.display = ''; // Assicura sia visibile
-            } else {
-                openaiStatusEl.textContent = 'DISATTIVATA';
-                openaiStatusEl.style.color = '#e74c3c'; // Rosso
-                openaiModelEl.textContent = 'N/A';
-                openaiInfoP.style.display = 'none'; // Nascondi se disattivato
+    try {
+        if (typeof runMetadata === 'object' && runMetadata !== null) {
+            document.getElementById('updateTimestamp').textContent = runMetadata.timestamp || 'N/A';
+            document.getElementById('trendsCount').textContent = runMetadata.trends_count !== undefined ? runMetadata.trends_count : '?';
+            document.getElementById('topScore').textContent = (runMetadata.top_score || 0).toFixed(2);
+            document.getElementById('runtimeMinutes').textContent = (runMetadata.runtime_minutes || 0).toFixed(1) + 'm';
+            document.getElementById('proxiesUsed').textContent = runMetadata.proxies_used !== undefined ? runMetadata.proxies_used : '?';
+            const openaiStatusEl = document.getElementById('openaiStatus');
+            const openaiModelEl = document.getElementById('openaiModel');
+            const openaiInfoP = document.querySelector('.openai-info');
+            if (openaiStatusEl && openaiModelEl && openaiInfoP) {
+                if (runMetadata.openai_enabled) {
+                    openaiStatusEl.textContent = 'ATTIVA'; openaiStatusEl.style.color = '#27ae60';
+                    openaiModelEl.textContent = runMetadata.openai_model || 'N/A'; openaiInfoP.style.display = '';
+                } else {
+                    openaiStatusEl.textContent = 'DISATTIVATA'; openaiStatusEl.style.color = '#e74c3c';
+                    openaiModelEl.textContent = 'N/A'; openaiInfoP.style.display = 'none';
+                }
             }
+        } else {
+            console.error('Dati metadati (runMetadata) non disponibili o non validi.');
+            document.getElementById('updateTimestamp').textContent = 'Errore';
+            document.getElementById('trendsCount').textContent = 'Errore';
+            document.getElementById('topScore').textContent = 'Errore';
+            document.getElementById('runtimeMinutes').textContent = 'Errore';
+            document.getElementById('proxiesUsed').textContent = 'Errore';
+            const openaiInfoP = document.querySelector('.openai-info');
+            if(openaiInfoP) openaiInfoP.style.display = 'none';
         }
-
-    } else {
-        console.error('Dati metadati (runMetadata) non disponibili o non validi in data.js');
-        // Imposta valori di fallback visibili all'utente
-        document.getElementById('updateTimestamp').textContent = 'Errore';
-        document.getElementById('trendsCount').textContent = 'Errore';
-        document.getElementById('topScore').textContent = 'Errore';
-        document.getElementById('runtimeMinutes').textContent = 'Errore';
-        document.getElementById('proxiesUsed').textContent = 'Errore';
-        const openaiInfoP = document.querySelector('.openai-info');
-        if(openaiInfoP) openaiInfoP.style.display = 'none';
+    } catch (error) {
+        console.error("Errore durante loadMetadata:", error);
     }
 }
 
 // Configura gli ascoltatori degli eventi (incluso il toggle AI)
 function setupEventListeners() {
-    // Ricerca
-    const searchBox = document.getElementById('searchBox');
-    if (searchBox) {
-        searchBox.addEventListener('input', () => filterTable(searchBox.value.trim().toLowerCase()));
-    }
-    // Ordinamento
-    const sortBy = document.getElementById('sortBy');
-    const sortOrder = document.getElementById('sortOrder');
-    if (sortBy) sortBy.addEventListener('change', sortTable);
-    if (sortOrder) sortOrder.addEventListener('change', sortTable);
+    try {
+        const searchBox = document.getElementById('searchBox');
+        if (searchBox) {
+            searchBox.addEventListener('input', () => filterTable(searchBox.value.trim().toLowerCase()));
+        }
+        const sortBy = document.getElementById('sortBy');
+        const sortOrder = document.getElementById('sortOrder');
+        if (sortBy) sortBy.addEventListener('change', sortTable);
+        if (sortOrder) sortOrder.addEventListener('change', sortTable);
 
-    // --- Event Listener per Toggle Entità AI (Delegato al tbody) ---
-    const tableBody = document.getElementById('trendsTableBody');
-    if (tableBody) {
-        tableBody.addEventListener('click', function(event) {
-            // Trova il bottone più vicino all'elemento cliccato
-            const button = event.target.closest('.toggle-ai-btn');
-            if (button) {
-                // Trova la cella parente, poi il div delle entità
-                const cell = button.closest('td.trend-cell');
-                if (cell) {
-                    const entitiesDiv = cell.querySelector('.extracted-entities.collapsible');
-                    if (entitiesDiv) {
-                        // Cambia la visibilità del div togglando la classe 'visible'
-                        entitiesDiv.classList.toggle('visible');
-
-                        // Cambia l'icona del bottone
-                        const icon = button.querySelector('i');
-                        if (icon) {
-                            if (entitiesDiv.classList.contains('visible')) {
-                                // Se è visibile -> mostra icona 'meno'
-                                icon.classList.remove('fa-plus-circle');
-                                icon.classList.add('fa-minus-circle');
-                                button.setAttribute('title', 'Nascondi entità AI');
-                            } else {
-                                // Se è nascosto -> mostra icona 'più'
-                                icon.classList.remove('fa-minus-circle');
-                                icon.classList.add('fa-plus-circle');
-                                button.setAttribute('title', 'Mostra entità AI');
+        // Event Listener per Toggle Entità AI (Delegato al tbody)
+        const tableBody = document.getElementById('trendsTableBody');
+        if (tableBody) {
+            tableBody.addEventListener('click', function(event) {
+                const button = event.target.closest('.toggle-ai-btn');
+                if (button) {
+                    const cell = button.closest('td.trend-cell');
+                    if (cell) {
+                        const entitiesDiv = cell.querySelector('.extracted-entities.collapsible');
+                        if (entitiesDiv) {
+                            entitiesDiv.classList.toggle('visible');
+                            const icon = button.querySelector('i');
+                            if (icon) {
+                                if (entitiesDiv.classList.contains('visible')) {
+                                    icon.classList.remove('fa-plus-circle'); icon.classList.add('fa-minus-circle');
+                                    button.setAttribute('title', 'Nascondi entità AI');
+                                } else {
+                                    icon.classList.remove('fa-minus-circle'); icon.classList.add('fa-plus-circle');
+                                    button.setAttribute('title', 'Mostra entità AI');
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
+    } catch (error) {
+        console.error("Errore durante setupEventListeners:", error);
     }
-    // --- FINE Event Listener Toggle ---
 }
 
 // Renderizza la tabella delle tendenze (con bottone toggle)
 function renderTrendsTable(data) {
     const tableBody = document.getElementById('trendsTableBody');
     if (!tableBody) { console.error("Elemento 'trendsTableBody' non trovato."); return; }
-    tableBody.innerHTML = ''; // Pulisce
+    tableBody.innerHTML = '';
 
     if (!data || data.length === 0) {
          tableBody.innerHTML = `<tr class="no-data-row"><td colspan="8">Nessun dato disponibile.</td></tr>`;
@@ -164,7 +144,7 @@ function renderTrendsTable(data) {
         row.dataset.score7d = String(item.score_7d || 0);
         row.dataset.aiEntities = String(item.extracted_entities || '').toLowerCase();
 
-        // Logica HOT (più restrittiva)
+        // Logica HOT
         const isHot = isEntityHot(item.score_1h, item.score_4h, item.score_7d);
         if (isHot) row.classList.add('hot-trend');
 
@@ -177,18 +157,14 @@ function renderTrendsTable(data) {
         // Entità principale
         let entityDisplay = escapeHtml(item.entity || 'N/A');
 
-        // --- LOGICA AGGIORNATA PER extracted_entities COLLAPSIBLE ---
+        // Logica per entità AI collapsible
         let extractedEntitiesHtml = '';
-        let toggleButtonHtml = ''; // Inizializza vuoto
-
+        let toggleButtonHtml = '';
         if (item.extracted_entities && typeof item.extracted_entities === 'string' && item.extracted_entities.trim() !== '') {
              const entitiesCleaned = item.extracted_entities.trim();
-             // Bottone per mostrare/nascondere (con icona '+' di default)
              toggleButtonHtml = `<button class="toggle-ai-btn" title="Mostra entità AI"><i class="fas fa-plus-circle"></i></button>`;
-             // Div esterno (collapsible, non visibile) e Span interno (scrolling)
              extractedEntitiesHtml = `<div class="extracted-entities collapsible" title="Entità suggerite da AI"><span class="scrolling-text-inner">${escapeHtml(entitiesCleaned)}</span></div>`;
         }
-        // --- FINE LOGICA AGGIORNATA ---
 
         // Costruzione HTML riga
         row.innerHTML = `
@@ -197,8 +173,10 @@ function renderTrendsTable(data) {
             <td class="trend-cell">
                  <div class="main-entity-container">
                     <span class="main-entity">${entityDisplay}</span>
-                    ${toggleButtonHtml} </div>
-                 ${extractedEntitiesHtml} </td>
+                    ${toggleButtonHtml}
+                 </div>
+                 ${extractedEntitiesHtml}
+            </td>
             <td class="score">
                 ${(item.discover_score || 0).toFixed(3)} ${trendIndicator}
                 ${isHot ? '<span class="hot-indicator" title="Trend in forte crescita recente">HOT</span>' : ''}
@@ -213,11 +191,30 @@ function renderTrendsTable(data) {
         tableBody.appendChild(row);
     });
 
-    // Creazione grafici
+    // Creazione grafici con log per debug
+    console.log("Avvio creazione grafici..."); // DEBUG
     requestAnimationFrame(() => {
+        console.log(`Inizio loop creazione grafici per ${data.length} elementi.`); // DEBUG
         data.forEach((item, index) => {
-            createTrendChart(`chart-${index}`, [Number(item.score_7d) || 0, Number(item.score_4h) || 0, Number(item.score_1h) || 0]);
+            const containerId = `chart-${index}`;
+            const chartData = [Number(item.score_7d) || 0, Number(item.score_4h) || 0, Number(item.score_1h) || 0];
+            // console.log(`Tentativo creazione grafico per ${containerId} con dati:`, chartData); // DEBUG (molto verboso)
+            try {
+                 // Verifica se il container esiste PRIMA di chiamare la funzione
+                 if(document.getElementById(containerId)) {
+                    createTrendChart(containerId, chartData);
+                 } else {
+                    console.warn(`Container ${containerId} non trovato nel DOM prima di chiamare createTrendChart.`);
+                 }
+            } catch (chartError) {
+                 console.error(`Errore durante la chiamata a createTrendChart per ${containerId}:`, chartError);
+                 const errorContainer = document.getElementById(containerId);
+                 if(errorContainer) {
+                     errorContainer.innerHTML = '<span class="chart-fallback" style="color:red;">Err!</span>';
+                 }
+            }
         });
+        console.log("Fine loop creazione grafici."); // DEBUG
     });
 }
 
@@ -245,77 +242,79 @@ function isEntityHot(score1h, score4h, score7d) {
 // Crea un grafico di tendenza per una entità
 function createTrendChart(containerId, dataPoints) {
     const container = document.getElementById(containerId);
-    if (!container) return; // Esce se il container non esiste
+    // console.log(`createTrendChart: Trovato container ${containerId}?`, container); // DEBUG (attivare se necessario)
+    if (!container) {
+        // console.warn(`createTrendChart: Container ${containerId} non trovato.`); // DEBUG (attivare se necessario)
+        return;
+    }
 
     container.innerHTML = ''; // Pulisce container
     const canvas = document.createElement('canvas');
-    canvas.style.display = 'block';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+    canvas.style.display = 'block'; canvas.style.width = '100%'; canvas.style.height = '100%';
     container.appendChild(canvas);
 
     const chartContext = canvas.getContext('2d');
     if (!chartContext) {
         console.error(`Impossibile ottenere il contesto 2D per ${containerId}`);
-        container.innerHTML = `<span class="chart-fallback">N/A</span>`; // Fallback
+        container.innerHTML = `<span class="chart-fallback">Ctx Err</span>`;
         return;
     }
+    // console.log(`createTrendChart: Contesto 2D OK per ${containerId}`); // DEBUG
 
     try {
         const lineColor = determineTrendColor(dataPoints);
-        // Crea gradiente usando l'altezza effettiva del container se possibile
         const gradient = chartContext.createLinearGradient(0, 0, 0, container.clientHeight || 35);
-        gradient.addColorStop(0, lineColor + '60'); // Opacità alta all'inizio
-        gradient.addColorStop(1, lineColor + '05'); // Opacità bassa alla fine
+        gradient.addColorStop(0, lineColor + '60'); gradient.addColorStop(1, lineColor + '05');
 
-        // Crea il grafico usando Chart.js
+        // --- Configurazione Chart.js COMPLETA ---
         new Chart(chartContext, {
             type: 'line',
             data: {
-                labels: ['7d Avg', '4h Avg', '1h Avg'], // Etichette per tooltip
+                labels: ['7d Avg', '4h Avg', '1h Avg'],
                 datasets: [{
-                    data: dataPoints, // Dati [7d, 4h, 1h]
+                    data: dataPoints,
                     borderColor: lineColor,
-                    backgroundColor: gradient, // Usa il gradiente come sfondo
-                    borderWidth: 2,            // Spessore linea
-                    pointRadius: 2.5,          // Dimensione punti
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    pointRadius: 2.5,
                     pointBackgroundColor: lineColor,
-                    pointHoverRadius: 4,       // Dimensione punti su hover
-                    tension: 0.3,              // Curvatura linea
-                    fill: true                 // Riempie area sotto la linea
+                    pointHoverRadius: 4,
+                    tension: 0.3,
+                    fill: true
                 }]
             },
             options: {
-                responsive: true,           // Adatta grafico al container
-                maintainAspectRatio: false, // Permette al grafico di usare l'altezza definita dal CSS
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }, // Nasconde legenda
-                    tooltip: {                  // Configura tooltip
+                    legend: { display: false },
+                    tooltip: {
                         enabled: true,
                         backgroundColor: 'rgba(0,0,0,0.7)',
                         titleFont: { size: 10 },
                         bodyFont: { size: 10 },
                         padding: 6,
-                        displayColors: false, // Nasconde quadratino colore nel tooltip
+                        displayColors: false,
                         callbacks: {
-                            // Mostra etichetta (es. '4h Avg') come titolo
                             title: (tooltipItems) => tooltipItems[0].label,
-                            // Mostra lo score nel corpo
                             label: (context) => `Score: ${context.parsed.y.toFixed(1)}`
                         }
                     }
                 },
-                scales: { // Configurazione assi
-                    x: { display: false }, // Nasconde asse X
-                    y: { display: false, beginAtZero: true } // Nasconde asse Y, parte da 0
+                scales: {
+                    x: { display: false },
+                    y: { display: false, beginAtZero: true }
                 },
-                animation: false, // Disabilita animazioni per performance
-                parsing: false,   // Dati già nel formato corretto, disabilita parsing Chart.js
-            }
-        });
+                animation: false, // Disabilita animazioni
+                parsing: false,   // Disabilita parsing dati
+                // Aggiungi eventuali altre opzioni necessarie qui sotto
+                // Esempio: interaction: { mode: 'index', intersect: false }, // Se vuoi tooltip più interattivi
+                // Esempio: elements: { point: { hoverRadius: 5 } } // Esempio opzione elementi
+            } // Fine blocco options
+        }); // Fine new Chart
+        // console.log(`createTrendChart: Grafico creato per ${containerId}`); // DEBUG
     } catch (error) {
         console.error(`Errore creazione grafico ${containerId}:`, error);
-        // Fallback in caso di errore Chart.js
         container.innerHTML = `<span class="chart-fallback">${dataPoints.map(p => p.toFixed(0)).join('→')}</span>`;
     }
 }
