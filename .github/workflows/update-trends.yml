@@ -31,6 +31,7 @@ jobs:
           pip install pandas numpy requests bs4 tqdm cloudscraper fake-useragent
           pip install urllib3==1.26.15
           pip install pytrends==4.9.2
+          pip install anthropic==0.18.0  # Aggiunto per l'integrazione Claude
       
       - name: Create required directories
         run: |
@@ -46,6 +47,8 @@ jobs:
           cp script.js templates/script.js || echo "Using default script"
       
       - name: Run Discover Prophet script
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python discover_prophet.py
       
       - name: Configure Git
