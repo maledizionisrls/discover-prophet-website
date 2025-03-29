@@ -27,43 +27,18 @@
 
     <main class="dashboard">
         <div class="stats-container">
-            <div class="stat-card">
-                <div class="icon"><i class="fas fa-hashtag"></i></div>
-                <div class="number" id="trendsCount">...</div>
-                <div class="label">Trends Analizzati</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon"><i class="fas fa-fire"></i></div>
-                <div class="number" id="topScore">...</div>
-                <div class="label">Discover Score Massimo</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon"><i class="fas fa-clock"></i></div>
-                <div class="number" id="runtimeMinutes">...</div>
-                <div class="label">Tempo di Elaborazione</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon"><i class="fas fa-server"></i></div>
-                <div class="number" id="proxiesUsed">...</div>
-                <div class="label">Proxy Utilizzati</div>
-            </div>
+            <div class="stat-card"> <div class="icon"><i class="fas fa-hashtag"></i></div> <div class="number" id="trendsCount">...</div> <div class="label">Trends Analizzati</div> </div>
+            <div class="stat-card"> <div class="icon"><i class="fas fa-fire"></i></div> <div class="number" id="topScore">...</div> <div class="label">Discover Score Massimo</div> </div>
+            <div class="stat-card"> <div class="icon"><i class="fas fa-clock"></i></div> <div class="number" id="runtimeMinutes">...</div> <div class="label">Tempo di Elaborazione</div> </div>
+            <div class="stat-card"> <div class="icon"><i class="fas fa-server"></i></div> <div class="number" id="proxiesUsed">...</div> <div class="label">Proxy Utilizzati</div> </div>
         </div>
 
         <div class="controls">
             <input type="text" id="searchBox" class="search-box" placeholder="Cerca trend o entità AI...">
             <div class="sorting">
                 <label for="sortBy">Ordina per:</label>
-                <select id="sortBy">
-                    <option value="discover_score">Discover Score</option>
-                    <option value="rank">Rank Originale</option>
-                    <option value="score_1h">Score 1 ora</option>
-                    <option value="score_4h">Score 4 ore</option>
-                    <option value="score_7d">Score 7 giorni</option>
-                </select>
-                <select id="sortOrder">
-                    <option value="desc">Decrescente</option>
-                    <option value="asc">Crescente</option>
-                </select>
+                <select id="sortBy"> <option value="discover_score">Discover Score</option> <option value="rank">Rank Originale</option> <option value="score_1h">Score 1 ora</option> <option value="score_4h">Score 4 ore</option> <option value="score_7d">Score 7 giorni</option> </select>
+                <select id="sortOrder"> <option value="desc">Decrescente</option> <option value="asc">Crescente</option> </select>
             </div>
         </div>
 
@@ -74,34 +49,26 @@
                         <th>#</th>
                         <th>Rank</th>
                         <th>Trend & <span title="Entità suggerite da AI">Entità AI</span></th>
-                        <th>Discover Score</th>
-                        <th>1h</th>
+                        <th>DScore</th> <th>1h</th>
                         <th>4h</th>
                         <th>7d</th>
                         <th>Trend Chart</th>
                     </tr>
                 </thead>
                 <tbody id="trendsTableBody">
-                    <tr class="loading-row">
-                        <td colspan="8" style="text-align: center; padding: 30px;">
-                            <i class="fas fa-spinner fa-spin"></i> Caricamento dati...
-                        </td>
-                    </tr>
+                    <tr class="loading-row"> <td colspan="8" style="text-align: center; padding: 30px;"> <i class="fas fa-spinner fa-spin"></i> Caricamento dati... </td> </tr>
                 </tbody>
             </table>
         </div>
-        <div id="noResultsMessage" class="no-results-message" style="display: none;">
-             Nessun risultato trovato per la ricerca.
-        </div>
+        <div id="noResultsMessage" class="no-results-message" style="display: none;"> Nessun risultato trovato per la ricerca. </div>
     </main>
 
     <footer>
         <p>&copy; <span id="currentYear"></span> Discover Prophet - Powered by Google Trends & OpenAI</p>
-        <p class="version">Version 7.7 - Docs Only</p>
+        <p class="version">Version 7.7 - Docs Only (Simple Layout)</p>
     </footer>
 
     <script src="data.js"></script>
-
     <script src="script.js"></script>
 </body>
 </html>
