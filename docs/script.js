@@ -70,10 +70,17 @@ function renderTrendsTable(data) {
         const trendIndicator = calculateTrendIndicator(item.score_1h, item.score_4h);
         
         // Crea il contenuto HTML della riga - INTEGRAZIONE HOT NON INVASIVA
+        
+        // Prepara la visualizzazione dell'entità con l'originale se necessario
+        let entityDisplay = item.entity;
+        if (item.show_original) {
+            entityDisplay = `${item.entity}<br><small class="original-query">(${item.entity_original})</small>`;
+        }
+        
         row.innerHTML = `
             <td>${index + 1}</td>
             <td><span class="rank-badge ${rankBadgeClass}">${item.rank}</span></td>
-            <td>${item.entity}</td>
+            <td>${entityDisplay}</td>
             <td class="score">
                 ${item.discover_score.toFixed(3)} ${trendIndicator}
                 ${isHot ? '<span class="hot-indicator">HOT</span>' : ''}
