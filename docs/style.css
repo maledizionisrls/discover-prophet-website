@@ -189,7 +189,8 @@ select {
 .trends-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 900px;
+    min-width: 900px; /* Larghezza minima tabella */
+    table-layout: fixed; /* IMPORTANTE: Fissa layout tabella per evitare che cella si allarghi */
 }
 
 .trends-table th,
@@ -197,20 +198,29 @@ select {
     padding: 0.75rem 0.8rem;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
-    white-space: nowrap;
+    /* Rimuovi white-space: nowrap; qui, gestito dove serve */
     vertical-align: middle;
+    overflow: hidden; /* Nasconde overflow anche nelle celle normali se necessario */
+    text-overflow: ellipsis; /* Mostra ... se il contenuto non entra (non per trend-cell) */
 }
 
-/* Cella Trend: permette a capo e allinea sopra */
+/* Cella Trend: permette a capo per main-entity, contiene lo scroller */
 .trends-table .trend-cell {
-    white-space: normal;
+    white-space: normal; /* Permette a main-entity di andare a capo se necessario */
     vertical-align: top;
-    min-width: 250px; /* Larghezza minima per leggibilità trend+entità */
+    /* Definisci una larghezza fissa o percentuale per questa colonna */
+    width: 30%; /* Esempio: Adatta questa percentuale! */
+    min-width: 250px; /* Minimo per leggibilità */
+    text-overflow: initial; /* Disabilita ellipsis per questa cella specifica */
 }
 .main-entity {
     font-weight: 500;
-    display: block; /* Assicura che stia su una riga separata */
-    margin-bottom: 3px; /* Piccolo spazio prima delle entità */
+    display: block;
+    margin-bottom: 3px;
+    /* Opzionale: Se il nome del trend è troppo lungo */
+    /* white-space: nowrap; */
+    /* overflow: hidden; */
+    /* text-overflow: ellipsis; */
 }
 
 
@@ -222,7 +232,18 @@ select {
     top: 0;
     z-index: 10;
     border-bottom-width: 2px;
+    white-space: nowrap; /* Header sempre su una riga */
 }
+/* Specifica larghezze colonne header se usi table-layout: fixed */
+.trends-table th:nth-child(1) { width: 40px; } /* # */
+.trends-table th:nth-child(2) { width: 70px; } /* Rank */
+.trends-table th:nth-child(3) { width: 30%; } /* Trend & AI (come cella dati) */
+.trends-table th:nth-child(4) { width: 130px; } /* Discover Score */
+.trends-table th:nth-child(5),
+.trends-table th:nth-child(6),
+.trends-table th:nth-child(7) { width: 60px; } /* 1h, 4h, 7d */
+.trends-table th:nth-child(8) { width: 110px; } /* Trend Chart */
+
 
 .trends-table tr:last-child td {
     border-bottom: none;
@@ -320,42 +341,48 @@ footer {
     line-height: 1;
 }
 
-/* --- Stili per Entità AI + Scorrimento Orizzontale --- */
+/* --- Stili per Entità AI + Scorrimento (Logica Aggiornata) --- */
+
+/* 1. Contenitore Esterno: definisce la finestra visibile */
 .extracted-entities {
-    font-size: 0.8rem; /* Leggermente più piccolo */
-    color: #555;       /* Grigio scuro */
-    margin-top: 4px;    /* Spazio dal trend principale */
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 4px;
     line-height: 1.4;
-    display: block;     /* Occupa la sua riga */
-
-    /* --- Stili per SCORRIMENTO --- */
-    white-space: nowrap;  /* Impedisce al testo di andare a capo */
-    overflow: hidden;     /* Nasconde il testo che esce dal box */
+    display: block; /* Occupa la larghezza disponibile sotto main-entity */
+    width: 100%;    /* Forza la larghezza al 100% della cella (importante con table-layout: fixed) */
+    overflow: hidden; /* Nasconde ciò che esce */
     box-sizing: border-box;
-    width: 100%;          /* Occupa tutta la larghezza disponibile */
-    padding: 3px 0;       /* Piccolo padding verticale */
-    cursor: default;      /* Cursore standard */
-
-    /* Applica l'animazione di scorrimento */
-    /* Durata animazione (es. 25s) - più lunga è, più lento scorre */
-    animation: marquee-scroll 25s linear infinite;
+    padding: 3px 0;
+    cursor: default;
+    /* Rimosso animation e white-space da qui */
 }
 
-/* Definisce l'animazione di scorrimento */
-@keyframes marquee-scroll {
+/* 2. Contenitore Interno: contiene il testo e scorre */
+.scrolling-text-inner {
+    display: inline-block; /* Si adatta alla larghezza del testo */
+    white-space: nowrap;   /* Mantiene il testo su una riga */
+    padding-left: 100%;   /* Spinge l'inizio del testo fuori a destra */
+    animation: marquee-scroll-inner 25s linear infinite; /* Applica animazione qui */
+}
+
+/* 3. Animazione per l'elemento interno */
+@keyframes marquee-scroll-inner {
   0% {
-    transform: translateX(100%); /* Parte completamente fuori a destra */
+    transform: translateX(0%); /* Parte dalla posizione iniziale (spostata dal padding) */
   }
   100% {
-    transform: translateX(-110%); /* Finisce completamente fuori a sinistra (valore > 100% per dare spazio tra le ripetizioni) */
+    /* Muove verso sinistra di una quantità sufficiente a far scomparire tutto il testo + il padding iniziale */
+    /* Un valore come -200% o -210% di solito funziona bene */
+    transform: translateX(-210%);
   }
 }
 
-/* Opzionale: Metti in pausa l'animazione al passaggio del mouse */
-.extracted-entities:hover {
+/* 4. Pausa su hover del contenitore esterno */
+.extracted-entities:hover .scrolling-text-inner {
   animation-play-state: paused;
 }
-/* --- Fine Stili Scorrimento --- */
+/* --- Fine Stili Scorrimento Aggiornati --- */
 
 
 .no-results-message {
@@ -369,13 +396,25 @@ footer {
     margin-top: 1rem;
 }
 
+/* Righe speciali tabella */
+.loading-row td, .error-row td, .no-data-row td {
+    text-align: center !important;
+    white-space: normal !important;
+    padding: 30px 15px !important;
+}
+.error-row td {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
 
 /* Responsive design */
 @media (max-width: 1200px) {
     .trends-table th,
     .trends-table td { padding: 0.7rem 0.6rem; }
     .trend-chart-container { width: 90px; height: 30px; }
-    .trends-table .trend-cell { min-width: 200px; }
+    .trends-table .trend-cell { min-width: 200px; width: 28%; } /* Adatta % */
+    .trends-table th:nth-child(3) { width: 28%; }
 }
 
 @media (max-width: 992px) {
@@ -385,6 +424,8 @@ footer {
     .trends-table th:nth-child(6), .trends-table td:nth-child(6), /* Nascondi 4h */
     .trends-table th:nth-child(7), .trends-table td:nth-child(7) { display: none; } /* Nascondi 7d */
     .trend-chart-container { width: 80px; height: 28px; }
+    .trends-table .trend-cell { width: auto; } /* Rimuovi % fissa se nascondi colonne */
+    .trends-table th:nth-child(3) { width: auto; }
 }
 
 @media (max-width: 768px) {
@@ -402,12 +443,12 @@ footer {
      .trends-table th, .trends-table td { padding: 0.6rem 0.5rem; font-size: 0.85rem; }
      .rank-badge { font-size: 0.75rem; padding: 0.1rem 0.3rem; min-width: 1.5rem;}
      .score { font-size: 0.9rem; }
-     .extracted-entities { font-size: 0.75rem; animation-duration: 20s; } /* Riduci durata animazione */
+     .extracted-entities .scrolling-text-inner { font-size: 0.75rem; animation-duration: 20s; } /* Riduci durata animazione */
      .hot-indicator { font-size: 0.65rem; }
 }
 
 @media (max-width: 480px) {
      .trends-table th, .trends-table td { padding: 0.5rem 0.4rem; }
      .trends-table .trend-cell { min-width: 150px; }
-     .extracted-entities { animation-duration: 15s; } /* Riduci ancora durata */
+     .extracted-entities .scrolling-text-inner { animation-duration: 15s; } /* Riduci ancora durata */
 }
