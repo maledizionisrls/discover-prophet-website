@@ -31,9 +31,25 @@
     "confidence": 0.1,
     "is_fallback": true
   },
+  "andrea pucci": {
+    "original_query": "andrea pucci",
+    "primary_entity": "andrea pucci",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
   "cambio ora 2025": {
     "original_query": "cambio ora 2025",
     "primary_entity": "cambio ora 2025",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "assalto portavalori": {
+    "original_query": "assalto portavalori",
+    "primary_entity": "assalto portavalori",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,
@@ -55,25 +71,17 @@
     "confidence": 0.1,
     "is_fallback": true
   },
-  "assalto portavalori": {
-    "original_query": "assalto portavalori",
-    "primary_entity": "assalto portavalori",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "andrea pucci": {
-    "original_query": "andrea pucci",
-    "primary_entity": "andrea pucci",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
   "cittadinanza italiana ius sanguinis": {
     "original_query": "cittadinanza italiana ius sanguinis",
     "primary_entity": "cittadinanza italiana ius sanguinis",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "juve genoa": {
+    "original_query": "juve genoa",
+    "primary_entity": "juve genoa",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,
@@ -87,14 +95,6 @@
     "confidence": 0.1,
     "is_fallback": true
   },
-  "pilar fogliati": {
-    "original_query": "pilar fogliati",
-    "primary_entity": "pilar fogliati",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
   "napoli milan": {
     "original_query": "napoli milan",
     "primary_entity": "napoli milan",
@@ -103,41 +103,9 @@
     "confidence": 0.1,
     "is_fallback": true
   },
-  "lecce roma": {
-    "original_query": "lecce roma",
-    "primary_entity": "lecce roma",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "pelicans - warriors": {
-    "original_query": "pelicans - warriors",
-    "primary_entity": "pelicans - warriors",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "achille costacurta": {
-    "original_query": "achille costacurta",
-    "primary_entity": "achille costacurta",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "sciopero treni aprile 2025": {
-    "original_query": "sciopero treni aprile 2025",
-    "primary_entity": "sciopero treni aprile 2025",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "sbk": {
-    "original_query": "sbk",
-    "primary_entity": "sbk",
+  "pilar fogliati": {
+    "original_query": "pilar fogliati",
+    "primary_entity": "pilar fogliati",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,
@@ -151,33 +119,33 @@
     "confidence": 0.1,
     "is_fallback": true
   },
+  "sciopero treni aprile 2025": {
+    "original_query": "sciopero treni aprile 2025",
+    "primary_entity": "sciopero treni aprile 2025",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "joao felix": {
+    "original_query": "joao felix",
+    "primary_entity": "joao felix",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "pelicans - warriors": {
+    "original_query": "pelicans - warriors",
+    "primary_entity": "pelicans - warriors",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
   "ghibli": {
     "original_query": "ghibli",
     "primary_entity": "ghibli",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "mensik tennis": {
-    "original_query": "mensik tennis",
-    "primary_entity": "mensik tennis",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "miami open 2025 tabellone": {
-    "original_query": "miami open 2025 tabellone",
-    "primary_entity": "miami open 2025 tabellone",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "le assaggiatrici (film)": {
-    "original_query": "le assaggiatrici (film)",
-    "primary_entity": "le assaggiatrici (film)",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,
@@ -191,25 +159,49 @@
     "confidence": 0.1,
     "is_fallback": true
   },
-  "oroscopo paolo fox capricorno": {
-    "original_query": "oroscopo paolo fox capricorno",
-    "primary_entity": "oroscopo paolo fox capricorno",
+  "sondrio": {
+    "original_query": "sondrio",
+    "primary_entity": "sondrio",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,
     "is_fallback": true
   },
-  "perugia - pineto": {
-    "original_query": "perugia - pineto",
-    "primary_entity": "perugia - pineto",
+  "valtellina": {
+    "original_query": "valtellina",
+    "primary_entity": "valtellina",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,
     "is_fallback": true
   },
-  "meteo milano": {
-    "original_query": "meteo milano",
-    "primary_entity": "meteo milano",
+  "wind warning": {
+    "original_query": "wind warning",
+    "primary_entity": "wind warning",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "le assaggiatrici (film)": {
+    "original_query": "le assaggiatrici (film)",
+    "primary_entity": "le assaggiatrici (film)",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "miami open 2025 tabellone": {
+    "original_query": "miami open 2025 tabellone",
+    "primary_entity": "miami open 2025 tabellone",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "aspromonte": {
+    "original_query": "aspromonte",
+    "primary_entity": "aspromonte",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,
@@ -223,9 +215,97 @@
     "confidence": 0.1,
     "is_fallback": true
   },
+  "taylor fritz": {
+    "original_query": "taylor fritz",
+    "primary_entity": "taylor fritz",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "superbike": {
+    "original_query": "superbike",
+    "primary_entity": "superbike",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "como empoli": {
+    "original_query": "como empoli",
+    "primary_entity": "como empoli",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "perugia - pineto": {
+    "original_query": "perugia - pineto",
+    "primary_entity": "perugia - pineto",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "ciclismo oggi": {
+    "original_query": "ciclismo oggi",
+    "primary_entity": "ciclismo oggi",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "meteo milano": {
+    "original_query": "meteo milano",
+    "primary_entity": "meteo milano",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "venezia bologna": {
+    "original_query": "venezia bologna",
+    "primary_entity": "venezia bologna",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
   "inps cedolino pensione": {
     "original_query": "inps cedolino pensione",
     "primary_entity": "inps cedolino pensione",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "probabili formazioni gazzetta": {
+    "original_query": "probabili formazioni gazzetta",
+    "primary_entity": "probabili formazioni gazzetta",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "fabio balaso": {
+    "original_query": "fabio balaso",
+    "primary_entity": "fabio balaso",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "oroscopo paolo fox capricorno": {
+    "original_query": "oroscopo paolo fox capricorno",
+    "primary_entity": "oroscopo paolo fox capricorno",
+    "is_meta_query": false,
+    "secondary_entities": [],
+    "confidence": 0.1,
+    "is_fallback": true
+  },
+  "castello sforzesco": {
+    "original_query": "castello sforzesco",
+    "primary_entity": "castello sforzesco",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,
@@ -247,9 +327,9 @@
     "confidence": 0.1,
     "is_fallback": true
   },
-  "como empoli": {
-    "original_query": "como empoli",
-    "primary_entity": "como empoli",
+  "richard jewell": {
+    "original_query": "richard jewell",
+    "primary_entity": "richard jewell",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,
@@ -263,17 +343,17 @@
     "confidence": 0.1,
     "is_fallback": true
   },
-  "richard jewell": {
-    "original_query": "richard jewell",
-    "primary_entity": "richard jewell",
+  "muhammad abbas": {
+    "original_query": "muhammad abbas",
+    "primary_entity": "muhammad abbas",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,
     "is_fallback": true
   },
-  "muhammad abbas": {
-    "original_query": "muhammad abbas",
-    "primary_entity": "muhammad abbas",
+  "eid ul fitr 2025": {
+    "original_query": "eid ul fitr 2025",
+    "primary_entity": "eid ul fitr 2025",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,
@@ -287,17 +367,17 @@
     "confidence": 0.1,
     "is_fallback": true
   },
-  "orari motogp": {
-    "original_query": "orari motogp",
-    "primary_entity": "orari motogp",
+  "pistons - cavaliers": {
+    "original_query": "pistons - cavaliers",
+    "primary_entity": "pistons - cavaliers",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,
     "is_fallback": true
   },
-  "pistons - cavaliers": {
-    "original_query": "pistons - cavaliers",
-    "primary_entity": "pistons - cavaliers",
+  "orari motogp": {
+    "original_query": "orari motogp",
+    "primary_entity": "orari motogp",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,
@@ -311,89 +391,9 @@
     "confidence": 0.1,
     "is_fallback": true
   },
-  "belve": {
-    "original_query": "belve",
-    "primary_entity": "belve",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "anticipazioni il paradiso delle signore": {
-    "original_query": "anticipazioni il paradiso delle signore",
-    "primary_entity": "anticipazioni il paradiso delle signore",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
   "polizze catastrofali proroga": {
     "original_query": "polizze catastrofali proroga",
     "primary_entity": "polizze catastrofali proroga",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "fritz oggi": {
-    "original_query": "fritz oggi",
-    "primary_entity": "fritz oggi",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "michael magnesi": {
-    "original_query": "michael magnesi",
-    "primary_entity": "michael magnesi",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "groenlandia": {
-    "original_query": "groenlandia",
-    "primary_entity": "groenlandia",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "programmi tv stasera prima serata": {
-    "original_query": "programmi tv stasera prima serata",
-    "primary_entity": "programmi tv stasera prima serata",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "omar pedrini": {
-    "original_query": "omar pedrini",
-    "primary_entity": "omar pedrini",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "arzignano valchiampo - renate": {
-    "original_query": "arzignano valchiampo - renate",
-    "primary_entity": "arzignano valchiampo - renate",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "michela moioli snowboard": {
-    "original_query": "michela moioli snowboard",
-    "primary_entity": "michela moioli snowboard",
-    "is_meta_query": false,
-    "secondary_entities": [],
-    "confidence": 0.1,
-    "is_fallback": true
-  },
-  "latte crudo": {
-    "original_query": "latte crudo",
-    "primary_entity": "latte crudo",
     "is_meta_query": false,
     "secondary_entities": [],
     "confidence": 0.1,

@@ -1,209 +1,213 @@
 ﻿Rank,Entita,Score_Avg_now 1-H,Score_Avg_now 4-H,Score_Avg_now 7-d,Primary_Entity,Is_Meta_Query,Analysis_Confidence,Discover_Score
-1,eclissi 29 marzo,60.04310344827586,19.985294117647058,4.789940828402367,eclissi 29 marzo,False,0.1,36.59498198103994
-5,cambio ora 2025,46.64655172413793,38.15126050420168,19.384615384615383,cambio ora 2025,False,0.1,32.66949436803374
-6,probabili formazioni,63.275862068965516,31.991596638655462,12.331360946745562,probabili formazioni,False,0.1,23.291392774432108
-27,meteo milano,53.56896551724138,38.96008403361344,25.653846153846153,meteo milano,False,0.1,19.69084730156904
-2,scossa terremoto myanmar,14.060344827586206,16.06512605042017,3.680473372781065,scossa terremoto myanmar,False,0.1,16.039543171350974
-20,ghibli,20.051724137931032,13.897058823529411,14.198224852071007,ghibli,False,0.1,9.55660017974995
-13,napoli milan,13.887931034482758,3.686974789915966,17.026627218934912,napoli milan,False,0.1,8.22778715914309
-37,orari motogp,15.629310344827585,12.758403361344538,8.254437869822485,orari motogp,False,0.1,6.051496862090216
-8,assalto portavalori,8.801724137931034,5.899159663865547,6.059171597633136,assalto portavalori,False,0.1,5.897590712920465
-3,spezia - brescia,0.5603448275862069,4.6113445378151265,3.5207100591715976,spezia - brescia,False,0.1,5.57647221428711
-4,gil vicente - benfica,1.4913793103448274,1.9285714285714286,4.840236686390533,gil vicente - benfica,False,0.1,4.798317559103526
-45,groenlandia,1.7586206896551724,6.546218487394958,8.52958579881657,groenlandia,False,0.1,4.1988273701875585
-22,miami open 2025 tabellone,0.0,0.3550420168067227,10.798816568047338,miami open 2025 tabellone,False,0.1,3.876217829747287
-19,formazioni serie a,5.974137931034482,3.296218487394958,5.949704142011835,formazioni serie a,False,0.1,3.420172997385887
-46,programmi tv stasera prima serata,0.8620689655172413,0.3403361344537815,11.822485207100591,programmi tv stasera prima serata,False,0.1,3.418783564481542
-14,lecce roma,5.439655172413794,3.3676470588235294,4.686390532544379,lecce roma,False,0.1,3.2937435045571393
-23,le assaggiatrici (film),0.9655172413793104,0.6680672268907564,8.695266272189349,le assaggiatrici (film),False,0.1,3.2609055894894916
-12,pilar fogliati,8.655172413793103,8.428571428571429,1.801775147928994,pilar fogliati,False,0.1,3.2245526449159922
-28,inter udinese,1.7241379310344827,1.1596638655462186,7.375739644970414,inter udinese,False,0.1,2.8317688709147175
-41,anticipazioni il paradiso delle signore,2.094827586206897,0.5126050420168067,8.751479289940828,anticipazioni il paradiso delle signore,False,0.1,2.746118672915695
-42,polizze catastrofali proroga,1.3103448275862069,0.5798319327731092,8.14792899408284,polizze catastrofali proroga,False,0.1,2.5863449504499862
-18,sbk,3.4482758620689657,2.544117647058824,3.680473372781065,sbk,False,0.1,2.2498752160588698
-7,leverkusen - bochum,0.0,0.5063025210084033,3.2662721893491122,leverkusen - bochum,False,0.1,1.9613002714199363
-29,inps cedolino pensione,0.8017241379310345,1.0714285714285714,4.3076923076923075,inps cedolino pensione,False,0.1,1.8105387283986814
-10,cittadinanza italiana ius sanguinis,0.0,0.7584033613445378,3.2337278106508873,cittadinanza italiana ius sanguinis,False,0.1,1.8006027689606847
-36,picierno,0.0,1.7373949579831933,3.5710059171597637,picierno,False,0.1,1.6122964777712503
-9,andrea pucci,2.0258620689655173,1.6197478991596639,1.940828402366864,andrea pucci,False,0.1,1.4534959629407775
-31,new zealand vs pakistan,0.8620689655172413,0.47478991596638653,3.3846153846153846,new zealand vs pakistan,False,0.1,1.272995439666083
-40,belve,0.0,0.19747899159663868,3.2633136094674557,belve,False,0.1,1.0874498500381256
-38,pistons - cavaliers,1.5775862068965516,0.7626050420168067,2.399408284023669,pistons - cavaliers,False,0.1,0.9580975829753102
-26,perugia - pineto,0.4224137931034483,0.5168067226890756,2.2366863905325443,perugia - pineto,False,0.1,0.9298614483511056
-33,nuggets - jazz,0.75,0.846638655462185,2.106508875739645,nuggets - jazz,False,0.1,0.9134273852928234
-32,como empoli,0.41379310344827586,0.5945378151260504,1.9644970414201182,como empoli,False,0.1,0.8157109698729734
-21,mensik tennis,0.0,0.707983193277311,1.5621301775147929,mensik tennis,False,0.1,0.7857891108950141
-30,alba berlino - virtus bologna,0.7586206896551724,0.27521008403361347,1.7928994082840237,alba berlino - virtus bologna,False,0.1,0.6996723744596374
-11,federico faggin,0.8620689655172413,0.5042016806722689,1.1183431952662723,federico faggin,False,0.1,0.6844246251525972
-48,arzignano valchiampo - renate,0.0,0.3970588235294118,1.8668639053254439,arzignano valchiampo - renate,False,0.1,0.6782373780413141
-47,omar pedrini,0.0,0.12815126050420167,1.997041420118343,omar pedrini,False,0.1,0.6610048670980402
-34,richard jewell,0.3448275862068966,0.7668067226890757,1.21301775147929,richard jewell,False,0.1,0.6117273616912992
-16,achille costacurta,1.603448275862069,0.43487394957983194,0.9201183431952663,achille costacurta,False,0.1,0.538311162862948
-25,oroscopo paolo fox capricorno,0.3620689655172414,0.6974789915966386,0.8786982248520709,oroscopo paolo fox capricorno,False,0.1,0.5303346255205815
-17,sciopero treni aprile 2025,1.456896551724138,0.40756302521008403,0.878698224852071,sciopero treni aprile 2025,False,0.1,0.510824282251238
-15,pelicans - warriors,0.0,0.32142857142857145,0.8609467455621301,pelicans - warriors,False,0.1,0.49939302800013063
-35,muhammad abbas,0.8620689655172413,0.0,1.301775147928994,muhammad abbas,False,0.1,0.476062737659827
-24,the voice senior 2025,1.2413793103448274,0.48319327731092443,0.7810650887573964,the voice senior 2025,False,0.1,0.4600813076736604
-50,latte crudo,0.3706896551724138,0.15966386554621848,1.2041420118343193,latte crudo,False,0.1,0.44929720713324645
-43,fritz oggi,0.4827586206896552,0.11974789915966387,1.1183431952662721,fritz oggi,False,0.1,0.43216429624874625
-44,michael magnesi,0.7241379310344828,0.2626050420168067,0.6568047337278107,michael magnesi,False,0.1,0.3381795776548042
-49,michela moioli snowboard,0.6293103448275862,0.3382352941176471,0.4349112426035503,michela moioli snowboard,False,0.1,0.28929996106042005
-39,anticipazioni upas un posto al sole,0.0,0.3235294117647059,0.3727810650887574,anticipazioni upas un posto al sole,False,0.1,0.2815666174169779
-51,djuric,0.0,0.0,0.0,djuric,False,0.1,0.12748206434910195
-52,ultimi sondaggi politici,0.0,0.0,0.0,ultimi sondaggi politici,False,0.1,0.12716738907202113
-53,vanuatu,0.0,0.0,0.0,vanuatu,False,0.1,0.12686021143920512
-54,beppe severgnini,0.0,0.0,0.0,beppe severgnini,False,0.1,0.12656021288744118
-55,rcb vs csk,0.0,0.0,0.0,rcb vs csk,False,0.1,0.12626709406233544
-56,bucks - knicks,0.0,0.0,0.0,bucks - knicks,False,0.1,0.12598057333163432
-57,pianese - pontedera,0.0,0.0,0.0,pianese - pontedera,False,0.1,0.1257003854380681
-58,diego armando maradona,0.0,0.0,0.0,diego armando maradona,False,0.1,0.12542628027641056
-59,the town,0.0,0.0,0.0,the town,False,0.1,0.12515802178136212
-60,f1 giappone,0.0,0.0,0.0,f1 giappone,False,0.1,0.12489538691450888
-61,bodrum - fenerbahçe,0.0,0.0,0.0,bodrum - fenerbahçe,False,0.1,0.12463816474003105
-62,meta al su whatsapp,0.0,0.0,0.0,meta al su whatsapp,False,0.1,0.12438615558006041
-63,fabio balaso,0.0,0.0,0.0,fabio balaso,False,0.1,0.12413917024165175
-64,tradimento,0.0,0.0,0.0,tradimento,False,0.1,0.12389702930825783
-65,joël dicker,0.0,0.0,0.0,joël dicker,False,0.1,0.1236595624894035
-66,bezos,0.0,0.0,0.0,bezos,False,0.1,0.12342660802295771
-67,nicolas sarkozy,0.0,0.0,0.0,nicolas sarkozy,False,0.1,0.12319801212501763
-68,mission impossible,0.0,0.0,0.0,mission impossible,False,0.1,0.1229736284829599
-69,kit sopravvivenza 72 ore,0.0,0.0,0.0,kit sopravvivenza 72 ore,False,0.1,0.12275331778768661
-70,meteo milano oggi,0.0,0.0,0.0,meteo milano oggi,False,0.1,0.1225369473015127
-71,sex and the city,0.0,0.0,0.0,sex and the city,False,0.1,0.12232439045850875
-72,nets - clippers,0.0,0.0,0.0,nets - clippers,False,0.1,0.12211552649443932
-73,carlo ancelotti,0.0,0.0,0.0,carlo ancelotti,False,0.1,0.12191024010372484
-74,pierpaolo uomini e donne,0.0,0.0,0.0,pierpaolo uomini e donne,False,0.1,0.12170842112111058
-75,liam neeson,0.0,0.0,0.0,liam neeson,False,0.1,0.12150996422595373
-76,allegri roma,0.0,0.0,0.0,allegri roma,False,0.1,0.12131476866724165
-77,denzel washington,0.0,0.0,0.0,denzel washington,False,0.1,0.1211227380076341
-78,xai,0.0,0.0,0.0,xai,False,0.1,0.12093377988498329
-79,timberwolves - suns,0.0,0.0,0.0,timberwolves - suns,False,0.1,0.12074780578993015
-80,tommaso cassissa,0.0,0.0,0.0,tommaso cassissa,False,0.1,0.12056473085830295
-81,luciano darderi,0.0,0.0,0.0,luciano darderi,False,0.1,0.12038447367716024
-82,previsioni meteo,0.0,0.0,0.0,previsioni meteo,False,0.1,0.1202069561034244
-83,dani alves,0.0,0.0,0.0,dani alves,False,0.1,0.12003210309414468
-84,babygirl,0.0,0.0,0.0,babygirl,False,0.1,0.11985984254751274
-85,universitario - sport huancayo,0.0,0.0,0.0,universitario - sport huancayo,False,0.1,0.11969010515383002
-86,enzo bearzot,0.0,0.0,0.0,enzo bearzot,False,0.1,0.11952282425569376
-87,e3 saxo classic 2025,0.0,0.0,0.0,e3 saxo classic 2025,False,0.1,0.11935793571673116
-88,matrimonio bezos,0.0,0.0,0.0,matrimonio bezos,False,0.1,0.11919537779826668
-89,patti smith,0.0,0.0,0.0,patti smith,False,0.1,0.11903509104335824
-90,queen,0.0,0.0,0.0,queen,False,0.1,0.11887701816768416
-91,dimitrov,0.0,0.0,0.0,dimitrov,False,0.1,0.11872110395680456
-92,meteo brescia,0.0,0.0,0.0,meteo brescia,False,0.1,0.11856729516935871
-93,eid ul fitr 2025,0.0,0.0,0.0,eid ul fitr 2025,False,0.1,0.11841554044579458
-94,vance,0.0,0.0,0.0,vance,False,0.1,0.11826579022225828
-95,orvieto,0.0,0.0,0.0,orvieto,False,0.1,0.11811799664929994
-96,ciclismo oggi,0.0,0.0,0.0,ciclismo oggi,False,0.1,0.11797211351507844
-97,andrea pisani,0.0,0.0,0.0,andrea pisani,False,0.1,0.11782809617277233
-98,venezia bologna,0.0,0.0,0.0,venezia bologna,False,0.1,0.11768590147192458
-99,penelope cruz,0.0,0.0,0.0,penelope cruz,False,0.1,0.117545487693471
+1,eclissi 29 marzo,56.43424897720631,27.682773109243698,5.340236686390533,eclissi 29 marzo,False,0.1,49.08482750827813
+8,probabili formazioni,64.80172413793103,47.35504201680672,15.180473372781066,probabili formazioni,False,0.1,28.916259195777954
+6,cambio ora 2025,54.03886616014027,33.470588235294116,19.63905325443787,cambio ora 2025,False,0.1,27.806855067794757
+2,scossa terremoto myanmar,15.43147282291058,12.792016806722689,4.943786982248521,scossa terremoto myanmar,False,0.1,17.054063551105326
+21,sondrio,19.051724137931032,5.052521008403362,45.05029585798817,sondrio,False,0.1,16.53255095570428
+33,meteo milano,31.01724137931034,30.682773109243698,26.15680473372781,meteo milano,False,0.1,16.402060265595573
+19,ghibli,27.07758620689655,11.237394957983193,16.13609467455621,ghibli,False,0.1,9.471303521685694
+13,napoli milan,8.517241379310345,3.6764705882352944,18.59467455621302,napoli milan,False,0.1,8.817976359703012
+48,orari motogp,26.129310344827587,18.40966386554622,9.485207100591715,orari motogp,False,0.1,7.424513146243061
+3,spezia - brescia,0.75,2.9495798319327733,3.600591715976331,spezia - brescia,False,0.1,4.66042010539243
+11,juve genoa,3.3275862068965516,2.3004201680672267,7.689349112426036,juve genoa,False,0.1,4.422608503796654
+7,assalto portavalori,12.53448275862069,5.275210084033613,2.9556213017751483,assalto portavalori,False,0.1,3.6600278833878352
+22,valtellina,13.30479251899474,3.004201680672269,6.855029585798817,valtellina,False,0.1,3.4633236480881653
+4,gil vicente - benfica,1.0258620689655173,1.3361344537815125,3.5562130177514795,gil vicente - benfica,False,0.1,3.155716684157755
+14,pilar fogliati,5.491379310344827,7.716386554621849,1.8994082840236688,pilar fogliati,False,0.1,2.9621561536695626
+34,venezia bologna,2.853448275862069,1.7626050420168067,7.381656804733728,venezia bologna,False,0.1,2.8532401529488736
+15,formazioni serie a,10.801724137931036,2.819327731092437,4.298816568047338,formazioni serie a,False,0.1,2.8059900572549967
+35,inps cedolino pensione,0.7068965517241379,1.9453781512605042,7.065088757396449,inps cedolino pensione,False,0.1,2.7934739792305296
+5,andrea pucci,10.336206896551724,2.552521008403361,2.7426035502958577,andrea pucci,False,0.1,2.7587847169595676
+24,le assaggiatrici (film),1.6637931034482758,0.47058823529411764,6.8639053254437865,le assaggiatrici (film),False,0.1,2.589256005574296
+28,taylor fritz,9.53448275862069,2.3592436974789917,4.85207100591716,taylor fritz,False,0.1,2.431831234090098
+10,cittadinanza italiana ius sanguinis,0.4396551724137931,1.277310924369748,3.328402366863905,cittadinanza italiana ius sanguinis,False,0.1,2.0412260870743975
+9,leverkusen - bochum,1.8189655172413794,0.9222689075630253,3.0207100591715976,leverkusen - bochum,False,0.1,1.8068741227722092
+50,polizze catastrofali proroga,0.0,0.22058823529411764,5.701183431952662,polizze catastrofali proroga,False,0.1,1.7604472613529274
+29,superbike,4.25,0.7794117647058822,4.304733727810651,superbike,False,0.1,1.72649872154268
+41,new zealand vs pakistan,12.50862068965517,2.2058823529411766,3.437869822485207,new zealand vs pakistan,False,0.1,1.629730396138311
+25,miami open 2025 tabellone,0.9655172413793103,0.48739495798319327,3.4792899408284024,miami open 2025 tabellone,False,0.1,1.3868070613853254
+16,sciopero treni aprile 2025,0.6206896551724138,0.25210084033613445,3.103550295857988,sciopero treni aprile 2025,False,0.1,1.3373075039113171
+27,inter udinese,1.3706896551724137,1.2941176470588234,2.7751479289940826,inter udinese,False,0.1,1.3098050202231486
+31,perugia - pineto,1.353448275862069,1.092436974789916,2.399408284023669,perugia - pineto,False,0.1,1.0841049121244979
+18,pelicans - warriors,0.0,0.0,2.505917159763314,pelicans - warriors,False,0.1,0.9818933055469727
+30,como empoli,0.6206896551724138,0.6974789915966386,2.07396449704142,como empoli,False,0.1,0.8877176469381317
+43,nuggets - jazz,0.0,0.49369747899159666,2.153846153846154,nuggets - jazz,False,0.1,0.7984241813444535
+32,ciclismo oggi,1.103448275862069,0.5840336134453781,1.6893491124260356,ciclismo oggi,False,0.1,0.7267008478968296
+45,eid ul fitr 2025,1.5344827586206897,0.5840336134453782,1.6804733727810652,eid ul fitr 2025,False,0.1,0.6734964883923119
+12,federico faggin,0.288135593220339,0.8676470588235294,0.8816568047337278,federico faggin,False,0.1,0.6658382617941474
+26,aspromonte,0.9754529514903565,0.226890756302521,1.576923076923077,aspromonte,False,0.1,0.642576837361701
+47,pistons - cavaliers,1.7758620689655173,1.273109243697479,1.0443786982248522,pistons - cavaliers,False,0.1,0.6224668722999258
+17,joao felix,2.5517241379310347,1.5819327731092436,0.48520710059171596,joao felix,False,0.1,0.6152365326325204
+44,muhammad abbas,0.8620689655172413,0.11764705882352941,1.801775147928994,muhammad abbas,False,0.1,0.613395243345439
+38,oroscopo paolo fox capricorno,0.39655172413793105,0.35084033613445376,1.482248520710059,oroscopo paolo fox capricorno,False,0.1,0.5906611949168851
+39,castello sforzesco,1.456896551724138,0.27941176470588236,1.455621301775148,castello sforzesco,False,0.1,0.5651980279064062
+20,the voice senior 2025,0.8620689655172413,0.5714285714285714,0.7189349112426036,the voice senior 2025,False,0.1,0.47586264486491553
+23,wind warning,0.0,0.31512605042016806,0.9289940828402368,wind warning,False,0.1,0.4749200873560055
+40,alba berlino - virtus bologna,0.3620689655172414,0.0,1.1331360946745561,alba berlino - virtus bologna,False,0.1,0.41868037058044555
+42,richard jewell,0.0,0.06722689075630252,0.8254437869822485,richard jewell,False,0.1,0.34862319865566493
+36,probabili formazioni gazzetta,0.0,0.0,0.7958579881656804,probabili formazioni gazzetta,False,0.1,0.33833714351248484
+46,picierno,0.8620689655172413,0.5042016806722689,0.30177514792899407,picierno,False,0.1,0.2843302479140627
+49,anticipazioni upas un posto al sole,0.0,0.14495798319327732,0.34911242603550297,anticipazioni upas un posto al sole,False,0.1,0.2370196590570407
+37,fabio balaso,0.0,0.3004201680672269,0.0650887573964497,fabio balaso,False,0.1,0.19444714426013163
+51,anticipazioni il paradiso delle signore,0.0,0.0,0.0,anticipazioni il paradiso delle signore,False,0.1,0.12748206434910195
+52,belve,0.0,0.0,0.0,belve,False,0.1,0.12716738907202113
+53,brigitte bardot,0.0,0.0,0.0,brigitte bardot,False,0.1,0.12686021143920512
+54,groenlandia,0.0,0.0,0.0,groenlandia,False,0.1,0.12656021288744118
+55,arzignano valchiampo - renate,0.0,0.0,0.0,arzignano valchiampo - renate,False,0.1,0.12626709406233544
+56,ultimi sondaggi politici,0.0,0.0,0.0,ultimi sondaggi politici,False,0.1,0.12598057333163432
+57,programmi tv stasera prima serata,0.0,0.0,0.0,programmi tv stasera prima serata,False,0.1,0.1257003854380681
+58,rcb vs csk,0.0,0.0,0.0,rcb vs csk,False,0.1,0.12542628027641056
+59,djuric,0.0,0.0,0.0,djuric,False,0.1,0.12515802178136212
+60,michael magnesi,0.0,0.0,0.0,michael magnesi,False,0.1,0.12489538691450888
+61,the town,0.0,0.0,0.0,the town,False,0.1,0.12463816474003105
+62,pianese - pontedera,0.0,0.0,0.0,pianese - pontedera,False,0.1,0.12438615558006041
+63,latte crudo,0.0,0.0,0.0,latte crudo,False,0.1,0.12413917024165175
+64,michela moioli,0.0,0.0,0.0,michela moioli,False,0.1,0.12389702930825783
+65,bodrum - fenerbahçe,0.0,0.0,0.0,bodrum - fenerbahçe,False,0.1,0.1236595624894035
+66,bucks - knicks,0.0,0.0,0.0,bucks - knicks,False,0.1,0.12342660802295771
+67,bezos,0.0,0.0,0.0,bezos,False,0.1,0.12319801212501763
+68,nicolas sarkozy,0.0,0.0,0.0,nicolas sarkozy,False,0.1,0.1229736284829599
+69,tradimento,0.0,0.0,0.0,tradimento,False,0.1,0.12275331778768661
+70,vanuatu,0.0,0.0,0.0,vanuatu,False,0.1,0.1225369473015127
+71,beppe severgnini,0.0,0.0,0.0,beppe severgnini,False,0.1,0.12232439045850875
+72,f1 giappone,0.0,0.0,0.0,f1 giappone,False,0.1,0.12211552649443932
+73,meta al su whatsapp,0.0,0.0,0.0,meta al su whatsapp,False,0.1,0.12191024010372484
+74,mission impossible,0.0,0.0,0.0,mission impossible,False,0.1,0.12170842112111058
+75,sex and the city,0.0,0.0,0.0,sex and the city,False,0.1,0.12150996422595373
+76,diego armando maradona,0.0,0.0,0.0,diego armando maradona,False,0.1,0.12131476866724165
+77,kit sopravvivenza 72 ore,0.0,0.0,0.0,kit sopravvivenza 72 ore,False,0.1,0.1211227380076341
+78,pierpaolo uomini e donne,0.0,0.0,0.0,pierpaolo uomini e donne,False,0.1,0.12093377988498329
+79,liam neeson,0.0,0.0,0.0,liam neeson,False,0.1,0.12074780578993015
+80,babygirl,0.0,0.0,0.0,babygirl,False,0.1,0.12056473085830295
+81,meteo milano oggi,0.0,0.0,0.0,meteo milano oggi,False,0.1,0.12038447367716024
+82,allegri roma,0.0,0.0,0.0,allegri roma,False,0.1,0.1202069561034244
+83,nets - clippers,0.0,0.0,0.0,nets - clippers,False,0.1,0.12003210309414468
+84,denzel washington,0.0,0.0,0.0,denzel washington,False,0.1,0.11985984254751274
+85,xai,0.0,0.0,0.0,xai,False,0.1,0.11969010515383002
+86,carlo ancelotti,0.0,0.0,0.0,carlo ancelotti,False,0.1,0.11952282425569376
+87,luciano darderi,0.0,0.0,0.0,luciano darderi,False,0.1,0.11935793571673116
+88,tommaso cassissa,0.0,0.0,0.0,tommaso cassissa,False,0.1,0.11919537779826668
+89,joël dicker,0.0,0.0,0.0,joël dicker,False,0.1,0.11903509104335824
+90,timberwolves - suns,0.0,0.0,0.0,timberwolves - suns,False,0.1,0.11887701816768416
+91,e3 saxo classic 2025,0.0,0.0,0.0,e3 saxo classic 2025,False,0.1,0.11872110395680456
+92,previsioni meteo,0.0,0.0,0.0,previsioni meteo,False,0.1,0.11856729516935871
+93,universitario - sport huancayo,0.0,0.0,0.0,universitario - sport huancayo,False,0.1,0.11841554044579458
+94,matrimonio bezos,0.0,0.0,0.0,matrimonio bezos,False,0.1,0.11826579022225828
+95,queen,0.0,0.0,0.0,queen,False,0.1,0.11811799664929994
+96,patti smith,0.0,0.0,0.0,patti smith,False,0.1,0.11797211351507844
+97,dimitrov,0.0,0.0,0.0,dimitrov,False,0.1,0.11782809617277233
+98,enzo bearzot,0.0,0.0,0.0,enzo bearzot,False,0.1,0.11768590147192458
+99,vance,0.0,0.0,0.0,vance,False,0.1,0.117545487693471
 100,bali,0.0,0.0,0.0,bali,False,0.1,0.1174068144882187
-101,grigor dimitrov,0.0,0.0,0.0,grigor dimitrov,False,0.1,0.11726984281855898
-102,costanza fiction,0.0,0.0,0.0,costanza fiction,False,0.1,0.11713453490321421
-103,maradona,0.0,0.0,0.0,maradona,False,0.1,0.11700085416483254
-104,rocco papaleo,0.0,0.0,0.0,rocco papaleo,False,0.1,0.11686876518025725
-105,tom cruise,0.0,0.0,0.0,tom cruise,False,0.1,0.11673823363331018
-106,moglie brignano,0.0,0.0,0.0,moglie brignano,False,0.1,0.11660922626993882
+101,andrea pisani,0.0,0.0,0.0,andrea pisani,False,0.1,0.11726984281855898
+102,penelope cruz,0.0,0.0,0.0,penelope cruz,False,0.1,0.11713453490321421
+103,meteo brescia,0.0,0.0,0.0,meteo brescia,False,0.1,0.11700085416483254
+104,grigor dimitrov,0.0,0.0,0.0,grigor dimitrov,False,0.1,0.11686876518025725
+105,costanza fiction,0.0,0.0,0.0,costanza fiction,False,0.1,0.11673823363331018
+106,maradona,0.0,0.0,0.0,maradona,False,0.1,0.11660922626993882
 107,bayer leverkusen,0.0,0.0,0.0,bayer leverkusen,False,0.1,0.11648171085558807
-108,re carlo iii,0.0,0.0,0.0,re carlo iii,False,0.1,0.11635565613466622
-109,woke,0.0,0.0,0.0,woke,False,0.1,0.1162310317919839
-110,michelle hunziker,0.0,0.0,0.0,michelle hunziker,False,0.1,0.11610780841605253
-111,ben affleck,0.0,0.0,0.0,ben affleck,False,0.1,0.11598595746413704
-112,millionday,0.0,0.0,0.0,millionday,False,0.1,0.11586545122896322
-113,novara,0.0,0.0,0.0,novara,False,0.1,0.11574626280698765
-114,partite oggi diretta,0.0,0.0,0.0,partite oggi diretta,False,0.1,0.11562836606814388
-115,stefania cappa,0.0,0.0,0.0,stefania cappa,False,0.1,0.11551173562698316
-116,francesca cipriani,0.0,0.0,0.0,francesca cipriani,False,0.1,0.11539634681513465
-117,rush hour,0.0,0.0,0.0,rush hour,False,0.1,0.11528217565501304
-118,rachel zegler,0.0,0.0,0.0,rachel zegler,False,0.1,0.11516919883470787
-119,monica maggioni,0.0,0.0,0.0,monica maggioni,False,0.1,0.11505739368399082
-120,antonio di bella,0.0,0.0,0.0,antonio di bella,False,0.1,0.11494673815138318
-121,balestrate,0.0,0.0,0.0,balestrate,False,0.1,0.11483721078222732
-122,putin,0.0,0.0,0.0,putin,False,0.1,0.11472879069771086
-123,val kilmer,0.0,0.0,0.0,val kilmer,False,0.1,0.11462145757479461
-124,luca argentero,0.0,0.0,0.0,luca argentero,False,0.1,0.11451519162699778
-125,twitter down,0.0,0.0,0.0,twitter down,False,0.1,0.11440997358599793
-126,achille lauro,0.0,0.0,0.0,achille lauro,False,0.1,0.11430578468400439
-127,indonesia,0.0,0.0,0.0,indonesia,False,0.1,0.11420260663686677
-128,raul cremona,0.0,0.0,0.0,raul cremona,False,0.1,0.11410042162788261
-129,ferrovie dello stato,0.0,0.0,0.0,ferrovie dello stato,False,0.1,0.11399921229226986
-130,massimiliano bruno,0.0,0.0,0.0,massimiliano bruno,False,0.1,0.11389896170227155
-131,taken,0.0,0.0,0.0,taken,False,0.1,0.11379965335286309
-132,miyazaki,0.0,0.0,0.0,miyazaki,False,0.1,0.11370127114803248
-133,hong kong,0.0,0.0,0.0,hong kong,False,0.1,0.11360379938760694
-134,downton abbey 3,0.0,0.0,0.0,downton abbey 3,False,0.1,0.11350722275459996
-135,gianmarco tognazzi,0.0,0.0,0.0,gianmarco tognazzi,False,0.1,0.11341152630305443
-136,swa,0.0,0.0,0.0,swa,False,0.1,0.11331669544635907
-137,brigitte bardot,0.0,0.0,0.0,brigitte bardot,False,0.1,0.11322271594601621
-138,brian may,0.0,0.0,0.0,brian may,False,0.1,0.11312957390084036
-139,corsa contro il tempo,0.0,0.0,0.0,corsa contro il tempo,False,0.1,0.11303725573656806
+108,rocco papaleo,0.0,0.0,0.0,rocco papaleo,False,0.1,0.11635565613466622
+109,partite oggi diretta,0.0,0.0,0.0,partite oggi diretta,False,0.1,0.1162310317919839
+110,tom cruise,0.0,0.0,0.0,tom cruise,False,0.1,0.11610780841605253
+111,moglie brignano,0.0,0.0,0.0,moglie brignano,False,0.1,0.11598595746413704
+112,orvieto,0.0,0.0,0.0,orvieto,False,0.1,0.11586545122896322
+113,re carlo iii,0.0,0.0,0.0,re carlo iii,False,0.1,0.11574626280698765
+114,michelle hunziker,0.0,0.0,0.0,michelle hunziker,False,0.1,0.11562836606814388
+115,woke,0.0,0.0,0.0,woke,False,0.1,0.11551173562698316
+116,ben affleck,0.0,0.0,0.0,ben affleck,False,0.1,0.11539634681513465
+117,millionday,0.0,0.0,0.0,millionday,False,0.1,0.11528217565501304
+118,novara,0.0,0.0,0.0,novara,False,0.1,0.11516919883470787
+119,francesca cipriani,0.0,0.0,0.0,francesca cipriani,False,0.1,0.11505739368399082
+120,stefania cappa,0.0,0.0,0.0,stefania cappa,False,0.1,0.11494673815138318
+121,rachel zegler,0.0,0.0,0.0,rachel zegler,False,0.1,0.11483721078222732
+122,rush hour,0.0,0.0,0.0,rush hour,False,0.1,0.11472879069771086
+123,balestrate,0.0,0.0,0.0,balestrate,False,0.1,0.11462145757479461
+124,antonio di bella,0.0,0.0,0.0,antonio di bella,False,0.1,0.11451519162699778
+125,monica maggioni,0.0,0.0,0.0,monica maggioni,False,0.1,0.11440997358599793
+126,luca argentero,0.0,0.0,0.0,luca argentero,False,0.1,0.11430578468400439
+127,val kilmer,0.0,0.0,0.0,val kilmer,False,0.1,0.11420260663686677
+128,indonesia,0.0,0.0,0.0,indonesia,False,0.1,0.11410042162788261
+129,twitter down,0.0,0.0,0.0,twitter down,False,0.1,0.11399921229226986
+130,achille lauro,0.0,0.0,0.0,achille lauro,False,0.1,0.11389896170227155
+131,massimiliano bruno,0.0,0.0,0.0,massimiliano bruno,False,0.1,0.11379965335286309
+132,raul cremona,0.0,0.0,0.0,raul cremona,False,0.1,0.11370127114803248
+133,miyazaki,0.0,0.0,0.0,miyazaki,False,0.1,0.11360379938760694
+134,taken,0.0,0.0,0.0,taken,False,0.1,0.11350722275459996
+135,hong kong,0.0,0.0,0.0,hong kong,False,0.1,0.11341152630305443
+136,gianmarco tognazzi,0.0,0.0,0.0,gianmarco tognazzi,False,0.1,0.11331669544635907
+137,downton abbey 3,0.0,0.0,0.0,downton abbey 3,False,0.1,0.11322271594601621
+138,swa,0.0,0.0,0.0,swa,False,0.1,0.11312957390084036
+139,brian may,0.0,0.0,0.0,brian may,False,0.1,0.11303725573656806
 140,prezzo oro,0.0,0.0,0.0,prezzo oro,False,0.1,0.11294574819586044
-141,john elkann,0.0,0.0,0.0,john elkann,False,0.1,0.11285503832868103
+141,corsa contro il tempo,0.0,0.0,0.0,corsa contro il tempo,False,0.1,0.11285503832868103
 142,strasburgo lione,0.0,0.0,0.0,strasburgo lione,False,0.1,0.11276511348303216
 143,geppi cucciari,0.0,0.0,0.0,geppi cucciari,False,0.1,0.11267596129603387
 144,sezione 8 film,0.0,0.0,0.0,sezione 8 film,False,0.1,0.112587569685331
-145,favignana,0.0,0.0,0.0,favignana,False,0.1,0.11249992684081335
-146,paolo villaggio,0.0,0.0,0.0,paolo villaggio,False,0.1,0.11241302121663614
-147,schumacher,0.0,0.0,0.0,schumacher,False,0.1,0.11232684152352747
-148,cracco,0.0,0.0,0.0,cracco,False,0.1,0.11224137672137072
-149,termoli,0.0,0.0,0.0,termoli,False,0.1,0.11215661601205026
-150,sri lanka,0.0,0.0,0.0,sri lanka,False,0.1,0.11207254883254941
-151,quando esce mare fuori 6,0.0,0.0,0.0,quando esce mare fuori 6,False,0.1,0.11198916484829012
-152,estrazione superenalotto,0.0,0.0,0.0,estrazione superenalotto,False,0.1,0.11190645394670419
+145,paolo villaggio,0.0,0.0,0.0,paolo villaggio,False,0.1,0.11249992684081335
+146,ferrovie dello stato,0.0,0.0,0.0,ferrovie dello stato,False,0.1,0.11241302121663614
+147,cracco,0.0,0.0,0.0,cracco,False,0.1,0.11232684152352747
+148,favignana,0.0,0.0,0.0,favignana,False,0.1,0.11224137672137072
+149,schumacher,0.0,0.0,0.0,schumacher,False,0.1,0.11215661601205026
+150,termoli,0.0,0.0,0.0,termoli,False,0.1,0.11207254883254941
+151,sri lanka,0.0,0.0,0.0,sri lanka,False,0.1,0.11198916484829012
+152,quando esce mare fuori 6,0.0,0.0,0.0,quando esce mare fuori 6,False,0.1,0.11190645394670419
 153,andrea belotti,0.0,0.0,0.0,andrea belotti,False,0.1,0.11182440623102707
 154,range rover,0.0,0.0,0.0,range rover,False,0.1,0.11174301201430423
 155,الزمالك ضد سيراميكا كليوباترا,0.0,0.0,0.0,الزمالك ضد سيراميكا كليوباترا,False,0.1,0.11166226181360236
 156,civita castellana,0.0,0.0,0.0,civita castellana,False,0.1,0.11158214634441663
-157,valerio aprea,0.0,0.0,0.0,valerio aprea,False,0.1,0.11150265651526611
-158,arkadiusz milik,0.0,0.0,0.0,arkadiusz milik,False,0.1,0.1114237834224703
-159,galeazzo bignami,0.0,0.0,0.0,galeazzo bignami,False,0.1,0.11134551834509902
-160,luisa ranieri,0.0,0.0,0.0,luisa ranieri,False,0.1,0.1112678527400893
-161,benedetta orlando,0.0,0.0,0.0,benedetta orlando,False,0.1,0.1111907782375225
-162,lacerenza,0.0,0.0,0.0,lacerenza,False,0.1,0.1111142866360556
-163,atf,0.0,0.0,0.0,atf,False,0.1,0.11103836989850041
-164,asia,0.0,0.0,0.0,asia,False,0.1,0.11096302014754543
-165,paolo ruffini,0.0,0.0,0.0,paolo ruffini,False,0.1,0.11088822966161462
-166,cambogia,0.0,0.0,0.0,cambogia,False,0.1,0.11081399087085796
-167,julio iglesias,0.0,0.0,0.0,julio iglesias,False,0.1,0.11074029635326887
-168,valore bitcoin,0.0,0.0,0.0,valore bitcoin,False,0.1,0.11066713883092397
-169,infernetto,0.0,0.0,0.0,infernetto,False,0.1,0.11059451116633974
-170,brignano,0.0,0.0,0.0,brignano,False,0.1,0.11052240635894325
-171,massimo giletti,0.0,0.0,0.0,massimo giletti,False,0.1,0.11045081754165122
-172,varenne,0.0,0.0,0.0,varenne,False,0.1,0.11037973797755445
-173,starlink,0.0,0.0,0.0,starlink,False,0.1,0.11030916105670341
-174,jodie foster,0.0,0.0,0.0,jodie foster,False,0.1,0.11023908029299152
-175,terence hill,0.0,0.0,0.0,terence hill,False,0.1,0.11016948932113223
-176,treviso,0.0,0.0,0.0,treviso,False,0.1,0.11010038189372698
-177,holland,0.0,0.0,0.0,holland,False,0.1,0.1100317518784207
-178,tangeri,0.0,0.0,0.0,tangeri,False,0.1,0.10996359325514149
-179,bursa,0.0,0.0,0.0,bursa,False,0.1,0.10989590011342192
-180,alexis sánchez,0.0,0.0,0.0,alexis sánchez,False,0.1,0.10982866664979875
-181,pier silvio berlusconi,0.0,0.0,0.0,pier silvio berlusconi,False,0.1,0.10976188716528863
-182,margaret spada,0.0,0.0,0.0,margaret spada,False,0.1,0.109695556062937
-183,referendum 8 9 giugno,0.0,0.0,0.0,referendum 8 9 giugno,False,0.1,0.10962966784543748
-184,sarah jessica parker,0.0,0.0,0.0,sarah jessica parker,False,0.1,0.10956421711282004
-185,ministro urso,0.0,0.0,0.0,ministro urso,False,0.1,0.10949919856020456
-186,nicola porro,0.0,0.0,0.0,nicola porro,False,0.1,0.10943460697561855
-187,lady gaga milano,0.0,0.0,0.0,lady gaga milano,False,0.1,0.10937043723787641
-188,brisighella,0.0,0.0,0.0,brisighella,False,0.1,0.10930668431451801
-189,sanchez,0.0,0.0,0.0,sanchez,False,0.1,0.10924334325980511
-190,sofia vergara,0.0,0.0,0.0,sofia vergara,False,0.1,0.10918040921277318
-191,vladimir putin,0.0,0.0,0.0,vladimir putin,False,0.1,0.10911787739533732
-192,david hasselhoff,0.0,0.0,0.0,david hasselhoff,False,0.1,0.10905574311044995
-193,blake lively,0.0,0.0,0.0,blake lively,False,0.1,0.10899400174030915
-194,brescia,0.0,0.0,0.0,brescia,False,0.1,0.10893264874461546
-195,valeria graci,0.0,0.0,0.0,valeria graci,False,0.1,0.10887167965887609
-196,messi,0.0,0.0,0.0,messi,False,0.1,0.10881109009275462
-197,nonostante film,0.0,0.0,0.0,nonostante film,False,0.1,0.10875087572846497
-198,bariloche,0.0,0.0,0.0,bariloche,False,0.1,0.10869103231920811
-199,veronica gentili,0.0,0.0,0.0,veronica gentili,False,0.1,0.10863155568765029
-200,omicidio pierina,0.0,0.0,0.0,omicidio pierina,False,0.1,0.10857244172444135
-201,neymar,0.0,0.0,0.0,neymar,False,0.1,0.1085136863867719
-202,rete 4 diretta,0.0,0.0,0.0,rete 4 diretta,False,0.1,0.10845528569696827
-203,diretta it,0.0,0.0,0.0,diretta it,False,0.1,0.10839723574112384
-204,la lista dei miei desideri,0.0,0.0,0.0,la lista dei miei desideri,False,0.1,0.10833953266776583
-205,unipol arena,0.0,0.0,0.0,unipol arena,False,0.1,0.10828217268655647
-206,phuket,0.0,0.0,0.0,phuket,False,0.1,0.10822515206702722
-207,narni,0.0,0.0,0.0,narni,False,0.1,0.10816846713734539
-208,lucrezia lando,0.0,0.0,0.0,lucrezia lando,False,0.1,0.10811211428311204
+157,estrazione superenalotto,0.0,0.0,0.0,estrazione superenalotto,False,0.1,0.11150265651526611
+158,milano meteo,0.0,0.0,0.0,milano meteo,False,0.1,0.1114237834224703
+159,valerio aprea,0.0,0.0,0.0,valerio aprea,False,0.1,0.11134551834509902
+160,arkadiusz milik,0.0,0.0,0.0,arkadiusz milik,False,0.1,0.1112678527400893
+161,galeazzo bignami,0.0,0.0,0.0,galeazzo bignami,False,0.1,0.1111907782375225
+162,luisa ranieri,0.0,0.0,0.0,luisa ranieri,False,0.1,0.1111142866360556
+163,benedetta orlando,0.0,0.0,0.0,benedetta orlando,False,0.1,0.11103836989850041
+164,lacerenza,0.0,0.0,0.0,lacerenza,False,0.1,0.11096302014754543
+165,asia,0.0,0.0,0.0,asia,False,0.1,0.11088822966161462
+166,paolo ruffini,0.0,0.0,0.0,paolo ruffini,False,0.1,0.11081399087085796
+167,atf,0.0,0.0,0.0,atf,False,0.1,0.11074029635326887
+168,jd vance,0.0,0.0,0.0,jd vance,False,0.1,0.11066713883092397
+169,cambogia,0.0,0.0,0.0,cambogia,False,0.1,0.11059451116633974
+170,julio iglesias,0.0,0.0,0.0,julio iglesias,False,0.1,0.11052240635894325
+171,valore bitcoin,0.0,0.0,0.0,valore bitcoin,False,0.1,0.11045081754165122
+172,infernetto,0.0,0.0,0.0,infernetto,False,0.1,0.11037973797755445
+173,brignano,0.0,0.0,0.0,brignano,False,0.1,0.11030916105670341
+174,massimo giletti,0.0,0.0,0.0,massimo giletti,False,0.1,0.11023908029299152
+175,varenne,0.0,0.0,0.0,varenne,False,0.1,0.11016948932113223
+176,starlink,0.0,0.0,0.0,starlink,False,0.1,0.11010038189372698
+177,jodie foster,0.0,0.0,0.0,jodie foster,False,0.1,0.1100317518784207
+178,treviso,0.0,0.0,0.0,treviso,False,0.1,0.10996359325514149
+179,terence hill,0.0,0.0,0.0,terence hill,False,0.1,0.10989590011342192
+180,tangeri,0.0,0.0,0.0,tangeri,False,0.1,0.10982866664979875
+181,holland,0.0,0.0,0.0,holland,False,0.1,0.10976188716528863
+182,bursa,0.0,0.0,0.0,bursa,False,0.1,0.109695556062937
+183,pier silvio berlusconi,0.0,0.0,0.0,pier silvio berlusconi,False,0.1,0.10962966784543748
+184,alexis sánchez,0.0,0.0,0.0,alexis sánchez,False,0.1,0.10956421711282004
+185,margaret spada,0.0,0.0,0.0,margaret spada,False,0.1,0.10949919856020456
+186,referendum 8 9 giugno,0.0,0.0,0.0,referendum 8 9 giugno,False,0.1,0.10943460697561855
+187,sarah jessica parker,0.0,0.0,0.0,sarah jessica parker,False,0.1,0.10937043723787641
+188,ministro urso,0.0,0.0,0.0,ministro urso,False,0.1,0.10930668431451801
+189,nicola porro,0.0,0.0,0.0,nicola porro,False,0.1,0.10924334325980511
+190,brisighella,0.0,0.0,0.0,brisighella,False,0.1,0.10918040921277318
+191,lady gaga milano,0.0,0.0,0.0,lady gaga milano,False,0.1,0.10911787739533732
+192,sanchez,0.0,0.0,0.0,sanchez,False,0.1,0.10905574311044995
+193,marracash,0.0,0.0,0.0,marracash,False,0.1,0.10899400174030915
+194,sofia vergara,0.0,0.0,0.0,sofia vergara,False,0.1,0.10893264874461546
+195,vladimir putin,0.0,0.0,0.0,vladimir putin,False,0.1,0.10887167965887609
+196,david hasselhoff,0.0,0.0,0.0,david hasselhoff,False,0.1,0.10881109009275462
+197,blake lively,0.0,0.0,0.0,blake lively,False,0.1,0.10875087572846497
+198,brescia,0.0,0.0,0.0,brescia,False,0.1,0.10869103231920811
+199,valeria graci,0.0,0.0,0.0,valeria graci,False,0.1,0.10863155568765029
+200,messi,0.0,0.0,0.0,messi,False,0.1,0.10857244172444135
+201,nonostante film,0.0,0.0,0.0,nonostante film,False,0.1,0.1085136863867719
+202,veronica gentili,0.0,0.0,0.0,veronica gentili,False,0.1,0.10845528569696827
+203,bariloche,0.0,0.0,0.0,bariloche,False,0.1,0.10839723574112384
+204,omicidio pierina,0.0,0.0,0.0,omicidio pierina,False,0.1,0.10833953266776583
+205,neymar,0.0,0.0,0.0,neymar,False,0.1,0.10828217268655647
+206,rete 4 diretta,0.0,0.0,0.0,rete 4 diretta,False,0.1,0.10822515206702722
+207,diretta it,0.0,0.0,0.0,diretta it,False,0.1,0.10816846713734539
+208,la lista dei miei desideri,0.0,0.0,0.0,la lista dei miei desideri,False,0.1,0.10811211428311204
+209,unipol arena,0.0,0.0,0.0,unipol arena,False,0.1,0.10805608994619015
+210,phuket,0.0,0.0,0.0,phuket,False,0.1,0.10800039062356212
+211,narni,0.0,0.0,0.0,narni,False,0.1,0.10794501286621618
+212,lucrezia lando,0.0,0.0,0.0,lucrezia lando,False,0.1,0.10788995327805997
