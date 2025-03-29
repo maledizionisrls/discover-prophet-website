@@ -1,169 +1,241 @@
-# -*- coding: utf-8 -*-
-import anthropic
 import json
+import time
 import os
-import warnings
-# Import necessari per type hinting compatibile con Python < 3.10
-from typing import Union, List, Dict, Optional
+import logging
+import anthropic
+from typing import List, Dict, Tuple, Any, Optional
 
-# !!! ATTENZIONE: API Key inserita direttamente nel codice come richiesto. !!!
-# !!! Per maggiore sicurezza, considera l'uso di variabili d'ambiente.  !!!
-API_KEY = "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"
-MODEL_NAME = "claude-3-5-sonnet-20240620"
-MAX_TOKENS_RESPONSE = 2048
+# Configurazione logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("claude_integration")
 
-# Placeholder per indicare incertezza o fallimento nell'identificazione
-UNCERTAIN_ENTITY_PLACEHOLDER = "[UNCERTAIN]"
-
-# Inizializzazione client Anthropic
-# VERIFICA: Assicurati che non ci siano argomenti extra come 'proxies=' qui.
-# Se servono proxy, vanno configurati tramite variabili d'ambiente (HTTP_PROXY/HTTPS_PROXY)
-# o passando un client httpx configurato all'argomento 'http_client'.
-try:
-    client = anthropic.Anthropic(api_key=API_KEY)
-    # Esempio (se servissero proxy e avessi installato httpx):
-    # import httpx
-    # proxies = {"http://": "http://user:pass@host:port", "https://": "http://user:pass@host:port"}
-    # http_client = httpx.Client(proxies=proxies)
-    # client = anthropic.Anthropic(api_key=API_KEY, http_client=http_client)
-except Exception as e:
-    # Gestisce sia l'errore specifico 'proxies' (se presente per errore) sia altri errori
-    warnings.warn(f"Errore inizializzazione client Anthropic: {e}. Le chiamate API falliranno.", RuntimeWarning)
-    client = None
-
-def _build_prompt(queries: List[str]) -> tuple[str, str]: # Usato List invece di list
-    """Costruisce il system prompt e lo user prompt per Claude."""
-
-    system_prompt = """Sei un analista esperto nell'interpretare query di ricerca provenienti da Google Trends (Hot Searches). Il tuo obiettivo è identificare l'entità principale o il concetto centrale rappresentato da ogni query, considerando che lo scopo finale è trovare argomenti adatti a Google Discover (che predilige entità riconoscibili e con una certa persistenza/rilevanza).
-
-Per ogni query fornita:
-1. Identifica la singola entità più rappresentativa (es. Persona, Organizzazione, Luogo, Evento, Opera Creativa, Concetto specifico).
-2. Dai priorità a entità chiare e specifiche rispetto a termini generici.
-3. Se la query è concettuale (es. "cambio ora legale", "stasera in tv programmi prima serata"), identifica il concetto sottostante (es. "Ora legale", "Palinsesto TV").
-4. Se la query è ambigua o puramente funzionale con un soggetto chiaro (es. "meteo milano"), identifica il soggetto principale ("Milano").
-5. Se contiene più entità (es. "squadraA vs squadraB"), scegli l'entità più centrale o l'evento stesso, oppure l'entità più probabile ad avere interesse generale (evita di scegliere solo una delle due squadre se l'interesse è per la partita). Scegli UNA sola entità rappresentativa.
-6. Se sei molto incerto sull'entità principale, o se la query è troppo generica/incomprensibile o non rappresenta un'entità/concetto chiaro, restituisci ESATTAMENTE la stringa "[UNCERTAIN]". Non inventare entità se non sei ragionevolmente sicuro.
-
-Formato Output Richiesto: Rispondi ESCLUSIVAMENTE con un oggetto JSON valido. L'oggetto JSON deve essere un dizionario dove le chiavi sono le query di ricerca originali fornite e i valori sono le stringhe delle entità principali identificate o la stringa "[UNCERTAIN]".
-
-Esempio:
-Input query: ["scossa terremoto myanmar", "probabili formazioni serie a", "ghibli ambiguo", "napoli milan"]
-Output JSON Atteso:
-{
-  "scossa terremoto myanmar": "Myanmar",
-  "probabili formazioni serie a": "Serie A",
-  "ghibli ambiguo": "[UNCERTAIN]",
-  "napoli milan": "SSC Napoli vs AC Milan"
-}
-"""
-
-    user_prompt = f"""Analizza le seguenti query di ricerca e restituisci l'oggetto JSON come specificato nel system prompt:
-
-{json.dumps(queries, indent=2, ensure_ascii=False)}"""
-
-    return system_prompt, user_prompt
-
-
-# CORREZIONE TYPE HINT per compatibilità Python < 3.10
-def get_main_entities(queries: List[str]) -> Dict[str, Optional[str]]:
-    """
-    Usa Claude 3.5 Sonnet per identificare l'entità principale per una lista di query.
-
-    Args:
-        queries: Lista di stringhe delle query di ricerca.
-
-    Returns:
-        Un dizionario che mappa ogni query originale alla sua entità principale identificata (stringa)
-        o a None se l'AI ha restituito "[UNCERTAIN]" o si è verificato un errore.
-    """
-    if not client:
-        warnings.warn("Client Anthropic non inizializzato. Impossibile chiamare l'API.", RuntimeWarning)
-        return {query: None for query in queries}
-
-    if not queries:
-        return {}
-
-    system_prompt, user_prompt = _build_prompt(queries)
-    result_map: Dict[str, Optional[str]] = {query: None for query in queries} # Inizializza con fallback None
-
-    try:
-        print(f"    Invio {len(queries)} query a Claude ({MODEL_NAME})...")
-        message = client.messages.create(
-            model=MODEL_NAME,
-            max_tokens=MAX_TOKENS_RESPONSE,
-            system=system_prompt,
-            messages=[
-                {"role": "user", "content": user_prompt}
-            ]
-        )
-        print("    Risposta ricevuta da Claude.")
-
-        json_response_str = None
-        if message.content and isinstance(message.content, list) and len(message.content) > 0:
-             raw_text = message.content[0].text
-             json_start = raw_text.find('{')
-             json_end = raw_text.rfind('}') + 1
-             if json_start != -1 and json_end != -1:
-                 json_response_str = raw_text[json_start:json_end]
-             else:
-                 warnings.warn("Blocco JSON non trovato nella risposta di Claude.", RuntimeWarning)
-        else:
-             warnings.warn("Risposta di Claude vuota o in formato non atteso.", RuntimeWarning)
-
-
-        if json_response_str:
+class ClaudeEntityExtractor:
+    def __init__(self, api_key: str, model: str = "claude-3-7-sonnet-20240229"):
+        """
+        Inizializza l'estrattore di entità basato su Claude.
+        
+        Args:
+            api_key: Anthropic API key
+            model: Modello Claude da utilizzare
+        """
+        self.api_key = api_key
+        self.model = model
+        self.client = anthropic.Anthropic(api_key=api_key)
+        logger.info(f"Inizializzato estrattore entità con modello {model}")
+    
+    def extract_entity(self, query: str) -> Tuple[str, float]:
+        """
+        Estrae l'entità principale da una query.
+        
+        Args:
+            query: La query da cui estrarre l'entità
+            
+        Returns:
+            Tuple[str, float]: L'entità estratta e il punteggio di confidenza
+        """
+        prompt = f"""
+        Sei un assistente specializzato nell'identificazione delle entità principali nelle query di ricerca.
+        Devi estrarre l'ENTITÀ PRINCIPALE da questa query di ricerca. L'entità principale è il soggetto o il concetto centrale della ricerca.
+        
+        Query di ricerca: "{query}"
+        
+        Devi fornire:
+        1. L'entità principale (sostantivo, nome proprio, concetto, ecc.)
+        2. Un punteggio di confidenza da 0.0 a 1.0 che indica quanto sei sicuro che questa sia l'entità corretta.
+        
+        Esempi:
+        - "stasera in tv programmi prima serata" → Entità: "programmi tv", Confidenza: 0.9
+        - "terremoto myanmar oggi" → Entità: "terremoto myanmar", Confidenza: 0.95
+        - "cambio ora 2025" → Entità: "cambio ora", Confidenza: 0.9
+        - "napoli milan risultato" → Entità: "napoli milan", Confidenza: 0.95
+        - "probabili formazioni serie a" → Entità: "probabili formazioni", Confidenza: 0.85
+        - "il paradiso delle signore in tv oggi" → Entità: "Il Paradiso delle signore", Confidenza: 0.95
+        
+        Fornisci solo l'entità principale e il punteggio di confidenza in formato JSON, senza altri commenti o spiegazioni.
+        Esempio di output: {{"entity": "terremoto myanmar", "confidence": 0.95}}
+        """
+        
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=150,
+                temperature=0.0, # Completamente deterministico
+                system="Sei un assistente specializzato nell'identificazione delle entità principali nelle query di ricerca.",
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            
+            # Estrai il contenuto della risposta
+            response_content = response.content[0].text
+            
+            # Trova l'oggetto JSON nella risposta
+            import re
+            json_match = re.search(r'\{.*\}', response_content, re.DOTALL)
+            
+            if json_match:
+                json_text = json_match.group(0)
+                result = json.loads(json_text)
+                entity = result.get("entity", "")
+                confidence = result.get("confidence", 0.0)
+                logger.info(f"Estratta entità '{entity}' (conf: {confidence}) da query '{query}'")
+                return entity, confidence
+            else:
+                # Fallback: usa la query originale
+                logger.warning(f"Impossibile estrarre JSON dalla risposta. Query: {query}, Risposta: {response_content}")
+                return query, 0.0
+                
+        except Exception as e:
+            logger.error(f"Errore durante l'estrazione dell'entità da '{query}': {e}")
+            return query, 0.0  # Fallback: usa la query originale
+    
+    def extract_entities_batch(self, queries: List[str], 
+                               batch_size: int = 10, 
+                               delay: float = 1.0,
+                               min_confidence: float = 0.6) -> Dict[str, Dict[str, Any]]:
+        """
+        Estrae entità da un batch di query con gestione degli errori e fallback.
+        
+        Args:
+            queries: Lista di query da cui estrarre le entità
+            batch_size: Numero di query da processare prima di una pausa
+            delay: Ritardo in secondi tra batch
+            min_confidence: Confidenza minima per accettare un'entità
+            
+        Returns:
+            Dict[str, Dict]: Mapping delle query originali alle informazioni estratte
+        """
+        results = {}
+        batch_count = 0
+        
+        for query in queries:
             try:
-                ai_results = json.loads(json_response_str)
-
-                if isinstance(ai_results, dict):
-                    for query in queries:
-                        entity = ai_results.get(query)
-                        if entity == UNCERTAIN_ENTITY_PLACEHOLDER:
-                            result_map[query] = None
-                            # print(f"      AI incerta per: '{query}'") # Rimosso per ridurre verbosità
-                        elif isinstance(entity, str) and entity.strip():
-                             result_map[query] = entity.strip()
-                        else:
-                            result_map[query] = None
-                            warnings.warn(f"Risultato mancante o non valido da AI per: '{query}'", RuntimeWarning)
-                else:
-                    warnings.warn(f"L'output JSON di Claude non era un dizionario: {type(ai_results)}", RuntimeWarning)
-
-            except json.JSONDecodeError as e:
-                warnings.warn(f"Errore parsing JSON dalla risposta di Claude: {e}\nRisposta grezza: {json_response_str[:500]}...", RuntimeWarning)
+                # Evita query vuote o None
+                if not query or not isinstance(query, str):
+                    results[query] = {
+                        "entity": query,
+                        "confidence": 0.0,
+                        "status": "invalid_query",
+                        "fallback_used": True
+                    }
+                    continue
+                
+                # Estrai l'entità
+                entity, confidence = self.extract_entity(query)
+                
+                # Implementa logica di fallback basata sulla confidenza
+                fallback_used = False
+                if confidence < min_confidence:
+                    # Se confidenza bassa, usa l'intera query come entità
+                    entity = query
+                    fallback_used = True
+                    logger.warning(f"Confidenza bassa ({confidence}) per query '{query}', usando fallback")
+                
+                results[query] = {
+                    "entity": entity,
+                    "confidence": confidence,
+                    "status": "success" if not fallback_used else "low_confidence",
+                    "fallback_used": fallback_used
+                }
+                
+                # Incrementa il contatore di batch e pausa se necessario
+                batch_count += 1
+                if batch_count % batch_size == 0:
+                    logger.info(f"Elaborato batch di {batch_size} query, pausa di {delay} secondi")
+                    time.sleep(delay)
+                    
             except Exception as e:
-                 warnings.warn(f"Errore imprevisto durante l'elaborazione della risposta AI: {e}", RuntimeWarning)
+                logger.error(f"Errore non gestito durante l'elaborazione della query '{query}': {e}")
+                results[query] = {
+                    "entity": query,  # Fallback all'intera query
+                    "confidence": 0.0,
+                    "status": "error",
+                    "error": str(e),
+                    "fallback_used": True
+                }
+        
+        # Statistiche finali
+        success_count = sum(1 for r in results.values() if r["status"] == "success")
+        fallback_count = sum(1 for r in results.values() if r["fallback_used"])
+        logger.info(f"Estrazione entità completata: {len(results)} totali, "
+                   f"{success_count} successi, {fallback_count} fallback utilizzati")
+        
+        return results
 
-    except anthropic.APIConnectionError as e:
-        warnings.warn(f"Errore connessione API Anthropic: {e}", RuntimeWarning)
-    except anthropic.RateLimitError as e:
-        warnings.warn(f"Errore Rate Limit API Anthropic: {e}", RuntimeWarning)
-    except anthropic.APIStatusError as e:
-        warnings.warn(f"Errore stato API Anthropic (Status {e.status_code}): {e.message}", RuntimeWarning)
+def extract_entities_from_trends(trend_queries: List[str], 
+                                api_key: str, 
+                                model: str = "claude-3-7-sonnet-20240229",
+                                min_confidence: float = 0.6,
+                                batch_size: int = 10,
+                                delay: float = 1.0) -> Dict[str, Dict[str, Any]]:
+    """
+    Funzione wrapper per estrarre entità da query di trend.
+    
+    Args:
+        trend_queries: Lista di query da Google Trends TV
+        api_key: Anthropic API key
+        model: Modello Claude da utilizzare
+        min_confidence: Confidenza minima per accettare un'entità
+        batch_size: Dimensione del batch per le richieste
+        delay: Ritardo tra batch in secondi
+        
+    Returns:
+        Dict[str, Dict]: Mapping delle query originali alle informazioni estratte
+    """
+    try:
+        extractor = ClaudeEntityExtractor(api_key=api_key, model=model)
+        return extractor.extract_entities_batch(
+            queries=trend_queries,
+            min_confidence=min_confidence,
+            batch_size=batch_size,
+            delay=delay
+        )
     except Exception as e:
-        warnings.warn(f"Errore generico chiamata API Anthropic: {type(e).__name__} - {e}", RuntimeWarning)
+        logger.error(f"Errore durante l'estrazione delle entità: {e}")
+        # Fallback di emergenza: ritorna le query originali come entità
+        return {
+            query: {
+                "entity": query,
+                "confidence": 0.0,
+                "status": "system_error",
+                "error": str(e),
+                "fallback_used": True
+            } for query in trend_queries
+        }
 
-    final_map = {query: result_map.get(query) for query in queries}
-    num_identified = sum(1 for entity in final_map.values() if entity is not None)
-    print(f"    Identificate {num_identified}/{len(queries)} entità principali dall'AI.")
-    return final_map
-
-# Esempio di utilizzo
-if __name__ == '__main__':
-    sample_queries = [
-        "meteo milano",
-        "scossa terremoto myanmar",
-        "probabili formazioni serie a",
+# Test standalone
+if __name__ == "__main__":
+    # API key da parametro o ambiente
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    
+    if not api_key:
+        api_key = input("Inserisci la tua API key di Anthropic: ")
+        if not api_key:
+            print("Errore: API key non fornita")
+            exit(1)
+    
+    # Alcune query di test
+    test_queries = [
         "stasera in tv programmi prima serata",
-        "napoli milan",
-        "query incomprensibile xyz123",
-        "pilar fogliati"
+        "terremoto myanmar oggi",
+        "cambio ora 2025",
+        "napoli milan risultato",
+        "probabili formazioni serie a",
+        "il paradiso delle signore in tv oggi"
     ]
-    print("Esempio chiamata API Claude...")
-    # Verifica che il client sia inizializzato prima di chiamare
-    if client:
-        entities = get_main_entities(sample_queries)
-        print("\nRisultato mappatura:")
-        print(json.dumps(entities, indent=2, ensure_ascii=False))
-    else:
-        print("Client Anthropic non utilizzabile. Impossibile eseguire l'esempio.")
+    
+    results = extract_entities_from_trends(test_queries, api_key)
+    
+    # Stampa risultati formattati
+    print("\nRisultati:")
+    print("-" * 80)
+    for query, data in results.items():
+        print(f"Query: {query}")
+        print(f"Entità: {data['entity']} (Confidenza: {data['confidence']:.2f})")
+        print(f"Status: {data['status']}")
+        if data["fallback_used"]:
+            print("⚠️ Fallback utilizzato")
+        print("-" * 80)
