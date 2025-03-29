@@ -1,41 +1,115 @@
 :root {
-    --primary-color: #2c3e50; /* Blu scuro */
-    --secondary-color: #3498db; /* Blu chiaro */
-    --accent-color: #e74c3c; /* Rosso */
-    --hot-color: #ff6600; /* Arancione per HOT */
-    --background-color: #f8f9fa; /* Grigio molto chiaro */
-    --card-color: #ffffff; /* Bianco */
-    --text-color: #212529; /* Nero leggermente più morbido */
-    --text-light: #6c757d; /* Grigio */
-    --border-color: #dee2e6; /* Grigio chiaro per bordi */
-    --trending-up: #28a745; /* Verde successo */
-    --trending-down: #dc3545; /* Rosso pericolo */
-    --trending-neutral: #ffc107; /* Giallo warning */
-    --link-color: #007bff; /* Blu link standard */
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --accent-color: #e74c3c;
+    --background-color: #f9f9f9;
+    --card-color: #ffffff;
+    --text-color: #333333;
+    --text-light: #777777;
+    --border-color: #eeeeee;
+    --trending-up: #27ae60;
+    --trending-down: #e74c3c;
+    --trending-neutral: #f39c12;
+    --hot-color: #ff6600; /* Colore per sfondo riga hot */
     --header-text: #ffffff;
     --badge-text: #ffffff;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
-    font-size: 16px;
 }
 
 header {
     background-color: var(--primary-color);
-    color: var(--header-text);
+    color: white; /* Usa var(--header-text) se definito sopra */
     padding: 1rem 2rem;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .header-content {
-    max-width: 1600px;
+    max-width: 1400px;
     margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+h1 i {
+    margin-right: 0.5rem;
+    color: var(--secondary-color);
+}
+
+.update-info {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-top: 0.3rem;
+}
+
+.header-badge {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.dashboard {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background-color: var(--card-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.stat-card .icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--secondary-color);
+}
+
+.stat-card .number {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-card .label {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.controls {
+    margin-bottom: 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -43,142 +117,191 @@ header {
     gap: 1rem;
 }
 
-h1 { margin: 0; font-size: 1.7rem; font-weight: 600; }
-h1 i { margin-right: 0.6rem; color: var(--secondary-color); }
-.update-info { font-size: 0.85rem; opacity: 0.9; margin-top: 0.2rem; margin-bottom: 0; line-height: 1.4; }
-.openai-info { font-size: 0.8rem; }
-.openai-info #openaiStatus { font-weight: bold; }
-.header-badge { background-color: rgba(255, 255, 255, 0.15); padding: 0.4rem 0.8rem; border-radius: 15px; font-size: 0.85rem; white-space: nowrap; }
-.header-badge i { margin-right: 0.3rem; }
+.search-box {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    flex-grow: 1;
+    max-width: 300px;
+    font-size: 0.95rem;
+}
 
-.dashboard { max-width: 1600px; margin: 1.5rem auto; padding: 0 1.5rem; }
+.sorting {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
 
-.stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-.stat-card { background-color: var(--card-color); border-radius: 6px; padding: 1.2rem; border: 1px solid var(--border-color); text-align: center; transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-.stat-card:hover { transform: translateY(-2px); box-shadow: 0 3px 6px rgba(0,0,0,0.06); }
-.stat-card .icon { font-size: 1.8rem; margin-bottom: 0.4rem; color: var(--secondary-color); }
-.stat-card .number { font-size: 1.7rem; font-weight: 600; color: var(--primary-color); margin-bottom: 0.4rem; line-height: 1.2; }
-.stat-card .label { color: var(--text-light); font-size: 0.85rem; }
-
-.controls { margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 0.8rem; background-color: var(--card-color); border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-.search-box { padding: 0.5rem 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; flex-grow: 1; max-width: 350px; font-size: 0.9rem; }
-.search-box:focus { outline: none; border-color: var(--secondary-color); box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); }
-.sorting { display: flex; gap: 0.5rem; align-items: center; }
-.sorting label { font-size: 0.9rem; color: var(--text-light); white-space: nowrap; }
-select { padding: 0.4rem 0.6rem; border: 1px solid var(--border-color); border-radius: 4px; background-color: white; font-size: 0.9rem; }
+select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: white;
+    font-size: 0.95rem;
+}
 
 /* Tabella */
-.table-container { width: 100%; overflow-x: auto; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.04); background-color: var(--card-color); }
-.trends-table { width: 100%; border-collapse: collapse; /* Rimosso table-layout: fixed */ }
-.trends-table th, .trends-table td { padding: 0.75rem 0.8rem; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: middle; white-space: nowrap; }
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Mantiene scroll orizzontale se la tabella è ancora larga */
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color); /* Aggiunge bordo a container */
+    background-color: var(--card-color); /* Sposta sfondo qui */
+}
 
-/* Cella Trend: Permette a capo, allinea sopra */
+.trends-table {
+    width: 100%;
+    border-collapse: collapse;
+    /* Rimosso background-color da qui */
+    /* Rimosso table-layout fixed */
+}
+
+.trends-table th,
+.trends-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top; /* Allinea tutto in alto nella cella */
+    white-space: nowrap; /* Default nowrap per la maggior parte */
+}
+
+/* Cella Trend: permette wrap, padding extra */
 .trends-table .trend-cell {
-    white-space: normal; /* Permetti a capo */
-    vertical-align: top; /* Allinea in alto */
-    min-width: 200px; /* Larghezza minima ragionevole */
-    /* Larghezza gestita automaticamente dal browser ora */
+    white-space: normal; /* Permette wrap */
+    min-width: 200px; /* Minimo per nome trend */
 }
-.main-entity {
+
+.main-entity { /* Nome trend principale */
     font-weight: 500;
-    display: block; /* Su una riga separata */
-    margin-bottom: 4px; /* Spazio sotto */
+    display: block; /* Occupa sua riga */
+    margin-bottom: 5px; /* Spazio sotto */
 }
 
-/* Stili Header Tabella */
-.trends-table th { background-color: #f8f9fa; color: var(--primary-color); font-weight: 600; position: sticky; top: 0; z-index: 10; border-bottom-width: 2px; }
-/* Rimosse larghezze fisse TH */
-
-
-/* Altri stili tabella (badge, chart, score, indicatori) */
-.trends-table tr:last-child td { border-bottom: none; }
-.trends-table tbody tr:hover { background-color: #e9f5ff; }
-.rank-badge { display: inline-block; min-width: 1.8rem; padding: 0.15rem 0.4rem; text-align: center; border-radius: 4px; font-weight: bold; font-size: 0.85rem; background-color: var(--secondary-color); color: var(--badge-text); line-height: 1.4; }
-.top-10 { background-color: var(--accent-color); }
-.top-25 { background-color: var(--trending-neutral); }
-.trend-chart-container { width: 100px; height: 35px; min-width: 100px; } /* Assicura dimensioni minime */
-.chart-fallback { font-size: 10px; color: #aaa; text-align: center; display: block; line-height: 35px; }
-.score { font-weight: 600; white-space: nowrap; }
-.trend-indicator { margin-left: 0.4rem; font-size: 0.8rem; display: inline-block; width: 1.2em; text-align: center; }
-.trend-indicator i { opacity: 0.8; }
-.trend-stable { color: var(--text-light); }
-.trend-small-up, .trend-medium-up, .trend-strong-up { color: var(--trending-up); }
-.trend-small-down, .trend-medium-down, .trend-strong-down { color: var(--trending-down); }
-.trend-strong-up i, .trend-strong-down i { font-weight: bold; }
-
-/* Trend HOT (solo sfondo riga) */
-.hot-trend { background-color: #fff8e1 !important; }
-.hot-trend td:first-child { border-left: 3px solid var(--hot-color); }
-/* RIMOSSO .hot-indicator */
-
-/* --- Stili SEMPLIFICATI per Entità AI (visibili sotto, con wrap) --- */
+/* Stile per Entità AI (visibili sotto, con wrap) */
 .extracted-entities {
     font-size: 0.8rem;
     color: #555;
-    margin-top: 5px;
     line-height: 1.3;
     display: block;
-    white-space: normal; /* Permette al testo di andare a capo! */
-    word-break: break-word; /* Forza a capo parole lunghe */
-    /* Rimosse tutte le regole di animazione, scorrimento, collapsible */
+    white-space: normal; /* Permette wrap */
+    word-break: break-word; /* Forza wrap parole lunghe */
+    margin-top: 5px; /* Spazio sopra */
 }
-/* --- Fine Stili Entità AI --- */
 
 
-/* Messaggi e Footer */
-.no-results-message { text-align: center; padding: 20px; color: var(--text-light); font-style: italic; background-color: var(--card-color); border: 1px solid var(--border-color); border-radius: 6px; margin-top: 1rem; }
-.loading-row td, .error-row td, .no-data-row td { text-align: center !important; white-space: normal !important; padding: 30px 15px !important; }
-.error-row td { color: var(--accent-color); font-weight: bold; }
-footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--text-light); font-size: 0.85rem; border-top: 1px solid var(--border-color); }
-.version { font-size: 0.75rem; margin-top: 0.3rem; }
+.trends-table th {
+    background-color: #f8f9fa; /* Leggermente diverso da primary per distinguerlo */
+    color: var(--primary-color);
+    font-weight: 600; /* Un po' più bold */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom-width: 2px; /* Bordo più spesso */
+}
 
-/* Responsive */
+.trends-table tr:last-child td {
+    border-bottom: none;
+}
+
+.trends-table tbody tr:hover { /* Usa tbody per specificità */
+    background-color: rgba(52, 152, 219, 0.05); /* Hover più leggero */
+}
+
+.rank-badge {
+    display: inline-block;
+    min-width: 1.8rem; /* Ridotto */
+    padding: 0.15rem 0.4rem;
+    text-align: center;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    background-color: var(--secondary-color);
+    color: var(--badge-text);
+    line-height: 1.4;
+    vertical-align: middle; /* Allineamento verticale */
+}
+
+.top-10 { background-color: var(--accent-color); }
+.top-25 { background-color: var(--trending-neutral); }
+
+.trend-chart-container { width: 120px; height: 40px; min-width: 120px;} /* Dimensioni originali */
+.chart-fallback { font-size: 10px; color: #aaa; line-height: 40px; text-align: center; display: block;}
+
+.score { font-weight: bold; white-space: nowrap; }
+
+.trend-indicator { margin-left: 0.5rem; font-size: 0.9rem; display: inline-block; width: 1.1em; text-align: center;}
+.trend-indicator i { opacity: 0.8; }
+.trend-stable { color: #7f8c8d; }
+.trend-small-up { color: #2ecc71; }
+.trend-medium-up { color: #27ae60; font-weight: bold; }
+.trend-strong-up { color: #16a085; font-weight: bold; }
+.trend-small-down { color: #e74c3c; }
+.trend-medium-down { color: #c0392b; font-weight: bold; }
+.trend-strong-down { color: #922b21; font-weight: bold; }
+
+footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--text-light); font-size: 0.9rem; border-top: 1px solid var(--border-color); }
+.version { font-size: 0.8rem; margin-top: 0.5rem; }
+
+/* Stile per trend HOT (solo sfondo e bordo) */
+.hot-trend { background-color: #fff8e1 !important; } /* Usa !important se serve a sovrascrivere :hover */
+.hot-trend td:first-child { border-left: 3px solid var(--hot-color); }
+/* RIMOSSO .hot-indicator e .hot-trend td:nth-child(3)::before */
+
+
+/* Responsive design (basato sul tuo originale, MA con grafici VISIBILI e righe ALTE) */
+@media (max-width: 1200px) {
+    .trends-table th, .trends-table td { padding: 0.8rem 0.6rem; }
+    .trend-chart-container { width: 100px; height: 35px; min-width: 100px;}
+}
+
 @media (max-width: 992px) {
-    /* Nascondi 4h, 7d */
+    .header-content { flex-direction: column; align-items: flex-start; }
+    .header-badge { margin-top: 0.8rem; }
+    .stats-container { grid-template-columns: repeat(2, 1fr); }
+    /* Nascondi 4h e 7d */
     .trends-table th:nth-child(6), .trends-table td:nth-child(6),
     .trends-table th:nth-child(7), .trends-table td:nth-child(7) { display: none; }
-    .trend-chart-container { width: 90px; height: 30px; }
-    /* Aumenta padding verticale TD per altezza riga */
-    .trends-table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
-    .trends-table .trend-cell { min-width: 180px; } /* Adatta min-width */
+    .trend-chart-container { width: 90px; height: 30px; min-width: 90px; }
+    /* Aumenta padding verticale */
+    .trends-table td { padding-top: 1rem; padding-bottom: 1rem; }
+    .trends-table .trend-cell { padding-top: 1rem; padding-bottom: 1rem; }
 }
 
 @media (max-width: 768px) {
-    body { font-size: 14px; }
-    header { padding: 0.8rem 1rem; }
-    h1 { font-size: 1.4rem; }
-    .dashboard { padding: 0 0.8rem; }
-    .controls { flex-direction: column; align-items: stretch; gap: 0.8rem; padding: 0.6rem; }
-    .stats-container { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem;}
-    .stat-card { padding: 0.8rem; }
-    .stat-card .number { font-size: 1.4rem; }
-    .stat-card .label { font-size: 0.8rem; }
+    body { font-size: 15px; }
+    .controls { flex-direction: column; align-items: stretch; }
+    .search-box { max-width: 100%; }
+    .stats-container { grid-template-columns: 1fr; }
+    .trends-table th, .trends-table td { padding: 0.8rem 0.5rem; font-size: 0.9rem; white-space: nowrap;} /* Aumenta padding base */
+    .trends-table .trend-cell { white-space: normal; padding: 0.8rem 0.5rem; } /* Cella trend permette wrap */
 
-    /* Nascondi SOLO 1h */
-    .trends-table th:nth-child(5), .trends-table td:nth-child(5) { display: none; }
-    /* ASSICURATI CHE IL GRAFICO SIA VISIBILE (rimuovi display:none se c'era) */
-    .trends-table th:nth-child(8), .trends-table td:nth-child(8) { display: table-cell; } /* Forza visualizzazione */
-
-    /* Aumenta padding verticale e riduci orizzontale/font */
-    .trends-table th, .trends-table td { padding: 0.9rem 0.4rem; font-size: 0.8rem; white-space: nowrap; }
-    .trends-table .trend-cell { padding-top: 0.9rem; padding-bottom: 0.9rem; white-space: normal; min-width: 150px; }
-    .rank-badge { font-size: 0.7rem; padding: 0.1rem 0.3rem; min-width: 1.4rem;}
-    .score { font-size: 0.85rem; }
-    .extracted-entities { font-size: 0.75rem; line-height: 1.4; }
-    .trend-chart-container { width: 80px; height: 28px; min-width: 80px;}
+    /* Nascondi SOLO 1h e 4h (7d già nascosto) */
+    .trends-table th:nth-child(5), .trends-table td:nth-child(5),
+    .trends-table th:nth-child(6), .trends-table td:nth-child(6) { display: none; }
+    /* Lascia VISIBILE il grafico: th:nth-child(8), td:nth-child(8) */
+    .trend-chart-container { width: 80px; height: 28px; min-width: 80px;} /* Riduci grafico */
+    .rank-badge { min-width: 1.5rem; padding: 0.15rem 0.4rem; font-size: 0.85rem; }
+    .extracted-entities { font-size: 0.8rem; } /* Rendi leggibile */
 }
 
 @media (max-width: 480px) {
-     /* Nascondi Rank e Discover Score */
+     /* Nascondi Rank, 1h, 4h, 7d */
      .trends-table th:nth-child(2), .trends-table td:nth-child(2),
-     .trends-table th:nth-child(4), .trends-table td:nth-child(4) { display: none; }
-     /* Nascondi 1h, 4h, 7d (alcuni già nascosti) */
      .trends-table th:nth-child(5), .trends-table td:nth-child(5),
      .trends-table th:nth-child(6), .trends-table td:nth-child(6),
      .trends-table th:nth-child(7), .trends-table td:nth-child(7) { display: none; }
-
-     /* Lascia #, Trend&AI, Grafico */
-     .trends-table th, .trends-table td { padding: 0.7rem 0.3rem; font-size: 0.75rem; } /* Aumenta padding verticale */
-     .trends-table .trend-cell { padding: 0.7rem 0.3rem; min-width: 120px;}
+     /* Lascia #, Trend&AI, Score, Grafico */
+     .trends-table th, .trends-table td { padding: 0.7rem 0.4rem; font-size: 0.8rem; } /* Aumenta padding */
+     .trends-table .trend-cell { padding: 0.7rem 0.4rem; }
      .trend-chart-container { width: 70px; height: 25px; min-width: 70px;}
+     .extracted-entities { font-size: 0.75rem; }
 }
+
+/* Righe speciali */
+.hidden-row { display: none; } /* Necessario per filtro JS */
+.loading-row td, .error-row td, .no-data-row td { text-align: center !important; white-space: normal !important; padding: 30px 15px !important; }
+.error-row td { color: var(--accent-color); font-weight: bold; }
+.no-results-message { text-align: center; padding: 20px; color: var(--text-light); font-style: italic; background-color: var(--card-color); border: 1px solid var(--border-color); border-radius: 6px; margin-top: 1rem; }
+/* Rimuovi stile .original-query se non usato */
+/* .original-query { color: #777; font-size: 0.85rem; font-style: italic; } */
