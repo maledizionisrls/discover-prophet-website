@@ -4,14 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discover Prophet - Google Trends Dashboard</title>
-    
-    <!-- Font Awesome per le icone -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Chart.js per i grafici -->
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- CSS personalizzato -->
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,9 +17,10 @@
             <div>
                 <h1><i class="fas fa-chart-line"></i> Discover Prophet</h1>
                 <p class="update-info">Dashboard aggiornata: <span id="updateTimestamp">...</span></p>
+                <p class="update-info openai-info">AI Entity Extraction: <span id="openaiStatus">...</span> (Model: <span id="openaiModel">...</span>)</p>
             </div>
             <div class="header-badge">
-                <span><i class="fab fa-google"></i> Powered by Google Trends</span>
+                <span><i class="fab fa-google"></i> Powered by Google Trends & OpenAI</span>
             </div>
         </div>
     </header>
@@ -52,7 +50,7 @@
         </div>
 
         <div class="controls">
-            <input type="text" id="searchBox" class="search-box" placeholder="Cerca trend...">
+            <input type="text" id="searchBox" class="search-box" placeholder="Cerca trend o entità AI...">
             <div class="sorting">
                 <label for="sortBy">Ordina per:</label>
                 <select id="sortBy">
@@ -69,14 +67,13 @@
             </div>
         </div>
 
-        <!-- Wrapper per la tabella con scroll orizzontale -->
         <div class="table-container">
             <table class="trends-table" id="trendsTable">
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>Rank</th>
-                        <th>Trend</th>
+                        <th>Trend & <span title="Entità suggerite da AI">Entità AI</span></th>
                         <th>Discover Score</th>
                         <th>1h</th>
                         <th>4h</th>
@@ -85,21 +82,25 @@
                     </tr>
                 </thead>
                 <tbody id="trendsTableBody">
-                    <!-- Righe della tabella generate da JavaScript -->
+                    <tr class="loading-row">
+                        <td colspan="8" style="text-align: center; padding: 30px;">
+                            <i class="fas fa-spinner fa-spin"></i> Caricamento dati...
+                        </td>
+                    </tr>
                 </tbody>
             </table>
+        </div>
+        <div id="noResultsMessage" class="no-results-message" style="display: none;">
+             Nessun risultato trovato per la ricerca.
         </div>
     </main>
 
     <footer>
-        <p>&copy; <span id="currentYear"></span> Discover Prophet - Powered by Google Trends</p>
-        <p class="version">Version 7.5 - Clean Edition</p>
-    </footer>
+        <p>&copy; <span id="currentYear"></span> Discover Prophet - Powered by Google Trends & OpenAI</p>
+        <p class="version">Version 7.7 - Docs Only</p> </footer>
 
-    <!-- Dati JSON generati dallo script Python -->
     <script src="data.js"></script>
-    
-    <!-- Script principale -->
+
     <script src="script.js"></script>
 </body>
 </html>
