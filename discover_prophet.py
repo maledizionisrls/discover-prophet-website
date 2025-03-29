@@ -91,7 +91,20 @@ V7D_PENALTY_EPSILON = 0.1 # Valore piccolo per evitare divisione per zero
 
 # --- Parametri Estrazione Entità con Claude ---
 USE_CLAUDE_ENTITY_EXTRACTION = True
-CLAUDE_API_KEY = "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"
+# Leggi l'API key dalla variabile d'ambiente (o da file .env se esiste)
+try:
+    if os.path.exists(".env"):
+        with open(".env", "r") as f:
+            for line in f:
+                if "=" in line:
+                    key, value = line.strip().split("=", 1)
+                    if key == "ANTHROPIC_API_KEY" and not os.environ.get("ANTHROPIC_API_KEY"):
+                        os.environ["ANTHROPIC_API_KEY"] = value
+except Exception as e:
+    print(f"Errore lettura .env: {e}")
+
+# Ottieni l'API key SOLO da variabile d'ambiente (nessun fallback in chiaro)
+CLAUDE_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 CLAUDE_MODEL = "claude-3-7-sonnet-20240229"
 CLAUDE_MIN_CONFIDENCE = 0.6
 CLAUDE_BATCH_SIZE = 10
@@ -598,12 +611,19 @@ if __name__ == "__main__":
         if not CONTEXT_TIMEFRAMES: warnings.warn("FETCH_VOLUME_CONTEXT=True ma CONTEXT_TIMEFRAMES vuoto.", UserWarning)
         if CONTEXT_N_RUNS <= 0: raise ValueError("CONTEXT_N_RUNS >= 1")
 
+    # Verifica se l'API key Claude è disponibile
+    if USE_CLAUDE_ENTITY_EXTRACTION and not CLAUDE_API_KEY:
+        print("\n⚠️ ATTENZIONE: API key di Claude mancante. Imposta la variabile d'ambiente ANTHROPIC_API_KEY.")
+        print("⚠️ L'estrazione di entità con Claude verrà disabilitata.\n")
+        USE_CLAUDE_ENTITY_EXTRACTION = False
+
     print(f"Avvio script V7.6: Heuristic Discover Score con integrazione Claude AI per estrazione entità")
     print(f"Formula attuale: Vedi definizione funzione 'calculate_discover_score'")
     print(f"Parametri Penalità: K={V7D_PENALTY_K}, epsilon={V7D_PENALTY_EPSILON}")
     print(f"Obiettivo: Penalizzare Rank alto se V7d è basso (Contesto Top {N_PROCESS_FOR_CONTEXT}, N_RUNS={CONTEXT_N_RUNS})")
     print(f"MAX_CONCURRENT_PROXIES={MAX_CONCURRENT_PROXIES}, THREADS={MAX_THREADS}")
     print(f"Output HTML: {os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)}")
+    print(f"Estrazione entità Claude: {'ATTIVA' if USE_CLAUDE_ENTITY_EXTRACTION else 'DISABILITATA'}")
 
     ordered_entities = None
     entity_mapping = {}
