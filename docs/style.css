@@ -69,47 +69,32 @@ select { padding: 0.4rem 0.6rem; border: 1px solid var(--border-color); border-r
 
 /* Tabella */
 .table-container { width: 100%; overflow-x: auto; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.04); background-color: var(--card-color); }
-.trends-table { width: 100%; border-collapse: collapse; min-width: 800px; /* Riduci min-width ulteriormente */ table-layout: fixed; }
+.trends-table { width: 100%; border-collapse: collapse; min-width: 800px; table-layout: fixed; }
 .trends-table th, .trends-table td { padding: 0.75rem 0.8rem; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; }
 
-/* Cella Trend: permette a capo solo per main-entity */
-.trends-table .trend-cell {
-    white-space: normal;
-    vertical-align: top;
-    width: 35%; /* Aumenta leggermente % per più spazio */
-    min-width: 200px; /* Riduci ancora min-width */
-    text-overflow: initial;
+/* Cella Trend */
+.trends-table .trend-cell { white-space: normal; vertical-align: top; width: 35%; min-width: 200px; text-overflow: initial; }
+.main-entity-container { /* Contenitore per allineare trend e bottone */
+    display: flex;
+    align-items: center; /* Allinea verticalmente */
+    flex-wrap: nowrap; /* Non mandare a capo il bottone */
 }
-.main-entity {
-    font-weight: 500;
-    display: inline; /* Metti inline per far stare bottone accanto */
-    margin-right: 5px; /* Spazio prima del bottone */
-    /* Rimuovi margin-bottom */
-}
+.main-entity { font-weight: 500; display: inline; margin-right: 5px; flex-grow: 1; /* Occupa spazio disponibile */}
 /* Bottone Mostra/Nascondi Entità AI */
-.toggle-ai-btn {
-    background: none;
-    border: none;
-    color: var(--secondary-color);
-    cursor: pointer;
-    padding: 0 3px;
-    font-size: 0.8em; /* Rendi piccolo */
-    vertical-align: middle; /* Allinea con testo main-entity */
-    display: inline-block; /* Deve essere inline-block per stare accanto */
-}
+.toggle-ai-btn { background: none; border: none; color: var(--secondary-color); cursor: pointer; padding: 0 3px; font-size: 0.9em; /* Leggermente più grande */ vertical-align: middle; display: inline-block; line-height: 1; flex-shrink: 0; /* Non farlo restringere */ }
 .toggle-ai-btn:hover { color: var(--primary-color); }
 
 
 /* Stili Header Tabella */
 .trends-table th { background-color: #f8f9fa; color: var(--primary-color); font-weight: 600; position: sticky; top: 0; z-index: 10; border-bottom-width: 2px; white-space: nowrap; }
-.trends-table th:nth-child(1) { width: 40px; } /* # */
-.trends-table th:nth-child(2) { width: 65px; } /* Rank */
-.trends-table th:nth-child(3) { width: 35%; } /* Trend & AI */
-.trends-table th:nth-child(4) { width: 120px; } /* Discover Score */
+.trends-table th:nth-child(1) { width: 40px; }
+.trends-table th:nth-child(2) { width: 65px; }
+.trends-table th:nth-child(3) { width: 35%; }
+.trends-table th:nth-child(4) { width: 120px; }
 .trends-table th:nth-child(5),
 .trends-table th:nth-child(6),
-.trends-table th:nth-child(7) { width: 55px; } /* 1h, 4h, 7d */
-.trends-table th:nth-child(8) { width: 100px; } /* Trend Chart */
+.trends-table th:nth-child(7) { width: 55px; }
+.trends-table th:nth-child(8) { width: 100px; }
 
 /* Altri stili tabella */
 .trends-table tr:last-child td { border-bottom: none; }
@@ -125,7 +110,7 @@ select { padding: 0.4rem 0.6rem; border: 1px solid var(--border-color); border-r
 .trend-stable { color: var(--text-light); }
 .trend-small-up, .trend-medium-up, .trend-strong-up { color: var(--trending-up); }
 .trend-small-down, .trend-medium-down, .trend-strong-down { color: var(--trending-down); }
-.trend-strong-up i, .trend-strong-down i { font-weight: bold; } /* Rende solo freccia bold */
+.trend-strong-up i, .trend-strong-down i { font-weight: bold; }
 
 /* Trend HOT */
 .hot-trend { background-color: #fff8e1; }
@@ -133,55 +118,36 @@ select { padding: 0.4rem 0.6rem; border: 1px solid var(--border-color); border-r
 .hot-indicator { display: inline-block; background-color: var(--hot-color); color: white; font-weight: bold; font-size: 0.7rem; padding: 1px 4px; border-radius: 3px; margin-left: 5px; vertical-align: middle; line-height: 1; }
 
 /* --- Stili per Entità AI Collapsible + Scorrimento Interno --- */
-
-/* 1. Contenitore Esterno Collapsible */
 .extracted-entities.collapsible {
-    font-size: 0.8rem;
-    color: #555;
-    margin-top: 6px; /* Più spazio sotto il bottone/trend */
-    line-height: 1.4;
-    display: block;
-    width: 100%;
-    overflow: hidden; /* Nasconde scroller interno quando chiuso */
-    box-sizing: border-box;
-    padding: 0; /* Rimuovi padding verticale qui */
-    cursor: default;
-    /* Transizione per apertura/chiusura */
-    max-height: 0; /* Inizia chiuso */
-    transition: max-height 0.3s ease-out;
+    font-size: 0.8rem; color: #555; margin-top: 6px; line-height: 1.4;
+    display: block; width: 100%; overflow: hidden; box-sizing: border-box;
+    padding: 0; cursor: default; max-height: 0; /* Inizia chiuso */
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out; /* Aggiungi transizione padding */
 }
 /* Stato visibile */
 .extracted-entities.collapsible.visible {
-    max-height: 40px; /* Altezza massima quando aperto (aggiusta se serve) */
-    padding: 3px 0; /* Ri-applica padding solo quando visibile */
+    max-height: 40px; /* Altezza massima quando aperto */
+    padding: 3px 0;   /* Padding solo quando visibile */
 }
-
-/* 2. Contenitore Interno per Scorrimento */
+/* Contenitore Interno per Scorrimento */
 .scrolling-text-inner {
-    display: inline-block;
-    white-space: nowrap;
-    padding-left: 100%; /* Spinge testo a destra */
-    /* Animazione applicata solo quando il contenitore è visibile */
-    animation: none; /* Disattiva animazione di default */
+    display: inline-block; white-space: nowrap; padding-left: 100%;
+    animation: none; /* Animazione disattivata di default */
 }
 /* Applica animazione solo quando visibile */
 .extracted-entities.collapsible.visible .scrolling-text-inner {
      animation: marquee-scroll-inner 25s linear infinite;
 }
-
-
-/* 3. Animazione per l'elemento interno */
+/* Animazione per l'elemento interno */
 @keyframes marquee-scroll-inner {
   0%   { transform: translateX(0%); }
   100% { transform: translateX(-210%); } /* Muove verso sinistra */
 }
-
-/* 4. Pausa su hover del contenitore esterno */
+/* Pausa su hover del contenitore esterno */
 .extracted-entities.collapsible:hover .scrolling-text-inner {
   animation-play-state: paused;
 }
 /* --- Fine Stili Collapsible --- */
-
 
 /* Messaggi e Footer */
 .no-results-message { text-align: center; padding: 20px; color: var(--text-light); font-style: italic; background-color: var(--card-color); border: 1px solid var(--border-color); border-radius: 6px; margin-top: 1rem; }
@@ -192,21 +158,20 @@ footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--tex
 
 /* Responsive */
 @media (max-width: 992px) {
-    /* Nascondi 4h, 7d */
     .trends-table th:nth-child(6), .trends-table td:nth-child(6),
     .trends-table th:nth-child(7), .trends-table td:nth-child(7) { display: none; }
-    .trends-table .trend-cell { width: auto; min-width: 220px; } /* Rimuovi % fissa */
+    .trends-table .trend-cell { width: auto; min-width: 200px; }
     .trends-table th:nth-child(3) { width: auto; }
     .trend-chart-container { width: 90px; height: 30px; }
 }
 
 @media (max-width: 768px) {
-    body { font-size: 14px; } /* Riduci ulteriormente */
+    body { font-size: 14px; }
     header { padding: 0.8rem 1rem; }
     h1 { font-size: 1.4rem; }
     .dashboard { padding: 0 0.8rem; }
     .controls { flex-direction: column; align-items: stretch; gap: 0.8rem; padding: 0.6rem; }
-    .stats-container { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem;} /* Adatta cards */
+    .stats-container { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem;}
     .stat-card { padding: 0.8rem; }
     .stat-card .number { font-size: 1.4rem; }
     .stat-card .label { font-size: 0.8rem; }
@@ -214,23 +179,21 @@ footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--tex
     /* Nascondi 1h e Grafico */
     .trends-table th:nth-child(5), .trends-table td:nth-child(5),
     .trends-table th:nth-child(8), .trends-table td:nth-child(8) { display: none; }
-    /* Riduci padding e font tabella */
-    .trends-table th, .trends-table td { padding: 0.5rem 0.4rem; font-size: 0.8rem; }
+    .trends-table th, .trends-table td { padding: 0.5rem 0.4rem; font-size: 0.8rem; } /* Riduci ancora padding/font */
     .rank-badge { font-size: 0.7rem; padding: 0.1rem 0.3rem; min-width: 1.4rem;}
     .score { font-size: 0.85rem; }
     .extracted-entities { font-size: 0.75rem; }
-    .extracted-entities.collapsible.visible .scrolling-text-inner { animation-duration: 20s; } /* Riduci durata */
+    .extracted-entities.collapsible.visible .scrolling-text-inner { animation-duration: 20s; }
     .hot-indicator { font-size: 0.65rem; }
-    .trends-table .trend-cell { min-width: 180px; } /* Riduci ancora min-width */
-    .toggle-ai-btn { font-size: 0.75em; }
+    .trends-table .trend-cell { min-width: 160px; } /* Riduci ancora min-width */
+    .toggle-ai-btn { font-size: 0.85em; } /* Leggermente più grande su mobile */
 }
 
 @media (max-width: 480px) {
-     /* Nascondi Rank su schermi molto piccoli */
-     .trends-table th:nth-child(2),
-     .trends-table td:nth-child(2) { display: none; }
-     .trends-table th, .trends-table td { padding: 0.4rem 0.3rem; font-size: 0.75rem; } /* Padding/Font minimi */
-     .trends-table .trend-cell { min-width: 150px; }
+     /* Nascondi Rank */
+     .trends-table th:nth-child(2), .trends-table td:nth-child(2) { display: none; }
+     .trends-table th, .trends-table td { padding: 0.4rem 0.3rem; font-size: 0.75rem; }
+     .trends-table .trend-cell { min-width: auto; } /* Lascia che si adatti */
      .score { font-size: 0.8rem; }
      .extracted-entities.collapsible.visible .scrolling-text-inner { animation-duration: 15s; }
 }
