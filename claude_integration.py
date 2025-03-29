@@ -1,39 +1,26 @@
 # -*- coding: utf-8 -*-
+"""
+Claude Integration Module for Discover Prophet
+Provides semantic analysis of search queries using Anthropic's Claude API
+"""
 
-# ======================================================================
-# =========== INTEGRAZIONE CLAUDE PER ANALISI SEMANTICA ===============
-# ======================================================================
-
-import base64
 import json
-import time
-import os
-import requests
 import re
-from concurrent.futures import ThreadPoolExecutor
+import time
+import logging
+from typing import Dict, List, Any, Optional, Union
+import os
+import anthropic
+import jsonschema
 
-# Configurazioni per l'API Claude
-CLAUDE_MODEL = "claude-3-sonnet-20240229"  # Imposta il modello Claude
-MAX_BATCH_SIZE = 5  # Numero di query da analizzare in batch
-MAX_WORKERS = 5  # Numero massimo di worker thread
-MAX_RETRIES = 3  # Numero massimo di tentativi per chiamata API
-RETRY_DELAY = 2  # Secondi di attesa tra i tentativi
-RATE_LIMIT_PAUSE = 0.5  # Secondi di pausa tra le chiamate API per rate limiting
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO, 
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("ClaudeIntegration")
 
-# Offuscamento API Key - usa base64 per facilità di lettura/modifica
-# La chiave offuscata è facilmente decodificabile, ma offre una protezione base dal furto accidentale
-CLAUDE_API_KEY_ENCODED = "c2stYW50LWFwaTAzLXhVM1p0c0Y1cTVMYXJzbkZjN180b0NLd2tVQWZ1SDE0alJLaXM5cjYwcm5OZ3picUtzdEhQZ2R2QU55R29jS1FfdzJzTUFCZDBUQnpGTkpzYkZBVjJ3LWlhMkhadwAA"
-
-# Funzione per decodificare l'API key
-def get_api_key():
-    try:
-        # Decodifica la chiave dall'offuscamento base64
-        return base64.b64decode(CLAUDE_API_KEY_ENCODED).decode('utf-8')
-    except Exception as e:
-        print(f"Errore nella decodifica dell'API key: {e}")
-        return None
-
-# Schema per la validazione del JSON di output
+# JSON Schema for response validation
 QUERY_ANALYSIS_SCHEMA = {
     "type": "object",
     "required": ["original_query", "primary_entity", "is_meta_query", "secondary_entities", "confidence"],
@@ -57,303 +44,278 @@ QUERY_ANALYSIS_SCHEMA = {
     }
 }
 
-# Funzione per estrarre JSON dalla risposta
-def extract_json_from_text(text):
-    try:
-        # Cerca pattern JSON nella risposta
-        json_match = re.search(r'({[\s\S]*})', text)
-        if json_match:
-            json_str = json_match.group(1)
-            # Verifica che sia un JSON valido
-            data = json.loads(json_str)
-            return data
-        else:
-            raise ValueError("Nessun JSON trovato nella risposta")
-    except (ValueError, json.JSONDecodeError) as e:
-        print(f"Errore nell'estrazione JSON: {e}")
-        return None
-
-# Funzione per validare che il JSON sia conforme allo schema atteso
-def validate_json_structure(json_data):
-    try:
-        # Verifica manuale della struttura (senza dipendenza jsonschema)
-        required_keys = ["original_query", "primary_entity", "is_meta_query", "secondary_entities", "confidence"]
-        for key in required_keys:
-            if key not in json_data:
-                raise ValueError(f"Campo richiesto mancante: {key}")
+class ClaudeAnalyzer:
+    """Class to handle semantic analysis using Claude API"""
+    
+    def __init__(self, api_key: str, model: str = "claude-3-sonnet-20240229", cache_file: Optional[str] = None):
+        """
+        Initialize the Claude analyzer
         
-        if not isinstance(json_data["is_meta_query"], bool):
-            raise ValueError("is_meta_query deve essere un booleano")
+        Args:
+            api_key: Anthropic API key
+            model: Claude model to use
+            cache_file: Path to JSON file for caching results
+        """
+        self.api_key = api_key
+        self.model = model
+        self.client = anthropic.Anthropic(api_key=api_key)
+        self.cache_file = cache_file
+        self.cache = self._load_cache() if cache_file else {}
         
-        if not isinstance(json_data["secondary_entities"], list):
-            raise ValueError("secondary_entities deve essere una lista")
+        # Rate limiting parameters
+        self.requests_per_minute = 50  # Adjust based on your API tier
+        self.last_request_time = 0
+        self.request_interval = 60.0 / self.requests_per_minute
         
-        if not isinstance(json_data["confidence"], (int, float)) or not 0 <= json_data["confidence"] <= 1:
-            raise ValueError("confidence deve essere un numero tra 0 e 1")
+        logger.info(f"Claude Analyzer initialized with model: {model}")
         
-        # Verifica struttura per ogni entità secondaria
-        for entity in json_data["secondary_entities"]:
-            if not all(k in entity for k in ["entity", "type", "weight"]):
-                raise ValueError("Struttura entità secondaria non valida")
+    def _load_cache(self) -> Dict[str, Any]:
+        """Load cache from file if exists"""
+        if os.path.exists(self.cache_file):
+            try:
+                with open(self.cache_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except Exception as e:
+                logger.warning(f"Error loading cache: {e}")
+                return {}
+        return {}
+    
+    def _save_cache(self) -> None:
+        """Save cache to file"""
+        if self.cache_file:
+            try:
+                with open(self.cache_file, 'w', encoding='utf-8') as f:
+                    json.dump(self.cache, f, ensure_ascii=False, indent=2)
+            except Exception as e:
+                logger.warning(f"Error saving cache: {e}")
+    
+    def _rate_limit(self) -> None:
+        """Implement rate limiting for API calls"""
+        current_time = time.time()
+        time_since_last_request = current_time - self.last_request_time
+        
+        if time_since_last_request < self.request_interval:
+            sleep_time = self.request_interval - time_since_last_request
+            time.sleep(sleep_time)
             
-            if not isinstance(entity["weight"], (int, float)) or not 0 <= entity["weight"] <= 1:
-                raise ValueError("Il peso dell'entità deve essere un numero tra 0 e 1")
+        self.last_request_time = time.time()
+    
+    def extract_json_from_text(self, text: str) -> str:
+        """Extract JSON from text that might contain other content"""
+        # Try to find JSON objects with regex
+        json_matches = re.findall(r'({[\s\S]*})', text)
         
-        return True
-    except Exception as e:
-        print(f"Errore nella validazione JSON: {e}")
-        return False
-
-# Funzione principale per l'analisi di una singola query con Claude
-def analyze_query_with_claude(query, api_key, retries=MAX_RETRIES):
-    if not api_key:
-        print("API key non valida o mancante")
-        return create_fallback_analysis(query)
-    
-    # Sistema di prompt per ottenere l'analisi corretta
-    system_prompt = """Sei un esperto di analisi semantica specializzato nell'identificare le entità principali nelle query di ricerca. Rispondi SOLO con JSON valido, senza testo aggiuntivo prima o dopo."""
-    
-    user_prompt = f"""
-    Analizza la seguente query di ricerca: "{query}"
-    
-    Identifica:
-    1. L'entità principale (il vero oggetto della ricerca)
-    2. Eventuali entità secondarie
-    3. Se è una meta-query (ricerca generica di informazioni)
-    
-    Restituisci SOLO un oggetto JSON con questa struttura esatta:
-    {{
-        "original_query": "{query}",
-        "primary_entity": "l'entità principale identificata",
-        "is_meta_query": true/false,
-        "secondary_entities": [
-            {{"entity": "entità secondaria 1", "type": "tipo entità", "weight": 0.X}},
-            ...
-        ],
-        "confidence": 0.X (da 0.1 a 1.0)
-    }}
-    
-    Note:
-    - Le meta-query sono ricerche generiche come "come fare qualcosa" o "programmi stasera in tv"
-    - Il peso delle entità secondarie deve essere tra 0 e 1
-    - La somma dei pesi delle entità secondarie non deve superare 1.0
-    - I tipi di entità possono essere: person, location, organization, event, product, concept, time, date, etc.
-    """
-    
-    headers = {
-        "x-api-key": api_key,
-        "content-type": "application/json",
-        "anthropic-version": "2023-06-01"
-    }
-    
-    data = {
-        "model": CLAUDE_MODEL,
-        "max_tokens": 1000,
-        "temperature": 0.0,
-        "system": system_prompt,
-        "messages": [
-            {"role": "user", "content": user_prompt}
-        ]
-    }
-    
-    for attempt in range(retries):
-        try:
-            response = requests.post(
-                "https://api.anthropic.com/v1/messages",
-                headers=headers,
-                json=data
-            )
-            
-            if response.status_code == 200:
-                response_data = response.json()
-                content = response_data.get('content', [])
-                
-                if content and len(content) > 0 and 'text' in content[0]:
-                    text_response = content[0]['text']
-                    json_data = extract_json_from_text(text_response)
+        # If found, try each match until we find a valid JSON
+        if json_matches:
+            for potential_json in json_matches:
+                try:
+                    # Verify it's valid JSON by parsing it
+                    json.loads(potential_json)
+                    return potential_json
+                except json.JSONDecodeError:
+                    continue
                     
-                    if json_data and validate_json_structure(json_data):
-                        return json_data
-                    else:
-                        print(f"Risposta API non valida per query: {query}")
+        # If no valid JSON found, try a more aggressive approach
+        # Look for the largest {...} pattern
+        potential_json = re.search(r'({.*})', text.replace('\n', ' '))
+        if potential_json:
+            try:
+                json_str = potential_json.group(0)
+                json.loads(json_str)
+                return json_str
+            except json.JSONDecodeError:
+                pass
                 
-            elif response.status_code == 429:
-                wait_time = RETRY_DELAY * (2 ** attempt)
-                print(f"Rate limit superato. Attendo {wait_time}s prima di riprovare...")
-                time.sleep(wait_time)
-            else:
-                print(f"Errore API ({response.status_code}): {response.text}")
+        raise ValueError("No valid JSON found in the response")
+    
+    def validate_and_parse_json(self, json_str: str) -> Dict[str, Any]:
+        """Validate and parse JSON against the schema"""
+        try:
+            data = json.loads(json_str)
+            jsonschema.validate(instance=data, schema=QUERY_ANALYSIS_SCHEMA)
+            return data
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON format: {e}")
+        except jsonschema.exceptions.ValidationError as e:
+            raise ValueError(f"JSON does not conform to schema: {e}")
+    
+    def create_fallback_result(self, query: str) -> Dict[str, Any]:
+        """Create a fallback result when analysis fails"""
+        return {
+            "original_query": query,
+            "primary_entity": query,  # Use original query as primary entity
+            "is_meta_query": False,
+            "secondary_entities": [],
+            "confidence": 0.1
+        }
+    
+    def analyze_query(self, query: str, retry_count: int = 2) -> Dict[str, Any]:
+        """
+        Analyze a search query using Claude API
+        
+        Args:
+            query: The search query to analyze
+            retry_count: Number of retries if the API call fails
             
-            if attempt < retries - 1:
-                time.sleep(RETRY_DELAY)
+        Returns:
+            Dict containing the semantic analysis
+        """
+        # Check cache first
+        cache_key = query.lower().strip()
+        if cache_key in self.cache:
+            logger.info(f"Cache hit for query: {query}")
+            return self.cache[cache_key]
+        
+        logger.info(f"Analyzing query: {query}")
+        
+        system_prompt = """
+        You are a semantic analysis expert specializing in search query intent analysis. 
+        Your task is to analyze search queries and extract the primary entity of interest along with any secondary entities.
+        Respond ONLY with the requested JSON format, with no additional text, explanations, or notes.
+        """
+        
+        user_prompt = f"""
+        Analyze this search query: "{query}"
+        
+        Please identify:
+        1. The primary entity (the main subject/focus of the search)
+        2. Whether this is a meta-query (a search asking how to do something or requesting general information)
+        3. Any secondary entities (related details or context)
+        
+        Consider:
+        - For queries like "stasera in tv programmi prima serata", the primary entity would be "programmi TV" not "TV" or "prima serata"
+        - For "terremoto myanmar oggi", the primary entity is "terremoto myanmar" not just "terremoto" or "myanmar"
+        - For "napoli milan risultato", the primary entity is "napoli milan" (the match) not "risultato"
+        
+        Return EXACTLY this JSON structure and nothing else:
+        {{
+            "original_query": "{query}",
+            "primary_entity": "the identified primary entity",
+            "is_meta_query": true/false,
+            "secondary_entities": [
+                {{"entity": "secondary entity 1", "type": "entity type", "weight": 0.X}},
+                ...
+            ],
+            "confidence": 0.X (from 0.1 to 1.0)
+        }}
+        """
+        
+        for attempt in range(retry_count + 1):
+            try:
+                # Implement rate limiting
+                self._rate_limit()
                 
-        except Exception as e:
-            print(f"Eccezione durante l'analisi di '{query}': {type(e).__name__} - {e}")
-            if attempt < retries - 1:
-                time.sleep(RETRY_DELAY)
+                # Call Claude API
+                message = self.client.messages.create(
+                    model=self.model,
+                    max_tokens=1000,
+                    temperature=0,
+                    system=system_prompt,
+                    messages=[
+                        {"role": "user", "content": user_prompt}
+                    ]
+                )
+                
+                # Extract the response
+                response_text = message.content[0].text
+                
+                # Extract and validate JSON
+                json_str = self.extract_json_from_text(response_text)
+                result = self.validate_and_parse_json(json_str)
+                
+                # Add to cache
+                self.cache[cache_key] = result
+                if len(self.cache) % 10 == 0:  # Save every 10 new entries
+                    self._save_cache()
+                
+                return result
+                
+            except Exception as e:
+                logger.warning(f"Attempt {attempt+1}/{retry_count+1} failed: {e}")
+                if attempt < retry_count:
+                    # Wait before retrying (exponential backoff)
+                    time.sleep(2 ** attempt)
+                else:
+                    logger.error(f"All retries failed for query: {query}")
+                    fallback = self.create_fallback_result(query)
+                    self.cache[cache_key] = fallback
+                    return fallback
     
-    # Fallback in caso di errori persistenti
-    return create_fallback_analysis(query)
-
-# Crea un'analisi di fallback per una query
-def create_fallback_analysis(query):
-    return {
-        "original_query": query,
-        "primary_entity": query,  # fallback alla query originale
-        "is_meta_query": False,
-        "secondary_entities": [],
-        "confidence": 0.1,
-        "is_fallback": True  # Flag che indica fallback
-    }
-
-# Analizza un batch di query in parallelo
-def analyze_queries_batch(queries, api_key, max_workers=MAX_WORKERS):
-    results = {}
-    
-    # Verifica che ci sia almeno una query
-    if not queries:
+    def analyze_queries_batch(self, queries: List[str], batch_size: int = 5) -> Dict[str, Dict[str, Any]]:
+        """
+        Analyze multiple queries in batches
+        
+        Args:
+            queries: List of queries to analyze
+            batch_size: Number of queries to process in parallel (not actually parallel, but conceptually)
+            
+        Returns:
+            Dict mapping queries to their analysis results
+        """
+        results = {}
+        total = len(queries)
+        
+        logger.info(f"Processing {total} queries in batches of {batch_size}")
+        
+        for i in range(0, total, batch_size):
+            batch = queries[i:i+batch_size]
+            logger.info(f"Processing batch {i//batch_size + 1}/{(total-1)//batch_size + 1}: {len(batch)} queries")
+            
+            for query in batch:
+                results[query] = self.analyze_query(query)
+            
+            # Save cache after each batch
+            self._save_cache()
+        
         return results
     
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        # Crea i futures per ogni query
-        future_to_query = {
-            executor.submit(analyze_query_with_claude, query, api_key): query 
-            for query in queries
-        }
-        
-        # Processa i risultati man mano che completano
-        for future in future_to_query:
-            query = future_to_query[future]
-            try:
-                result = future.result()
-                results[query] = result
-                # Breve pausa per evitare rate limiting
-                time.sleep(RATE_LIMIT_PAUSE)
-            except Exception as e:
-                print(f"Errore nell'elaborazione della query '{query}': {e}")
-                results[query] = create_fallback_analysis(query)
-    
-    return results
+    def close(self) -> None:
+        """Save cache and clean up"""
+        self._save_cache()
+        logger.info("Claude Analyzer closed")
 
-# Funzione per aggiornare il Discover Score usando l'analisi semantica
-def calculate_enhanced_discover_score(base_score, analysis):
-    """
-    Modifica il Discover Score in base all'analisi semantica.
-    
-    Args:
-        base_score: Il Discover Score originale
-        analysis: L'analisi semantica dalla chiamata Claude
-        
-    Returns:
-        float: Il Discover Score aggiornato
-    """
-    # Fattori di modifica
-    META_QUERY_FACTOR = 0.8  # Leggera penalizzazione per query generiche
-    LOW_CONFIDENCE_FACTOR = 0.9  # Penalizzazione per analisi a bassa confidenza
-    
-    # Score iniziale
-    enhanced_score = base_score
-    
-    # Applica modifiche in base all'analisi
-    if analysis.get("is_meta_query", False):
-        # Meta query (ricerche generiche) hanno un leggero abbassamento
-        enhanced_score *= META_QUERY_FACTOR
-    
-    # Considera il livello di confidenza dell'analisi
-    confidence = analysis.get("confidence", 1.0)
-    if confidence < 0.7:  # Solo per analisi a bassa confidenza
-        enhanced_score *= LOW_CONFIDENCE_FACTOR + (confidence * 0.1)
-    
-    return enhanced_score
 
-# Funzione principale di integrazione da richiamare nello script principale
-def integrate_claude_analysis(ordered_entities, df_final, checkpoint_dir=None, max_entities=50):
-    """
-    Integra l'analisi semantica di Claude nel processo di Discover Prophet.
-    
-    Args:
-        ordered_entities: Lista ordinata di entità/query estratte
-        df_final: DataFrame con i dati finali
-        checkpoint_dir: Directory per salvare i checkpoint
-        max_entities: Numero massimo di entità da analizzare (default: 50)
-        
-    Returns:
-        tuple: (DataFrame aggiornato, dizionario con l'analisi delle entità)
-    """
-    # Controllo API key
-    api_key = get_api_key()
+# Helper functions for standalone usage
+def setup_analyzer(api_key: Optional[str] = None, model: str = "claude-3-sonnet-20240229", 
+                  cache_file: str = "query_analysis_cache.json") -> ClaudeAnalyzer:
+    """Setup a Claude analyzer with the given parameters"""
     if not api_key:
-        print("ERRORE: Impossibile decodificare l'API key. L'integrazione Claude non sarà disponibile.")
-        return df_final, {}
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError("No API key provided and ANTHROPIC_API_KEY not found in environment")
+    
+    return ClaudeAnalyzer(api_key=api_key, model=model, cache_file=cache_file)
 
-    print(f"\n--- Avvio analisi semantica Claude per top {max_entities} entità ---")
-    entity_analysis = {}
+def analyze_single_query(query: str, api_key: Optional[str] = None, 
+                        model: str = "claude-3-sonnet-20240229") -> Dict[str, Any]:
+    """Analyze a single query (convenience function)"""
+    analyzer = setup_analyzer(api_key, model, cache_file=None)
+    result = analyzer.analyze_query(query)
+    return result
+
+# Example usage if run as script
+if __name__ == "__main__":
+    # Example using the module
+    ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
     
-    # Limita alle prime N entità
-    entities_to_analyze = ordered_entities[:min(len(ordered_entities), max_entities)]
+    if not ANTHROPIC_API_KEY:
+        print("Please set the ANTHROPIC_API_KEY environment variable")
+        exit(1)
     
-    # Elabora in batch per efficienza
-    total_entities = len(entities_to_analyze)
-    batch_size = min(MAX_BATCH_SIZE, total_entities)
+    # Example queries
+    test_queries = [
+        "stasera in tv programmi prima serata",
+        "terremoto myanmar oggi",
+        "napoli milan risultato",
+        "come cucinare la pasta",
+        "taylor swift nuovo album"
+    ]
     
-    for i in range(0, total_entities, batch_size):
-        batch_end = min(i + batch_size, total_entities)
-        current_batch = entities_to_analyze[i:batch_end]
-        
-        print(f"  Analizzo batch {i//batch_size + 1}/{(total_entities+batch_size-1)//batch_size}: entità {i+1}-{batch_end} di {total_entities}")
-        batch_results = analyze_queries_batch(current_batch, api_key)
-        
-        # Aggiungi risultati al dizionario principale
-        entity_analysis.update(batch_results)
-        
-        # Breve pausa tra batch
-        if batch_end < total_entities:
-            time.sleep(1)
+    analyzer = setup_analyzer(ANTHROPIC_API_KEY, model="claude-3-sonnet-20240229")
     
-    # Aggiorna il DataFrame con le analisi semantiche
-    if entity_analysis:
-        print("\n  Aggiornamento Discover Score con l'analisi semantica...")
-        
-        # Aggiungi colonne per l'analisi semantica
-        df_final['Primary_Entity'] = df_final['Entita'].map(
-            lambda x: entity_analysis.get(x, {}).get('primary_entity', x)
-        )
-        
-        df_final['Is_Meta_Query'] = df_final['Entita'].map(
-            lambda x: entity_analysis.get(x, {}).get('is_meta_query', False)
-        )
-        
-        df_final['Analysis_Confidence'] = df_final['Entita'].map(
-            lambda x: entity_analysis.get(x, {}).get('confidence', 0.1)
-        )
-        
-        # Calcola il Discover Score aggiornato
-        if 'Discover_Score' in df_final.columns:
-            df_final['Enhanced_Discover_Score'] = df_final.apply(
-                lambda row: calculate_enhanced_discover_score(
-                    row['Discover_Score'],
-                    entity_analysis.get(row['Entita'], {})
-                ),
-                axis=1
-            )
-            
-            # Usa Enhanced_Discover_Score come nuovo punteggio principale
-            df_final['Original_Discover_Score'] = df_final['Discover_Score']
-            df_final['Discover_Score'] = df_final['Enhanced_Discover_Score']
-            
-            print("  Discover Score aggiornato con analisi semantica Claude.")
+    for query in test_queries:
+        result = analyzer.analyze_query(query)
+        print(f"\nQuery: {query}")
+        print(json.dumps(result, indent=2, ensure_ascii=False))
     
-    # Salva l'analisi come checkpoint
-    if checkpoint_dir:
-        try:
-            os.makedirs(checkpoint_dir, exist_ok=True)
-            output_file = os.path.join(checkpoint_dir, "claude_entity_analysis.json")
-            
-            with open(output_file, "w", encoding="utf-8") as f:
-                json.dump(entity_analysis, f, indent=2, ensure_ascii=False)
-                
-            print(f"  Analisi entità salvata in: {output_file}")
-        except Exception as e:
-            print(f"  Errore nel salvataggio dell'analisi: {e}")
-    
-    return df_final, entity_analysis
+    analyzer.close()
