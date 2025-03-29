@@ -186,6 +186,19 @@ def extract_entities_from_trends(trend_queries: List[str],
         Dict[str, Dict]: Mapping delle query originali alle informazioni estratte
     """
     try:
+        # Verifica che l'API key sia valida
+        if not api_key:
+            logger.error("API key non fornita o vuota!")
+            # Fallback: ritorna le query originali come entità
+            return {
+                query: {
+                    "entity": query,
+                    "confidence": 0.0,
+                    "status": "missing_api_key",
+                    "fallback_used": True
+                } for query in trend_queries
+            }
+            
         extractor = ClaudeEntityExtractor(api_key=api_key, model=model)
         return extractor.extract_entities_batch(
             queries=trend_queries,
