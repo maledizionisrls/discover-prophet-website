@@ -23,6 +23,7 @@ class ClaudeEntityExtractor:
         """
         self.api_key = api_key
         self.model = model
+        # Inizializzazione semplice senza parametri aggiuntivi
         self.client = anthropic.Anthropic(api_key=api_key)
         logger.info(f"Inizializzato estrattore entità con modello {model}")
     
