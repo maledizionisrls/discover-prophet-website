@@ -104,7 +104,7 @@ if FETCH_OPENAI_ENTITIES:
             FETCH_OPENAI_ENTITIES = False
 
 # --- Parametri Formula Discover Score V7.5 ---
-V7D_PENALTY_K = 5.0
+V7D_PENALTY_K = 15.0
 V7D_PENALTY_EPSILON = 0.1
 
 # --- Parametri Gestione Proxy e Concorrenza ---
