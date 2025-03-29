@@ -2,8 +2,8 @@ name: Discover Prophet Daily Update (Docs Only)
 
 on:
   schedule:
-    # Esegue alle 30 min di ogni ora tra le 7:00 e le 16:00 UTC (Roma 9:30-17:30 +/- DST).
-    - cron: '30 7-16 * * *'
+    # Esegue alle 30 min di ogni ora UTC tra le 7:00 e le 17:00 (copre 9:30-18:30 Roma)
+    - cron: '30 7-17 * * *' # <-- MODIFICATO QUI (16 -> 17)
 
   # Permette l'esecuzione manuale
   workflow_dispatch:
