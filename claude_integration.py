@@ -2,7 +2,7 @@ import json
 import time
 import os
 import logging
-import anthropic
+import requests
 from typing import List, Dict, Tuple, Any, Optional
 
 # Configurazione logging
@@ -23,8 +23,12 @@ class ClaudeEntityExtractor:
         """
         self.api_key = api_key
         self.model = model
-        # Inizializzazione semplice senza parametri aggiuntivi
-        self.client = anthropic.Anthropic(api_key=api_key)
+        self.api_url = "https://api.anthropic.com/v1/messages"
+        self.headers = {
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json"
+        }
         logger.info(f"Inizializzato estrattore entità con modello {model}")
     
     def extract_entity(self, query: str) -> Tuple[str, float]:
@@ -60,20 +64,41 @@ class ClaudeEntityExtractor:
         """
         
         try:
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=150,
-                temperature=0.0, # Completamente deterministico
-                system="Sei un assistente specializzato nell'identificazione delle entità principali nelle query di ricerca.",
-                messages=[
+            # Preparazione del payload per la richiesta
+            payload = {
+                "model": self.model,
+                "max_tokens": 150,
+                "temperature": 0.0,
+                "system": "Sei un assistente specializzato nell'identificazione delle entità principali nelle query di ricerca.",
+                "messages": [
                     {"role": "user", "content": prompt}
                 ]
+            }
+            
+            # Invio della richiesta HTTP diretta
+            response = requests.post(
+                self.api_url,
+                headers=self.headers,
+                json=payload,
+                timeout=30
             )
             
-            # Estrai il contenuto della risposta
-            response_content = response.content[0].text
+            # Verifica risposta
+            if response.status_code != 200:
+                logger.error(f"Errore API Claude: Status {response.status_code}, Response: {response.text}")
+                return query, 0.0
             
-            # Trova l'oggetto JSON nella risposta
+            # Parse della risposta JSON
+            response_data = response.json()
+            
+            # Estrazione del testo dalla risposta
+            if "content" in response_data and len(response_data["content"]) > 0:
+                response_content = response_data["content"][0].get("text", "")
+            else:
+                logger.error(f"Risposta Claude non contiene content: {response_data}")
+                return query, 0.0
+            
+            # Estrai il JSON dalla risposta
             import re
             json_match = re.search(r'\{.*\}', response_content, re.DOTALL)
             
