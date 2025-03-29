@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Carica e visualizza i dati delle tendenze
     renderTrendsTable(trendData); // Usa i dati da data.js
 
-    // Configura gli ascoltatori per la ricerca e l'ordinamento
+    // Configura gli ascoltatori per la ricerca e l'ordinamento (incluso toggle AI)
     setupEventListeners();
 
     // Rimuovi messaggio di caricamento iniziale (se presente)
@@ -91,40 +91,71 @@ function loadMetadata() {
     }
 }
 
-// Configura gli ascoltatori degli eventi per la ricerca e l'ordinamento
+// Configura gli ascoltatori degli eventi (incluso il toggle AI)
 function setupEventListeners() {
+    // Ricerca
     const searchBox = document.getElementById('searchBox');
     if (searchBox) {
-        searchBox.addEventListener('input', function() {
-            filterTable(this.value.trim().toLowerCase());
-        });
+        searchBox.addEventListener('input', () => filterTable(searchBox.value.trim().toLowerCase()));
     }
-
+    // Ordinamento
     const sortBy = document.getElementById('sortBy');
     const sortOrder = document.getElementById('sortOrder');
     if (sortBy) sortBy.addEventListener('change', sortTable);
     if (sortOrder) sortOrder.addEventListener('change', sortTable);
+
+    // --- Event Listener per Toggle Entità AI (Delegato al tbody) ---
+    const tableBody = document.getElementById('trendsTableBody');
+    if (tableBody) {
+        tableBody.addEventListener('click', function(event) {
+            // Trova il bottone più vicino all'elemento cliccato
+            const button = event.target.closest('.toggle-ai-btn');
+            if (button) {
+                // Trova la cella parente, poi il div delle entità
+                const cell = button.closest('td.trend-cell');
+                if (cell) {
+                    const entitiesDiv = cell.querySelector('.extracted-entities.collapsible');
+                    if (entitiesDiv) {
+                        // Cambia la visibilità del div togglando la classe 'visible'
+                        entitiesDiv.classList.toggle('visible');
+
+                        // Cambia l'icona del bottone
+                        const icon = button.querySelector('i');
+                        if (icon) {
+                            if (entitiesDiv.classList.contains('visible')) {
+                                // Se è visibile -> mostra icona 'meno'
+                                icon.classList.remove('fa-plus-circle');
+                                icon.classList.add('fa-minus-circle');
+                                button.setAttribute('title', 'Nascondi entità AI');
+                            } else {
+                                // Se è nascosto -> mostra icona 'più'
+                                icon.classList.remove('fa-minus-circle');
+                                icon.classList.add('fa-plus-circle');
+                                button.setAttribute('title', 'Mostra entità AI');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    // --- FINE Event Listener Toggle ---
 }
 
-// Renderizza la tabella delle tendenze
+// Renderizza la tabella delle tendenze (con bottone toggle)
 function renderTrendsTable(data) {
     const tableBody = document.getElementById('trendsTableBody');
-    if (!tableBody) {
-        console.error("Elemento 'trendsTableBody' non trovato nel DOM.");
-        return;
-    }
-    tableBody.innerHTML = ''; // Pulisci prima di renderizzare
+    if (!tableBody) { console.error("Elemento 'trendsTableBody' non trovato."); return; }
+    tableBody.innerHTML = ''; // Pulisce
 
     if (!data || data.length === 0) {
-         tableBody.innerHTML = `<tr class="no-data-row"><td colspan="8" style="text-align: center; padding: 30px;">Nessun dato di tendenza disponibile.</td></tr>`;
+         tableBody.innerHTML = `<tr class="no-data-row"><td colspan="8">Nessun dato disponibile.</td></tr>`;
          return;
     }
 
-    // Itera sui dati e crea le righe della tabella
     data.forEach((item, index) => {
         const row = document.createElement('tr');
-
-        // Popola gli attributi data-* per ordinamento/filtro
+        // Popola dataset
         row.dataset.entity = String(item.entity || '').toLowerCase();
         row.dataset.rank = String(item.rank || 0);
         row.dataset.discoverScore = String(item.discover_score || 0);
@@ -133,39 +164,40 @@ function renderTrendsTable(data) {
         row.dataset.score7d = String(item.score_7d || 0);
         row.dataset.aiEntities = String(item.extracted_entities || '').toLowerCase();
 
-        // Applica classe 'hot-trend' se necessario
+        // Logica HOT (più restrittiva)
         const isHot = isEntityHot(item.score_1h, item.score_4h, item.score_7d);
-        if (isHot) {
-            row.classList.add('hot-trend');
-        }
+        if (isHot) row.classList.add('hot-trend');
 
-        // Determina classe badge rank
+        // Badge Rank
         let rankBadgeClass = '';
         if (item.rank <= 10) rankBadgeClass = 'top-10';
         else if (item.rank <= 25) rankBadgeClass = 'top-25';
-
-        // Calcola indicatore freccia
+        // Indicatore Trend
         const trendIndicator = calculateTrendIndicator(item.score_1h, item.score_4h);
-
-        // Prepara visualizzazione entità principale (con fallback e escape)
+        // Entità principale
         let entityDisplay = escapeHtml(item.entity || 'N/A');
 
-        // --- LOGICA PER VISUALIZZARE extracted_entities ---
+        // --- LOGICA AGGIORNATA PER extracted_entities COLLAPSIBLE ---
         let extractedEntitiesHtml = '';
-        // Controlla che esista, sia stringa non vuota
+        let toggleButtonHtml = ''; // Inizializza vuoto
+
         if (item.extracted_entities && typeof item.extracted_entities === 'string' && item.extracted_entities.trim() !== '') {
              const entitiesCleaned = item.extracted_entities.trim();
-             // Crea il div con la classe corretta, applicando escapeHtml al contenuto
-             extractedEntitiesHtml = `<div class="extracted-entities" title="Entità suggerite da AI">${escapeHtml(entitiesCleaned)}</div>`;
+             // Bottone per mostrare/nascondere (con icona '+' di default)
+             toggleButtonHtml = `<button class="toggle-ai-btn" title="Mostra entità AI"><i class="fas fa-plus-circle"></i></button>`;
+             // Div esterno (collapsible, non visibile) e Span interno (scrolling)
+             extractedEntitiesHtml = `<div class="extracted-entities collapsible" title="Entità suggerite da AI"><span class="scrolling-text-inner">${escapeHtml(entitiesCleaned)}</span></div>`;
         }
-        // --- FINE LOGICA ---
+        // --- FINE LOGICA AGGIORNATA ---
 
-        // Costruisce l'HTML interno della riga
+        // Costruzione HTML riga
         row.innerHTML = `
             <td>${index + 1}</td>
             <td><span class="rank-badge ${rankBadgeClass}">${item.rank || 0}</span></td>
             <td class="trend-cell">
-                 <div class="main-entity">${entityDisplay}</div>
+                 <div class="main-entity-container">
+                    <span class="main-entity">${entityDisplay}</span>
+                    ${toggleButtonHtml} </div>
                  ${extractedEntitiesHtml} </td>
             <td class="score">
                 ${(item.discover_score || 0).toFixed(3)} ${trendIndicator}
@@ -178,32 +210,36 @@ function renderTrendsTable(data) {
                 <div class="trend-chart-container" id="chart-${index}"></div>
             </td>
         `;
-        // Aggiunge la riga completa al corpo della tabella
         tableBody.appendChild(row);
     });
 
-    // Crea i grafici DOPO che tutte le righe sono state aggiunte al DOM
+    // Creazione grafici
     requestAnimationFrame(() => {
         data.forEach((item, index) => {
-            createTrendChart(
-                `chart-${index}`,
-                [Number(item.score_7d) || 0, Number(item.score_4h) || 0, Number(item.score_1h) || 0]
-            );
+            createTrendChart(`chart-${index}`, [Number(item.score_7d) || 0, Number(item.score_4h) || 0, Number(item.score_1h) || 0]);
         });
     });
 }
 
-// Verifica se un'entità è "hot"
+// --- FUNZIONE isEntityHot AGGIORNATA (MENO SENSIBILE) ---
 function isEntityHot(score1h, score4h, score7d) {
     const s1h = Number(score1h) || 0;
     const s4h = Number(score4h) || 0;
-    if (s4h === 0) { return s1h > 10; } // Soglia se parte da zero
-    // Condizioni per essere 'hot'
-    if (s1h > 30 && s1h > s4h * 1.3) return true;
-    if (s1h > 15 && s1h > s4h * 1.6) return true;
-    if (s1h > 8 && s1h > s4h * 2.0) return true;
-    return false;
+    // Caso base: crescita da zero o quasi zero -> richiede picco più alto
+    if (s4h < 1) {
+         return s1h > 15; // Era 10
+    }
+    // Condizioni più restrittive
+    // 1. Volume alto (>40) e crescita notevole (>50%)
+    if (s1h > 40 && s1h > s4h * 1.5) return true; // Era >30 e >1.3
+    // 2. Volume medio (>20) e crescita forte (>80%)
+    if (s1h > 20 && s1h > s4h * 1.8) return true; // Era >15 e >1.6
+    // 3. Volume basso (>12) ma crescita molto forte (>150%)
+    if (s1h > 12 && s1h > s4h * 2.5) return true; // Era >8 e >2.0
+
+    return false; // Se nessuna condizione è soddisfatta
 }
+// --- FINE FUNZIONE isEntityHot AGGIORNATA ---
 
 
 // Crea un grafico di tendenza per una entità
@@ -423,10 +459,11 @@ function sortTable() {
     });
 
     // Ri-appendi le righe ordinate al tbody
+    // Nota: appendChild sposta l'elemento se già presente nel DOM, quindi basta appenderle in ordine
     rows.forEach((row, index) => {
         const cellIndex = row.querySelector('td:first-child');
         if(cellIndex) cellIndex.textContent = index + 1; // Aggiorna numero riga
-        tableBody.appendChild(row); // Append riordina automaticamente
+        tableBody.appendChild(row);
     });
 
      // Se c'era una ricerca attiva, riapplicala dopo l'ordinamento
