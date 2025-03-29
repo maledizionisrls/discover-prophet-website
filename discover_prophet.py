@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-# 🚀 Script Ottimizzato per Google Trends TV (Hot Trends) - V8.0 (AI Entity Linking)
-#    Utilizza Claude 3.5 Sonnet (via claude_integration.py) per estrarre entità principali.
-#    Implementa Heuristic Discover Score V7.5 sulla base delle entità AI.
+# 🚀 Script Ottimizzato per Google Trends TV (Hot Trends) - V7.6 (Integrazione Claude AI)
+#    Implementa estrazione entità principali tramite Claude AI
 #    Formula V7.5: (1 + V4h + V7d) / log1p(Rank * max(1, K / (V7d + epsilon)))
-#    Gestisce fallback per entità non identificate.
-#    Output in HTML con Entità Principale e Query Originale.
+#    Obiettivo: Penalizzare Rank alto se V7d è basso, validando esplosioni con storico.
+#    Ordina per Discover_Score decrescente. Contesto per Top N.
+#    Output in HTML.
 
 # --- Import Librerie Essenziali ---
 import requests
@@ -31,12 +31,8 @@ from tqdm import tqdm
 from datetime import datetime
 import shutil
 
-# --- Import Modulo AI ---
-try:
-    import claude_integration
-except ImportError:
-    print("ERRORE: File 'claude_integration.py' non trovato. Assicurati che sia nella stessa directory.")
-    exit() # Esce se il modulo AI non è presente
+# --- Importa il modulo di integrazione Claude ---
+from claude_integration import extract_entities_from_trends
 
 # --- Patch per errore method_whitelist vs allowed_methods ---
 import urllib3
@@ -77,20 +73,29 @@ warnings.filterwarnings("ignore", message="urllib3 v2 only supports OpenSSL 1.1.
 
 # --- Parametri Principali ---
 TOP_N_FINAL_DISPLAY = 50
-OUTPUT_FILENAME = "index.html"
-OUTPUT_DIR = "docs"
-CHECKPOINT_DIR = "checkpoint_data"
-TEMPLATE_DIR = "templates"
+OUTPUT_FILENAME = "index.html" # Modificato per output HTML
+OUTPUT_DIR = "docs" # Directory per output GitHub Pages
+CHECKPOINT_DIR = "checkpoint_data" # Directory checkpoint
+TEMPLATE_DIR = "templates" # Directory template HTML
 
 # --- Parametri Contesto di Volume ---
 FETCH_VOLUME_CONTEXT = True
-N_PROCESS_FOR_CONTEXT = 50 # Numero di ENTITÀ UNICHE VALIDE (post AI) per cui cercare contesto
+N_PROCESS_FOR_CONTEXT = 50
 CONTEXT_TIMEFRAMES = ['now 1-H', 'now 4-H', 'now 7-d']
 CONTEXT_N_RUNS = 2
 
 # --- Parametri Formula Discover Score V7.5 ---
-V7D_PENALTY_K = 5.0
-V7D_PENALTY_EPSILON = 0.1
+# Puoi modificare K ed epsilon per regolare la penalità per V7d basso
+V7D_PENALTY_K = 5.0      # Costante K: valore più alto = penalità maggiore per V7d basso
+V7D_PENALTY_EPSILON = 0.1 # Valore piccolo per evitare divisione per zero
+
+# --- Parametri Estrazione Entità con Claude ---
+USE_CLAUDE_ENTITY_EXTRACTION = True
+CLAUDE_API_KEY = "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"
+CLAUDE_MODEL = "claude-3-7-sonnet-20240229"
+CLAUDE_MIN_CONFIDENCE = 0.6
+CLAUDE_BATCH_SIZE = 10
+CLAUDE_BATCH_DELAY = 2.0
 
 # --- Parametri Gestione Proxy e Concorrenza ---
 MAX_CONCURRENT_PROXIES = 210
@@ -117,7 +122,7 @@ ENTITY_EXTRACTION_READ_TIMEOUT = 25
 PYTRENDS_CONNECT_TIMEOUT = 10
 PYTRENDS_READ_TIMEOUT = 25
 
-# --- Parametri Interni Pytrends ---
+# --- Parametri Interni Pytrends (Non modificare se non sai cosa fai) ---
 PYTRENDS_RETRIES = 1
 PYTRENDS_BACKOFF_FACTOR = 0.2
 
@@ -129,29 +134,48 @@ PYTRENDS_BACKOFF_FACTOR = 0.2
 # ==============================================================================
 # ==================== FUNZIONE CALCOLO DISCOVER SCORE (V7.5) ==================
 # ==============================================================================
-# La logica è qui per chiarezza, ma potresti anche importarla se preferisci
+# Modifica questa funzione per cambiare la logica di calcolo dello score.
+# Riceve Series Pandas per rank, score_4h, score_7d (già pulite).
+# Restituisce una Series Pandas con i punteggi calcolati.
+# ------------------------------------------------------------------------------
 
 def calculate_discover_score(rank_series, score_4h, score_7d, k_penalty=V7D_PENALTY_K, epsilon=V7D_PENALTY_EPSILON):
     """
-    Calcola l'Heuristic Discover Score V7.5.
-    Formula: (1 + V4h + V7d) / log1p(Rank * max(1, K / (V7d + epsilon)))
+    Calcola l'Heuristic Discover Score basato su rank, volume 4h e volume 7d.
+    Formula V7.5: (1 + V4h + V7d) / log1p(Rank * max(1, K / (V7d + epsilon)))
+    - V4h: Score medio ultime 4 ore
+    - V7d: Score medio ultimi 7 giorni
+    - Rank: Rank iniziale estratto da Google Trends TV
+    - K, epsilon: Parametri per regolare la penalità del rank se V7d è basso.
+    Logica: Usa un numeratore semplice (somma volumi). Penalizza il Rank nel
+            denominatore in modo dinamico: se V7d è basso, il Rank effettivo
+            usato nel logaritmo viene aumentato, abbassando lo score finale.
     """
     formula_str = f"(1 + V4h + V7d) / log1p(Rank * max(1, {k_penalty:.1f} / (V7d + {epsilon:.1f})))"
-    # Non stampiamo qui per evitare output ripetuto durante l'apply
-    # print(f"        Applicando Formula V7.5: {formula_str}")
+    print(f"        Applicando Formula V7.5: {formula_str}")
 
     # --- Calcolo Denominatore ---
+    # Calcola il fattore di penalità basato su V7d basso
     low_v7d_penalty_factor = np.maximum(1.0, k_penalty / (score_7d + epsilon))
+
+    # Calcola l'Effective Rank (Rank originale * fattore di penalità)
     effective_rank = rank_series * low_v7d_penalty_factor
+
+    # Calcola il denominatore usando l'Effective Rank
     denominator = np.log1p(effective_rank)
+    # Assicura che il denominatore non sia mai zero
     denominator = np.maximum(denominator, 1e-9)
 
     # --- Calcolo Numeratore ---
+    # Semplice somma dei volumi + 1
     numerator = 1 + score_4h + score_7d
 
     # --- Calcolo Score Finale ---
     discover_score = numerator / denominator
+
+    # Riempi eventuali NaN risultanti con 0
     discover_score = discover_score.fillna(0)
+
     return discover_score
 
 # ==============================================================================
@@ -184,6 +208,7 @@ for geo in country_codes:
 if not proxies_list_with_geo: raise ValueError("!!! Lista proxy VUOTA dopo filtro! !!!")
 print(f"Generati {len(proxies_list_with_geo)} proxy con geo associato.")
 
+
 # --- Mapping Geo -> Lingua/Timezone ---
 # (Codice omesso per brevità - invariato)
 COUNTRY_LOCALE_MAP = {
@@ -202,6 +227,7 @@ COUNTRY_LOCALE_MAP = {
     'DEFAULT': {'hl': 'en-US', 'tz': 0}
 }
 def get_locale_for_geo(geo_code): return COUNTRY_LOCALE_MAP.get(geo_code.upper(), COUNTRY_LOCALE_MAP['DEFAULT'])
+
 
 # --- Classi AdvancedProxyManager e ConsistentBrowserProfile ---
 # (Codice omesso per brevità - invariato)
@@ -273,12 +299,12 @@ def get_proxy_url(proxy_str):
         else: warnings.warn(f"Porta non valida: {proxy_str}", UserWarning); return None
     else: warnings.warn(f"Formato proxy non valido (attese 4 parti): {proxy_str}", UserWarning); return None
 
-# --- Estrazione Entità ORDINATA (Query Grezze) ---
-# (Codice omesso per brevità - invariato, restituisce le query come prima)
+# --- Estrazione Entità ORDINATA ---
+# (Codice omesso per brevità - invariato)
 def extract_ordered_entities(max_retries=ENTITY_EXTRACTION_MAX_RETRIES, initial_wait=ENTITY_EXTRACTION_INITIAL_WAIT):
-    attempts = 0; current_wait = initial_wait; proxy_info, geo_code = None, None; print(f"Avvio estrazione lista query grezze da Trends TV (max {max_retries} tentativi)...") # Nome aggiornato
+    attempts = 0; current_wait = initial_wait; proxy_info, geo_code = None, None; print(f"Avvio estrazione lista entità ORDINATA (max {max_retries} tentativi)...")
     while attempts < max_retries:
-        attempts += 1; print(f"Tentativo {attempts}/{max_retries} per estrarre query...")
+        attempts += 1; print(f"Tentativo {attempts}/{max_retries} per estrarre entità ordinate...")
         proxy_info, status_code, error_type_str, release_success = None, None, None, False; scraper, session_data, geo_code = None, None, None
         try:
             get_proxy_attempts = 0
@@ -300,31 +326,29 @@ def extract_ordered_entities(max_retries=ENTITY_EXTRACTION_MAX_RETRIES, initial_
                     if internal_attempt < max_internal_retries - 1: time.sleep(2)
                     else: print(f"       Falliti tutti retry interni (Exception)."); raise e_int
             if res is None or res.status_code != 200: status_code = res.status_code if res else None; raise Exception(f"Req fallita dopo retry interni. Status: {status_code}")
-            status_code = res.status_code; soup = BeautifulSoup(res.text, 'html.parser'); scripts = soup.find_all('script'); found_data = False; ordered_queries_found = [] # Nome variabile cambiato
+            status_code = res.status_code; soup = BeautifulSoup(res.text, 'html.parser'); scripts = soup.find_all('script'); found_data = False; ordered_entities_found = []
             for script in scripts:
                 if script.string and 'AF_initDataCallback' in script.string and 'key: \'ds:0\'' in script.string:
                     try:
                         match = re.search(r"data:(.*), sideChannel:", script.string, re.DOTALL)
                         if match: json_text = match.group(1).strip().rstrip(','); data = json.loads(json_text)
                         if isinstance(data, list) and len(data) > 1 and isinstance(data[1], list):
-                             # Estrae le stringhe delle query
-                            queries = [item[0] for item in data[1] if isinstance(item, list) and item and isinstance(item[0], str)]
-                            if queries: ordered_queries_found = queries; found_data = True; break
+                            entities = [item[0] for item in data[1] if isinstance(item, list) and item and isinstance(item[0], str)]
+                            if entities: ordered_entities_found = entities; found_data = True; break
                     except Exception as e_parse: print(f"       Parse JSON err (Proxy: {geo_code}): {e_parse}"); error_type_str = 'parse_fail'
-            if found_data and ordered_queries_found: print(f"    Estratte {len(ordered_queries_found)} query grezze via {geo_code}."); release_success = True; return ordered_queries_found
-            else: print(f"    Status 200 ma dati query non trovati/parsati via {geo_code}."); error_type_str = 'parse_fail'; time.sleep(current_wait); current_wait = min(current_wait * 1.5, MAX_WAIT_SECONDS / 2)
+            if found_data and ordered_entities_found: print(f"    Estratte {len(ordered_entities_found)} entità ordinate via {geo_code}."); release_success = True; return ordered_entities_found
+            else: print(f"    Status 200 ma dati non trovati/parsati via {geo_code}."); error_type_str = 'parse_fail'; time.sleep(current_wait); current_wait = min(current_wait * 1.5, MAX_WAIT_SECONDS / 2)
         except Exception as e:
-            error_type_str = type(e).__name__; print(f"!! Errore estrazione query (Tentativo {attempts}, Proxy: {geo_code}): {error_type_str}: {e} !!"); traceback.print_exc(); wait_time = min(current_wait * 1.5, MAX_WAIT_SECONDS / 2); time.sleep(wait_time); current_wait = wait_time * 1.5
+            error_type_str = type(e).__name__; print(f"!! Errore estrazione (Tentativo {attempts}, Proxy: {geo_code}): {error_type_str}: {e} !!"); traceback.print_exc(); wait_time = min(current_wait * 1.5, MAX_WAIT_SECONDS / 2); time.sleep(wait_time); current_wait = wait_time * 1.5
             if isinstance(e, (requests.exceptions.ProxyError, requests.exceptions.ConnectionError)): error_type_str = 'ProxyError'
             elif isinstance(e, requests.exceptions.Timeout): error_type_str = 'Timeout'
             if 'res' not in locals() or res is None: status_code = None
         finally:
             if proxy_info: proxy_manager.release_proxy(proxy_info[0], success=release_success, status_code=status_code, error_type=error_type_str); proxy_info = None
-    print(f"!!! Estrazione query grezze fallita dopo {max_retries} tentativi. !!!"); return None
+    print(f"!!! Estrazione entità ORDINATE fallita dopo {max_retries} tentativi. !!!"); return None
 
-
-# --- Funzione get_trends_scores (Context) ---
-# (Codice omesso per brevità - invariato, prende keyword e timeframe)
+# --- Funzione get_trends_scores ---
+# (Codice omesso per brevità - invariato)
 def get_trends_scores(keywords, timeframe):
     # Contiene la CORREZIONE V6.2 al blocco except ProxyError
     attempts = 0; current_backoff_429 = INITIAL_BACKOFF_SECONDS_429; current_backoff_other = 3.0; start_time = time.time()
@@ -373,147 +397,46 @@ def get_trends_scores(keywords, timeframe):
     print(f"!!! [CTX KW:{kw_hash}] Failed {attempts} ctx attempts for {kw_list_str} ({timeframe}). Scores 0.")
     return {kw: 0 for kw in keywords}
 
-# --- Funzione get_all_context_scores (Context) ---
-# (Codice omesso per brevità - invariato, prende lista entità e timeframe)
+
+# --- Funzione get_all_context_scores ---
+# (Codice omesso per brevità - invariato)
 def get_all_context_scores(entities_subset, timeframe):
-    # Filtra eventuali None o stringhe vuote dalla lista prima di processare
-    valid_entities_subset = [e for e in entities_subset if e and isinstance(e, str)]
-    if not valid_entities_subset:
-        print(f"--- Nessuna entità valida fornita per il contesto {timeframe}. Salto. ---")
-        return {}
-
-    all_scores = {}; entity_list = list(set(valid_entities_subset)); random.shuffle(entity_list)
+    all_scores = {}; entity_list = list(set(entities_subset)); random.shuffle(entity_list)
     group_size = 4; groups = [entity_list[i:i+group_size] for i in range(0, len(entity_list), group_size)]
-    print(f"\n--- Raccolta score CONTESTO per {len(entity_list)} entità: {timeframe} ({len(groups)} gruppi / {MAX_THREADS} threads) ---")
+    print(f"\n--- Raccolta score CONTESTO: {timeframe} ({len(groups)} gruppi / {len(entity_list)} entità / {MAX_THREADS} threads) ---")
     sem = threading.Semaphore(MAX_THREADS)
-
-    def get_trends_scores_safe(kw_group, tf):
-        # Assicurati che il gruppo contenga solo stringhe valide
-        valid_kw_group = [kw for kw in kw_group if isinstance(kw, str) and kw]
-        if not valid_kw_group:
-            return {}
+    def get_trends_scores_safe(kw, tf):
         with sem:
-            try:
-                # Pytrends potrebbe fallire con certi caratteri, fare un minimo di pulizia?
-                # Per ora, passiamo così come sono.
-                return get_trends_scores(valid_kw_group, tf)
-            except Exception as e:
-                print(f"\n!!! Eccezione non gestita in get_trends_scores_safe per {valid_kw_group}: {type(e).__name__} !!!")
-                # traceback.print_exc() # Abilita per debug approfondito
-                return {k: 0 for k in valid_kw_group} # Ritorna 0 per il gruppo fallito
-
+            try: return get_trends_scores(kw, tf)
+            except Exception as e: print(f"\n!!! Exc safe ctx: {type(e).__name__} !!!"); return {k: 0 for k in kw}
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
         future_to_group = {}; print(f"    Sottomissione {len(groups)} task CONTESTO..."); time.sleep(0.5)
-        for idx, group in enumerate(groups):
-             # Passa il gruppo originale, la pulizia avviene in get_trends_scores_safe
-            future = executor.submit(get_trends_scores_safe, group, timeframe);
-            future_to_group[future] = group;
-            # Riduci sleep per velocizzare sottomissione? Modulato ogni 10/20 task
-            sleep_time = random.uniform(0.02, 0.08) if idx % 15 != 0 else random.uniform(0.1, 0.3)
-            time.sleep(sleep_time)
-
-        print(f"    Attesa completamento task CONTESTO..."); completed_count, failed_count = 0, 0; failed_groups_info = []; total_tasks = len(groups)
-        # Usiamo tqdm per la barra di avanzamento
-        with tqdm(total=total_tasks, desc=f"Contesto {timeframe}", unit="task") as pbar:
-            for future in concurrent.futures.as_completed(future_to_group):
-                group = future_to_group[future]
-                original_group_str = ", ".join(map(str, group)) # Per logging
+        for idx, group in enumerate(groups): future = executor.submit(get_trends_scores_safe, group, timeframe); future_to_group[future] = group; time.sleep(random.uniform(0.05, 0.15) if idx % 10 != 0 else random.uniform(0.3, 0.6))
+        print(f"    Attesa completamento task CONTESTO..."); completed_count, failed_count = 0, 0; failed_groups = []; total_tasks = len(groups)
+        for future in concurrent.futures.as_completed(future_to_group):
+            completed_count += 1; group = future_to_group[future]
+            try:
+                result = future.result(timeout=MAX_WAIT_SECONDS * 2)
+                if result and all(s == 0 for s in result.values()): failed_count += 1; failed_groups.append(group); [all_scores.setdefault(e, 0) for e in group]
+                elif result: all_scores.update(result)
+                else: failed_count += 1; failed_groups.append(group); [all_scores.setdefault(e, 0) for e in group]
+                if completed_count % 20 == 0 or completed_count == total_tasks: print(f"       ...completati {completed_count}/{total_tasks} task CONTESTO ({timeframe})...")
+            except Exception as exc: print(f"\n!!! Errore recupero CONTESTO {group} ({timeframe}): {exc} !!!"); failed_count += 1; failed_groups.append(group); [all_scores.setdefault(e, 0) for e in group]
+        if failed_groups and len(failed_groups) < total_tasks // 2: # Retry
+            print(f"\n--- Riprovando {len(failed_groups)} gruppi CONTESTO falliti per {timeframe} ---"); random.shuffle(failed_groups); retry_futures = {}
+            for group in failed_groups: time.sleep(random.uniform(1.0, 2.0)); future = executor.submit(get_trends_scores_safe, group, timeframe); retry_futures[future] = group
+            for future in concurrent.futures.as_completed(retry_futures):
+                group = retry_futures[future]
                 try:
-                    result = future.result(timeout=MAX_WAIT_SECONDS * 2) # Timeout più generoso?
-                    if result is None: # Caso di errore inatteso in safe wrapper
-                         failed_count += 1
-                         failed_groups_info.append(f"{original_group_str} (None result)")
-                         # Assicura che le entità del gruppo siano in all_scores con 0
-                         for e in group: all_scores.setdefault(e, 0)
-                    elif isinstance(result, dict):
-                        if all(s == 0 for s in result.values()):
-                            # Potrebbe essere fallito o tutti a 0 realmente
-                            # Consideriamolo fallito per ora per eventuale retry
-                            failed_count += 1
-                            failed_groups_info.append(f"{original_group_str} (all zero)")
-                            # Aggiorna/inserisci comunque con 0
-                            for e, s in result.items(): all_scores[e] = s
-                            # Assicura che tutte le entità originali del gruppo abbiano uno score
-                            for e_orig in group: all_scores.setdefault(e_orig, 0)
-                        else:
-                            # Successo parziale o totale
-                            all_scores.update(result)
-                            # Assicura che tutte le entità originali del gruppo abbiano uno score
-                            for e_orig in group: all_scores.setdefault(e_orig, 0)
-                    else: # Tipo di ritorno non atteso
-                         failed_count += 1
-                         failed_groups_info.append(f"{original_group_str} (bad result type: {type(result)})")
-                         for e in group: all_scores.setdefault(e, 0)
-
-                except concurrent.futures.TimeoutError:
-                     failed_count += 1
-                     failed_groups_info.append(f"{original_group_str} (TimeoutError)")
-                     for e in group: all_scores.setdefault(e, 0)
-                     # Cancella il future? Potrebbe essere utile in alcuni scenari
-                     # future.cancel()
-                except Exception as exc:
-                    failed_count += 1
-                    failed_groups_info.append(f"{original_group_str} (Exception: {type(exc).__name__})")
-                    for e in group: all_scores.setdefault(e, 0)
-                finally:
-                     pbar.update(1) # Aggiorna la barra di avanzamento
-
-        # Gestione Retry (semplificata, riprova solo i gruppi falliti una volta)
-        # Potrebbe essere resa più sofisticata
-        failed_groups = [group for group in future_to_group.values() if any(all_scores.get(e) == 0 for e in group)] # Logica di identificazione falliti migliorabile
-
-        # Limitiamo il numero di retry per evitare loop o stalli
-        max_retries = min(len(failed_groups), total_tasks // 3, 30) # Es: max 1/3 dei task o 30
-        groups_to_retry = failed_groups[:max_retries]
-
-        if groups_to_retry:
-            print(f"\n--- Riprovando {len(groups_to_retry)}/{len(failed_groups)} gruppi CONTESTO falliti per {timeframe} ---")
-            retry_futures = {}
-            # Riduci numero worker per retry? O usa gli stessi? Usiamo gli stessi per ora.
-            with tqdm(total=len(groups_to_retry), desc=f"Retry Ctx {timeframe}", unit="task") as pbar_retry:
-                for group in groups_to_retry:
-                    time.sleep(random.uniform(0.5, 1.5)) # Pausa prima di ritentare
-                    future = executor.submit(get_trends_scores_safe, group, timeframe)
-                    retry_futures[future] = group
-
-                for future in concurrent.futures.as_completed(retry_futures):
-                    group = retry_futures[future]
-                    original_group_str = ", ".join(map(str, group))
-                    try:
-                        result = future.result(timeout=MAX_WAIT_SECONDS * 2.5) # Timeout leggermente più lungo
-                        if result and isinstance(result, dict) and not all(s == 0 for s in result.values()):
-                             all_scores.update(result)
-                             print(f"       Recuperato ctx (Retry): {original_group_str}")
-                             # Rimuovi da failed_groups_info se recuperato? Potrebbe complicare
-                        # else: Non fare nulla, rimane 0
-                    except Exception as retry_exc:
-                        print(f"       Errore retry ctx {original_group_str}: {retry_exc}")
-                    finally:
-                        pbar_retry.update(1)
-
-            # Conta i fallimenti finali dopo il retry
-            final_failed_count = sum(1 for group in groups_to_retry if all(all_scores.get(e) == 0 for e in group))
-            print(f"--- Retry completato. Fallimenti finali nei gruppi ritentati: {final_failed_count}/{len(groups_to_retry)} ---")
-        else:
-             final_failed_count = failed_count # Se non ci sono stati retry validi
-
-    # Stampa un riepilogo dei fallimenti persistenti se ce ne sono
-    if final_failed_count > 0:
-         print(f"--- Raccolta score CONTESTO {timeframe} completata con {final_failed_count}/{total_tasks} task falliti definitivamente (o con tutti 0). ---")
-         # Stampa i primi N gruppi falliti per debug, se necessario
-         # print("    Gruppi falliti (o tutti 0):")
-         # for i, fail_info in enumerate(failed_groups_info):
-         #      if i < 10: print(f"     - {fail_info}")
-         #      else: print(f"     ... e altri {len(failed_groups_info)-10}"); break
-    else:
-         print(f"--- Raccolta score CONTESTO {timeframe} completata con successo ({total_tasks} task). ---")
-
-    # Ritorna un dizionario con score per tutte le entità valide originali
-    return {entity: all_scores.get(entity, 0) for entity in valid_entities_subset}
+                    result = future.result(timeout=MAX_WAIT_SECONDS * 2.5)
+                    if result and not all(s == 0 for s in result.values()): all_scores.update(result); failed_count -= 1; print(f"       Recuperato ctx (Retry): {group}")
+                    else: [all_scores.setdefault(e, 0) for e in group]
+                except Exception as retry_exc: print(f"       Errore retry ctx {group}: {retry_exc}"); [all_scores.setdefault(e, 0) for e in group]
+    print(f"--- Raccolta score CONTESTO {timeframe} completata. ({total_tasks} task, {failed_count} falliti) ---")
+    return {entity: all_scores.get(entity, 0) for entity in entity_list}
 
 
 # --- Creazione dei file base statici (HTML, CSS, JS) ---
-# (Codice omesso per brevità - invariato)
 def create_static_files():
     """Crea i file HTML, CSS e JS di base nella directory output."""
     try:
@@ -536,34 +459,49 @@ def create_static_files():
         return False
 
 
-# --- FUNZIONE: Generazione output HTML (Modificata per Main_Entity/Original_Query) ---
+# --- FUNZIONE: Generazione output HTML ---
 def generate_html_output(df_final, runtime_info=None):
-    """Genera l'output HTML, includendo Main_Entity e Original_Query."""
+    """Genera l'output HTML con entità principale e originale."""
     try:
+        # Assicurati che la directory output esista
         os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+        # Crea file statici se necessario
         if not os.path.exists(os.path.join(OUTPUT_DIR, "index.html")):
             create_static_files()
 
+        # Prepara la lista di trend per il template
         trend_list = []
-        required_cols = ['Rank', 'Original_Query', 'Main_Entity', 'Discover_Score', 'Score_Avg_now 1-H', 'Score_Avg_now 4-H', 'Score_Avg_now 7-d']
+        # Assicurati che le colonne esistano prima di accedervi
+        required_cols = ['Rank', 'Entita', 'Entita_Principale', 'Entita_Originale', 'Discover_Score', 
+                          'Score_Avg_now 1-H', 'Score_Avg_now 4-H', 'Score_Avg_now 7-d']
         available_cols = df_final.columns
 
-        # Verifica presenza colonne necessarie
         for col in required_cols:
-             if col not in available_cols and col != 'Main_Entity': # Main_Entity può essere None
-                 warnings.warn(f"Colonna '{col}' mancante nel DataFrame finale per l'output HTML.", UserWarning)
+             if col not in available_cols and col not in ['Entita_Principale', 'Entita_Originale']:
+                 warnings.warn(f"Colonna '{col}' mancante nel DataFrame finale per l'output HTML. Verrà usato 0 o 'N/A'.", UserWarning)
 
         for _, row in df_final.iterrows():
-            main_entity = row.get('Main_Entity') # Può essere None
-            original_query = row.get('Original_Query', 'N/A')
+            # Gestisci i casi in cui potrebbero mancare le colonne di entità principale/originale
+            if 'Entita_Principale' in available_cols:
+                entity_principal = row['Entita_Principale']
+            else:
+                entity_principal = row['Entita']
 
-            # Se Main_Entity è None, usa Original_Query come fallback per il display principale
-            display_entity = main_entity if pd.notna(main_entity) else original_query
+            if 'Entita_Originale' in available_cols:
+                entity_original = row['Entita_Originale']
+            else:
+                entity_original = row['Entita']
 
+            # Se entità principale e originale sono uguali, non mostrare l'originale tra parentesi
+            show_original = entity_original != entity_principal
+            
+            # Seleziona e formatta le colonne rilevanti, gestendo quelle mancanti
             trend_data = {
-                'rank': int(row.get('Rank', 0)),
-                'entity': display_entity, # Entità principale da mostrare
-                'original_query': original_query, # Query originale (per tooltip o testo piccolo)
+                'rank': int(row['Rank']) if 'Rank' in available_cols else 0,
+                'entity': entity_principal,
+                'entity_original': entity_original,
+                'show_original': show_original,
                 'discover_score': float(row.get('Discover_Score', 0)),
                 'score_1h': float(row.get('Score_Avg_now 1-H', 0)),
                 'score_4h': float(row.get('Score_Avg_now 4-H', 0)),
@@ -571,32 +509,77 @@ def generate_html_output(df_final, runtime_info=None):
             }
             trend_list.append(trend_data)
 
-        # Prepara i dati per il template (metadati run)
+        # Prepara i dati per il template
         template_data = {
             'run_metadata': {
                 'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 'trends_count': len(trend_list),
                 'top_score': max([t['discover_score'] for t in trend_list]) if trend_list else 0,
                 'runtime_minutes': (runtime_info['end_time'] - runtime_info['start_time']) / 60 if runtime_info and 'start_time' in runtime_info and 'end_time' in runtime_info else 0,
-                'proxies_used': len(proxy_manager.all_proxies)
+                'proxies_used': len(proxy_manager.all_proxies),
+                'entity_extraction': 'Claude AI' if USE_CLAUDE_ENTITY_EXTRACTION else 'Disabilitato'
             }
         }
 
-        # Scrive i dati JS
-        js_data = "const trendData = " + json.dumps(trend_list, indent=2, ensure_ascii=False) + ";\n"
-        js_data += "const runMetadata = " + json.dumps(template_data['run_metadata'], indent=2, ensure_ascii=False) + ";\n"
+        # Prepara i file JS dati (solo questo file viene aggiornato ogni volta)
+        js_data = "const trendData = " + json.dumps(trend_list, indent=2) + ";\n"
+        js_data += "const runMetadata = " + json.dumps(template_data['run_metadata'], indent=2) + ";\n"
 
-        output_js_path = os.path.join(OUTPUT_DIR, 'data.js')
+        with open(os.path.join(OUTPUT_DIR, 'data.js'), 'w', encoding='utf-8') as f:
+            f.write(js_data)
+
+        # Modifica lo script.js per mostrare l'entità originale
         try:
-            with open(output_js_path, 'w', encoding='utf-8') as f:
-                f.write(js_data)
-            print(f"\nOutput HTML (data.js) generato con successo: {output_js_path}")
-            print(f"Ricorda di aggiornare index.html/script.js per mostrare 'original_query' se desiderato.")
-            return True
-        except Exception as e_write:
-             print(f"Errore scrittura file data.js: {e_write}")
-             return False
+            script_js_path = os.path.join(OUTPUT_DIR, 'script.js')
+            if os.path.exists(script_js_path):
+                with open(script_js_path, 'r', encoding='utf-8') as f:
+                    script_content = f.read()
+                
+                # Modifica la funzione renderTrendsTable per mostrare l'entità originale
+                if "row.innerHTML = `" in script_content and "entityDisplay" not in script_content:
+                    # Aggiungi codice per mostrare l'entità originale
+                    modified_content = script_content.replace(
+                        "row.innerHTML = `",
+                        """
+        // Prepara la visualizzazione dell'entità con l'originale se necessario
+        let entityDisplay = item.entity;
+        if (item.show_original) {
+            entityDisplay = `${item.entity}<br><small class="original-query">(${item.entity_original})</small>`;
+        }
+        
+        row.innerHTML = `"""
+                    )
+                    
+                    # Cerca il punto in cui viene mostrata l'entità
+                    modified_content = modified_content.replace(
+                        "<td>${item.entity}</td>",
+                        "<td>${entityDisplay}</td>"
+                    )
+                    
+                    # Aggiungi stile CSS per l'entità originale
+                    if ".original-query {" not in modified_content:
+                        css_addition = """
+/* Stile per l'entità originale */
+.original-query {
+    color: #777;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+"""
+                        # Aggiungi in un punto adatto nel file
+                        with open(os.path.join(OUTPUT_DIR, 'style.css'), 'a', encoding='utf-8') as css_file:
+                            css_file.write(css_addition)
+                    
+                    # Scrivi il file modificato
+                    with open(script_js_path, 'w', encoding='utf-8') as f:
+                        f.write(modified_content)
+                        print("Script.js modificato per mostrare entità originali.")
+        except Exception as e:
+            print(f"Avviso: Non è stato possibile modificare script.js: {e}")
+            # Non fallire l'intera operazione se non possiamo modificare lo script
 
+        print(f"\nOutput HTML generato con successo: {os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)}")
+        return True
     except Exception as e:
         print(f"Errore durante la generazione dell'output HTML: {e}")
         traceback.print_exc()
@@ -604,161 +587,187 @@ def generate_html_output(df_final, runtime_info=None):
 
 
 # ==============================================================================
-# ==================== SCRIPT PRINCIPALE (V8.0 - AI Entity Linking) ============
+# ==================== SCRIPT PRINCIPALE (Heuristic V7.6 con Claude AI) ========
 # ==============================================================================
 if __name__ == "__main__":
     main_start_time = time.time()
     runtime_info = {'start_time': main_start_time}
 
-    # Validazioni parametri (omesse per brevità)
-    # ...
+    # Validazioni
+    if FETCH_VOLUME_CONTEXT:
+        if not CONTEXT_TIMEFRAMES: warnings.warn("FETCH_VOLUME_CONTEXT=True ma CONTEXT_TIMEFRAMES vuoto.", UserWarning)
+        if CONTEXT_N_RUNS <= 0: raise ValueError("CONTEXT_N_RUNS >= 1")
 
-    print(f"Avvio script V8.0: AI Entity Linking + Heuristic Discover Score V7.5")
-    print(f"Formula attuale Score: Vedi definizione funzione 'calculate_discover_score'")
-    print(f"Parametri Penalità V7.5: K={V7D_PENALTY_K}, epsilon={V7D_PENALTY_EPSILON}")
-    print(f"Obiettivo: Identificare entità da query via AI, calcolare score bilanciato.")
-    # ... altri print info ...
+    print(f"Avvio script V7.6: Heuristic Discover Score con integrazione Claude AI per estrazione entità")
+    print(f"Formula attuale: Vedi definizione funzione 'calculate_discover_score'")
+    print(f"Parametri Penalità: K={V7D_PENALTY_K}, epsilon={V7D_PENALTY_EPSILON}")
+    print(f"Obiettivo: Penalizzare Rank alto se V7d è basso (Contesto Top {N_PROCESS_FOR_CONTEXT}, N_RUNS={CONTEXT_N_RUNS})")
+    print(f"MAX_CONCURRENT_PROXIES={MAX_CONCURRENT_PROXIES}, THREADS={MAX_THREADS}")
+    print(f"Output HTML: {os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)}")
 
-    ordered_queries = None # Cambiato nome variabile
+    ordered_entities = None
+    entity_mapping = {}
 
     try:
-        # --- 0. Setup Directory ---
         os.makedirs(CHECKPOINT_DIR, exist_ok=True); print(f"Directory checkpoint: '{CHECKPOINT_DIR}'")
         os.makedirs(OUTPUT_DIR, exist_ok=True); print(f"Directory output: '{OUTPUT_DIR}'")
         os.makedirs(TEMPLATE_DIR, exist_ok=True); print(f"Directory template: '{TEMPLATE_DIR}'")
-        # Verifica esistenza template (omesso per brevità)
-        # ...
 
-        # --- 1. Estrazione Query Grezze da Trends TV ---
-        ordered_queries = extract_ordered_entities() # Ora restituisce lista di query
-        if not ordered_queries: raise Exception("Estrazione iniziale query fallita.")
-        print(f"\nLista Query Grezze Estratta ({len(ordered_queries)} query).")
-        # Salva checkpoint query grezze
-        try:
-            pd.DataFrame({'Rank': range(1, len(ordered_queries) + 1), 'Original_Query': ordered_queries}).to_csv(
-                os.path.join(CHECKPOINT_DIR, "initial_queries_extracted.csv"), index=False, encoding='utf-8-sig')
-            print(f"Lista query grezze salvata.")
-        except Exception as e: print(f"Errore salvataggio checkpoint query grezze: {e}")
+        # Verifica esistenza dei file template
+        for file_name in ["index.html", "style.css", "script.js"]:
+            template_path = os.path.join(TEMPLATE_DIR, file_name)
+            if not os.path.exists(template_path):
+                print(f"ATTENZIONE: File template {file_name} non trovato in {TEMPLATE_DIR}!")
 
-        # Prepara DataFrame iniziale
-        df_final = pd.DataFrame({'Rank': range(1, len(ordered_queries) + 1), 'Original_Query': ordered_queries})
+        # 1. Estrazione Lista Ordinata
+        ordered_entities = extract_ordered_entities()
+        if not ordered_entities: raise Exception("Estrazione iniziale fallita.")
+        print(f"\nLista Ordinata Iniziale Estratta ({len(ordered_entities)} entità).")
+        try: pd.DataFrame({'Rank': range(1, len(ordered_entities) + 1), 'Entita': ordered_entities}).to_csv(os.path.join(CHECKPOINT_DIR, "entities_ordered_extracted.csv"), index=False, encoding='utf-8-sig'); print(f"Lista ordinata salvata.")
+        except Exception as e: print(f"Errore salvataggio checkpoint lista ordinata: {e}")
 
-        # --- 1.5 Estrazione Entità Principali tramite AI ---
-        print("\n--- Avvio Estrazione Entità Principali tramite AI ---")
-        start_ai_time = time.time()
-        # Limita il numero di query inviate all'AI se necessario (es. prime 50-100)
-        # query_to_process_ai = ordered_queries[:100] # Esempio: limita a 100
-        query_to_process_ai = ordered_queries # Processa tutte le query estratte
-        entity_mapping = claude_integration.get_main_entities(query_to_process_ai)
-        ai_duration = time.time() - start_ai_time
-        print(f"--- Fine Estrazione Entità AI (Durata: {ai_duration:.2f}s) ---")
+        # Prepara DataFrame finale
+        df_final = pd.DataFrame({'Rank': range(1, len(ordered_entities) + 1), 'Entita': ordered_entities})
+        
+        # 1.1 NUOVO: Estrazione entità principali con Claude AI
+        if USE_CLAUDE_ENTITY_EXTRACTION:
+            print(f"\n--- Avvio Estrazione Entità Principali con Claude AI ---")
+            try:
+                # Top N entità da analizzare con Claude
+                entities_for_claude = ordered_entities[:N_PROCESS_FOR_CONTEXT]
+                
+                # Chiama l'API di Claude
+                entity_mapping = extract_entities_from_trends(
+                    trend_queries=entities_for_claude,
+                    api_key=CLAUDE_API_KEY,
+                    model=CLAUDE_MODEL,
+                    min_confidence=CLAUDE_MIN_CONFIDENCE,
+                    batch_size=CLAUDE_BATCH_SIZE,
+                    delay=CLAUDE_BATCH_DELAY
+                )
+                
+                # Crea un DataFrame con le entità estratte
+                extracted_entities_data = []
+                for query, data in entity_mapping.items():
+                    extracted_entities_data.append({
+                        'Query': query,
+                        'Entita_Principale': data['entity'],
+                        'Confidenza': data['confidence'],
+                        'Status': data['status'],
+                        'Fallback': data['fallback_used']
+                    })
+                
+                extracted_df = pd.DataFrame(extracted_entities_data)
+                
+                # Salva le entità estratte come checkpoint
+                try:
+                    extracted_df.to_csv(os.path.join(CHECKPOINT_DIR, "extracted_entities.csv"), index=False, encoding='utf-8-sig')
+                    print(f"Entità estratte salvate come checkpoint.")
+                except Exception as e:
+                    print(f"Errore salvataggio entità estratte: {e}")
+                
+                # Aggiungi le entità estratte al DataFrame finale
+                df_final['Entita_Originale'] = df_final['Entita']
+                df_final['Entita_Principale'] = df_final['Entita'].map(lambda x: entity_mapping.get(x, {'entity': x})['entity'])
+                df_final['Confidenza_Entita'] = df_final['Entita'].map(lambda x: entity_mapping.get(x, {'confidence': 0.0})['confidence'])
+                
+                print(f"Estrazione entità completata. Estratte {len(entity_mapping)} entità.")
+                
+                # Statistiche
+                success_count = sum(1 for r in entity_mapping.values() if r["status"] == "success")
+                fallback_count = sum(1 for r in entity_mapping.values() if r["fallback_used"])
+                print(f"Statistiche: {success_count} successi, {fallback_count} fallback utilizzati.")
+                
+            except Exception as e:
+                print(f"Errore durante l'estrazione delle entità: {e}")
+                traceback.print_exc()
+                print("Continuo con le entità originali.")
+                
+                # Fallback: usa le entità originali
+                df_final['Entita_Originale'] = df_final['Entita']
+                df_final['Entita_Principale'] = df_final['Entita']
+                df_final['Confidenza_Entita'] = 0.0
+                
+                entity_mapping = {entity: {"entity": entity, "confidence": 0.0, "status": "system_error", "fallback_used": True} 
+                                 for entity in ordered_entities[:N_PROCESS_FOR_CONTEXT]}
+        else:
+            # Se non usiamo Claude, semplicemente copiamo le entità originali
+            print("Estrazione entità con Claude disabilitata, uso entità originali.")
+            df_final['Entita_Originale'] = df_final['Entita']
+            df_final['Entita_Principale'] = df_final['Entita']
+            df_final['Confidenza_Entita'] = 1.0
 
-        # Mappa i risultati nel DataFrame
-        df_final['Main_Entity'] = df_final['Original_Query'].map(entity_mapping)
-        # Gestisci casi in cui la query non era in quelle processate (se abbiamo limitato query_to_process_ai)
-        # o se l'AI ha fallito/restituito None (già gestito in get_main_entities che ritorna None)
-        df_final['Main_Entity'] = df_final['Main_Entity'].fillna(None) # Assicura che i mancanti siano None
-
-        # Salva checkpoint dopo AI
-        try:
-             df_final[['Rank', 'Original_Query', 'Main_Entity']].to_csv(
-                 os.path.join(CHECKPOINT_DIR, "queries_with_ai_entities.csv"), index=False, encoding='utf-8-sig')
-             print(f"Checkpoint con entità AI salvato.")
-        except Exception as e: print(f"Errore salvataggio checkpoint entità AI: {e}")
-
-
-        # --- 2. Raccolta Score di Contesto (per le Main_Entity VALIDE) ---
-        # Inizializza colonne score
+        # Assicurati che le colonne per i punteggi esistano
         for tf in CONTEXT_TIMEFRAMES:
-            col_name = f'Score_Avg_{tf}'
-            if col_name not in df_final.columns:
+             col_name = f'Score_Avg_{tf}'
+             if col_name not in df_final.columns:
                  df_final[col_name] = 0.0
 
+        # 2. Raccolta Score di Contesto (MODIFICATO per usare entità principali)
         if FETCH_VOLUME_CONTEXT and N_PROCESS_FOR_CONTEXT > 0 and CONTEXT_TIMEFRAMES:
-            print(f"\n--- Avvio Raccolta Score Contesto per Top {N_PROCESS_FOR_CONTEXT} Entità Valide ---")
+            print(f"\n--- Avvio Raccolta Score Contesto per Top {N_PROCESS_FOR_CONTEXT} Entità ---")
+            
+            # Ottieni la lista di entità principali uniche da analizzare
+            entities_for_context = df_final.loc[:N_PROCESS_FOR_CONTEXT-1, 'Entita_Principale'].unique().tolist()
+            print(f"Analisi contesto per {len(entities_for_context)} entità principali uniche.")
+            
+            timeframe_context_results = defaultdict(lambda: defaultdict(list))
+            for run in range(1, CONTEXT_N_RUNS + 1): # Loop N_RUNS
+                print(f"\n===== INIZIO RACCOLTA CONTESTO - RUN {run}/{CONTEXT_N_RUNS} ====="); rst = time.time()
+                for tf in CONTEXT_TIMEFRAMES:
+                    scores = get_all_context_scores(entities_for_context, tf)
+                    for entity, score in scores.items(): timeframe_context_results[tf][entity].append(score)
+                    try: # Checkpoint
+                        pd.DataFrame({'Entita':list(scores.keys()), f'Score_{tf}_Run{run}':list(scores.values())}).to_csv(os.path.join(CHECKPOINT_DIR, f"context_run{run}_{tf.replace(' ','_')}_scores.csv"), index=False, encoding='utf-8-sig')
+                    except Exception as e: print(f"Err salvataggio checkpoint ctx {run}/{tf}: {e}")
+                    print(f"       Run {run}/{CONTEXT_N_RUNS}: Contesto {tf} completato.")
+                print(f"===== FINE RACCOLTA CONTESTO - RUN {run}/{CONTEXT_N_RUNS} (Durata: {time.time() - rst:.2f}s) =====")
+                if run < CONTEXT_N_RUNS: time.sleep(random.uniform(10, 20))
 
-            # Seleziona le righe tra le prime N originali che hanno una Main_Entity valida
-            top_n_rows_with_query = df_final.head(N_PROCESS_FOR_CONTEXT * 2) # Prendi un buffer più grande
-            valid_entities_df = top_n_rows_with_query.dropna(subset=['Main_Entity'])
-
-            # Estrai le entità uniche da queste righe, limitando al numero desiderato
-            entities_for_context = valid_entities_df['Main_Entity'].unique().tolist()
-            if len(entities_for_context) > N_PROCESS_FOR_CONTEXT:
-                 # Se abbiamo più di N entità uniche valide, potremmo prendere quelle dalle righe con Rank originale più alto
-                 # O semplicemente prendere le prime N uniche trovate
-                 entities_for_context = entities_for_context[:N_PROCESS_FOR_CONTEXT]
-
-            if not entities_for_context:
-                 print("Nessuna entità valida trovata tra le prime query per raccogliere contesto.")
-            else:
-                print(f"Selezionate {len(entities_for_context)} entità uniche valide per il contesto.")
-                timeframe_context_results = defaultdict(lambda: defaultdict(list))
-                for run in range(1, CONTEXT_N_RUNS + 1):
-                    print(f"\n===== INIZIO RACCOLTA CONTESTO - RUN {run}/{CONTEXT_N_RUNS} ====="); rst = time.time()
-                    for tf in CONTEXT_TIMEFRAMES:
-                        # Passa le ENTITÀ VALIDE alla funzione di raccolta scores
-                        scores = get_all_context_scores(entities_for_context, tf)
-                        # Aggiorna i risultati per ogni entità
-                        for entity, score in scores.items():
-                             if entity in entities_for_context: # Sicurezza extra
-                                 timeframe_context_results[tf][entity].append(score)
-                        # Checkpoint (invariato)
-                        try:
-                            pd.DataFrame({'Entita':list(scores.keys()), f'Score_{tf}_Run{run}':list(scores.values())}).to_csv(os.path.join(CHECKPOINT_DIR, f"context_run{run}_{tf.replace(' ','_')}_scores.csv"), index=False, encoding='utf-8-sig')
-                        except Exception as e: print(f"Err salvataggio checkpoint ctx {run}/{tf}: {e}")
-                        # Stampa completamento timeframe rimossa da qui, ora è in get_all_context_scores
-
-                    print(f"===== FINE RACCOLTA CONTESTO - RUN {run}/{CONTEXT_N_RUNS} (Durata: {time.time() - rst:.2f}s) =====")
-                    if run < CONTEXT_N_RUNS: time.sleep(random.uniform(10, 20))
-
-                # Calcola medie contesto e aggiorna df_final usando Main_Entity
-                print("\n    Calcolo Score Medi di Contesto...")
-                for tf_agg in CONTEXT_TIMEFRAMES:
-                    sc_avg_col = f'Score_Avg_{tf_agg}';
-                    avg_s = {e: sum(s)/len(s) if s else 0 for e, s in timeframe_context_results[tf_agg].items()}
-                    # Mappa le medie al DataFrame usando la colonna 'Main_Entity'
-                    df_final[sc_avg_col] = df_final['Main_Entity'].map(avg_s).fillna(0);
-                    print(f"       Calcolata media contesto per {tf_agg} e mappata su Main_Entity.")
-                print("--- Fine Raccolta Score Contesto ---")
+            # Calcola medie contesto e aggiorna df_final (MODIFICATO per mappare alle entità originali)
+            print("\n    Calcolo Score Medi di Contesto...")
+            for tf_agg in CONTEXT_TIMEFRAMES:
+                sc_avg_col = f'Score_Avg_{tf_agg}';
+                avg_s = {e: sum(s)/len(s) if s else 0 for e, s in timeframe_context_results[tf_agg].items()}
+                
+                # Mappa gli score delle entità principali alle entità originali
+                df_final[sc_avg_col] = df_final['Entita_Principale'].map(avg_s).fillna(0)
+                print(f"       Calcolata media contesto per {tf_agg}.")
+                
+            print("--- Fine Raccolta Score Contesto ---")
         else:
              print("\n--- Raccolta Score Contesto Saltata ---")
-             # Assicura colonne score esistano con 0.0
              for tf in CONTEXT_TIMEFRAMES:
                  if f'Score_Avg_{tf}' not in df_final.columns: df_final[f'Score_Avg_{tf}'] = 0.0
 
-
         # ========================================================================
-        # --- 3. Calcolo Heuristic Discover Score (V7.5 via Funzione Dedicata) ---
+        # --- 3. Calcolo Heuristic Discover Score (Tramite Funzione Dedicata V7.5) ---
         # ========================================================================
         print("\n    Calcolo Heuristic Discover Score V7.5 (via funzione)...")
         discover_score_col = 'Discover_Score'
         score_4h_col = 'Score_Avg_now 4-H'
         score_7d_col = 'Score_Avg_now 7-d'
 
+        # Verifica presenza colonne necessarie
         if score_4h_col in df_final.columns and score_7d_col in df_final.columns and 'Rank' in df_final.columns:
+            # Estrai le serie, assicurandoti che siano numeriche e nei range corretti
             score_4h = pd.to_numeric(df_final[score_4h_col], errors='coerce').fillna(0).clip(lower=0)
             score_7d = pd.to_numeric(df_final[score_7d_col], errors='coerce').fillna(0).clip(lower=0)
-            rank_series = pd.to_numeric(df_final['Rank'], errors='coerce').fillna(1).clip(lower=1)
+            rank_series = pd.to_numeric(df_final['Rank'], errors='coerce').fillna(1).clip(lower=1) # Rank >= 1
 
-            # --- CHIAMA LA FUNZIONE DEDICATA PER IL CALCOLO ---
+            # --- CHIAMA LA FUNZIONE DEDICATA PER IL CALCOLO (V7.5) ---
+            # Passa i parametri K ed epsilon definiti all'inizio
             df_final[discover_score_col] = calculate_discover_score(
-                rank_series, score_4h, score_7d # K e epsilon usano i default globali
+                rank_series, score_4h, score_7d,
+                k_penalty=V7D_PENALTY_K,
+                epsilon=V7D_PENALTY_EPSILON
             )
-            # ----------------------------------------------------
+            # ---------------------------------------------------------
 
-            # --- Fallback Score a 0 per righe senza Main_Entity valida ---
-            # Queste righe non hanno ricevuto score di contesto e non dovrebbero averne uno finale
-            rows_without_entity = df_final['Main_Entity'].isnull()
-            count_no_entity = rows_without_entity.sum()
-            if count_no_entity > 0:
-                 df_final.loc[rows_without_entity, discover_score_col] = 0
-                 print(f"        Score impostato a 0 per {count_no_entity} righe senza Main_Entity valida.")
-            # -----------------------------------------------------------
-
-            print(f"       Colonna '{discover_score_col}' calcolata.")
+            print(f"       Colonna '{discover_score_col}' calcolata tramite funzione 'calculate_discover_score'.")
         else:
             missing_cols = [col for col in [score_4h_col, score_7d_col, 'Rank'] if col not in df_final.columns]
-            warnings.warn(f"Colonne necessarie ({', '.join(missing_cols)}) mancanti, impossibile calcolare Discover_Score.", UserWarning)
+            warnings.warn(f"Colonne necessarie ({', '.join(missing_cols)}) mancanti, impossibile calcolare Discover_Score V7.5.", UserWarning)
             if discover_score_col not in df_final.columns:
                  df_final[discover_score_col] = 0.0
         # ========================================================================
@@ -774,7 +783,8 @@ if __name__ == "__main__":
 
         # --- 5. Salva il DataFrame finale come CSV (per backup) ---
         try:
-            backup_filename = "final_data_v8.0.csv" # Aggiorna versione
+            # Aggiorna nome file per riflettere la versione
+            backup_filename = "final_data_v7.6.csv"
             df_final.to_csv(os.path.join(CHECKPOINT_DIR, backup_filename), index=False, encoding='utf-8-sig')
             print(f"\nDataFrame finale salvato come backup in: {os.path.join(CHECKPOINT_DIR, backup_filename)}")
         except Exception as e:
@@ -783,30 +793,29 @@ if __name__ == "__main__":
         # --- 6. Genera l'output HTML ---
         runtime_info['end_time'] = time.time()
         html_result = generate_html_output(df_final, runtime_info)
-        # (Messaggi di successo/errore già in generate_html_output)
+
+        if html_result:
+            print("\nGenerazione output HTML completata con successo.")
+        else:
+            print("\n!!! Errore durante la generazione dell'output HTML. !!!")
 
         # --- 7. Stampa Top N Finale (Ordinato per Discover Score) ---
-        print(f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score Heuristico V7.5 / AI V8.0) ---")
+        print(f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score Heuristico V7.6) ---")
         cols_to_show = []
-        # Ordine colonne per leggibilità
+        if 'Entita_Principale' in df_final.columns: cols_to_show.append('Entita_Principale')
+        if 'Entita_Originale' in df_final.columns: cols_to_show.append('Entita_Originale')
         if discover_score_col in df_final.columns: cols_to_show.append(discover_score_col)
         if 'Rank' in df_final.columns: cols_to_show.append('Rank')
-        if 'Main_Entity' in df_final.columns: cols_to_show.append('Main_Entity')
-        if 'Original_Query' in df_final.columns: cols_to_show.append('Original_Query')
 
         if FETCH_VOLUME_CONTEXT:
-            # Mostra solo gli score usati nella formula V7.5 + 1h per confronto
-            for tf_suffix in ['now 1-H', 'now 4-H', 'now 7-d']:
-                col_name = f'Score_Avg_{tf_suffix}'
+            for tf in CONTEXT_TIMEFRAMES:
+                col_name = f'Score_Avg_{tf}'
                 if col_name in df_final.columns:
                     cols_to_show.append(col_name)
 
         try:
-            # Aumenta larghezza per nuove colonne
-            pd.set_option('display.max_rows', TOP_N_FINAL_DISPLAY + 5); pd.set_option('display.width', 220); pd.set_option('display.float_format', '{:.3f}'.format)
-            # Seleziona solo colonne esistenti
-            cols_to_show_existing = [col for col in cols_to_show if col in df_final.columns]
-            print(df_final[cols_to_show_existing].head(TOP_N_FINAL_DISPLAY).to_string(index=False))
+            pd.set_option('display.max_rows', TOP_N_FINAL_DISPLAY + 5); pd.set_option('display.width', 180); pd.set_option('display.float_format', '{:.3f}'.format)
+            print(df_final[cols_to_show].head(TOP_N_FINAL_DISPLAY).to_string(index=False))
         except KeyError as ke: print(f"Errore colonne stampa finale: {ke}. Disponibili: {df_final.columns.tolist()}")
         except Exception as e_print: print(f"Errore imprevisto durante la stampa finale: {e_print}")
         finally: pd.reset_option('display.max_rows'); pd.reset_option('display.width'); pd.reset_option('display.float_format')
@@ -814,13 +823,11 @@ if __name__ == "__main__":
     except Exception as main_exc: print(f"\n!!! ERRORE CRITICO SCRIPT: {type(main_exc).__name__} - {main_exc} !!!"); traceback.print_exc()
     finally: # Stampa statistiche proxy
         print("\n--- Statistiche Proxy Rilevate (Fine Esecuzione) ---")
-        # (Codice statistiche proxy omesso per brevità - invariato)
         try:
             ps = proxy_manager.get_proxy_stats_summary(); print(f"Successi: {ps.get('total_success', 0)}"); print(f"Fail 429: {ps.get('total_fail_429', 0)}"); print(f"Fail Proxy/Timeout/5xx: {ps.get('total_fail_proxy_timeout', 0)}"); print(f"Fail Altri/Parse: {ps.get('total_fail_other_parse', 0)}")
             tfp = ps.get('top_failing_proxies', {});
             if tfp: print("\nTop Proxy con Fallimenti:"); [print(f"    - {pid}: Succ:{d['success']}, Fails Cons:{d['consecutive_fails']} (429:{d['fail_429']}, P/T:{d['fail_proxy/timeout']}, O/P:{d['fail_other/parse']})") for pid, d in tfp.items()]
             else: print("\nNessun fallimento proxy.")
         except Exception as stats_exc: print(f"Errore stampa statistiche proxy: {stats_exc}")
-
         main_end_time = time.time(); total_duration = main_end_time - main_start_time
         print(f"\n--- Script completato in {total_duration:.2f} secondi ({total_duration/60:.2f} minuti) ---")
