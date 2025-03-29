@@ -69,39 +69,37 @@ select { padding: 0.4rem 0.6rem; border: 1px solid var(--border-color); border-r
 
 /* Tabella */
 .table-container { width: 100%; overflow-x: auto; border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.04); background-color: var(--card-color); }
-.trends-table { width: 100%; border-collapse: collapse; /* Rimosso min-width */ table-layout: fixed; }
-.trends-table th, .trends-table td { padding: 0.75rem 0.8rem; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; }
+.trends-table { width: 100%; border-collapse: collapse; /* Rimosso table-layout: fixed e min-width */ }
+.trends-table th, .trends-table td { padding: 0.75rem 0.8rem; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: middle; /* Ripristina allineamento medio di default */ white-space: nowrap; /* Mantieni nowrap per la maggior parte delle celle */ }
 
-/* Cella Trend */
-.trends-table .trend-cell { white-space: normal; vertical-align: top; width: 35%; min-width: 180px; text-overflow: initial; }
-.main-entity-container { display: flex; align-items: center; flex-wrap: nowrap; }
-.main-entity { font-weight: 500; display: inline; margin-right: 5px; flex-grow: 1; }
-/* Bottone Toggle */
-.toggle-ai-btn { background: none; border: none; color: var(--secondary-color); cursor: pointer; padding: 0 3px; font-size: 0.9em; vertical-align: middle; display: inline-block; line-height: 1; flex-shrink: 0; }
-.toggle-ai-btn:hover { color: var(--primary-color); }
-
+/* Cella Trend: Permette a capo, allinea sopra */
+.trends-table .trend-cell {
+    white-space: normal; /* Permetti a capo per nome trend e entità */
+    vertical-align: top;
+    /* Rimuovi width fissa, lascia che si adatti, ma con un min-width */
+    min-width: 200px; /* O anche meno se necessario */
+    /* Rimuovi text-overflow per questa cella */
+    overflow: visible;
+    text-overflow: clip;
+}
+.main-entity {
+    font-weight: 500;
+    display: block; /* Trend principale su una riga */
+    margin-bottom: 4px; /* Spazio prima delle entità */
+}
 
 /* Stili Header Tabella */
-.trends-table th { background-color: #f8f9fa; color: var(--primary-color); font-weight: 600; position: sticky; top: 0; z-index: 10; border-bottom-width: 2px; white-space: nowrap; }
-/* Larghezze indicative per table-layout: fixed */
-.trends-table th:nth-child(1) { width: 40px; }
-.trends-table th:nth-child(2) { width: 65px; }
-.trends-table th:nth-child(3) { width: 35%; }
-.trends-table th:nth-child(4) { width: 120px; }
-.trends-table th:nth-child(5),
-.trends-table th:nth-child(6),
-.trends-table th:nth-child(7) { width: 55px; }
-.trends-table th:nth-child(8) { width: 100px; }
+.trends-table th { background-color: #f8f9fa; color: var(--primary-color); font-weight: 600; position: sticky; top: 0; z-index: 10; border-bottom-width: 2px; }
+/* Rimosse larghezze fisse th, lascia che il browser decida */
 
 
-/* Altri stili tabella */
+/* Altri stili tabella (badge, chart, score, indicatori) */
 .trends-table tr:last-child td { border-bottom: none; }
 .trends-table tbody tr:hover { background-color: #e9f5ff; }
 .rank-badge { display: inline-block; min-width: 1.8rem; padding: 0.15rem 0.4rem; text-align: center; border-radius: 4px; font-weight: bold; font-size: 0.85rem; background-color: var(--secondary-color); color: var(--badge-text); line-height: 1.4; }
 .top-10 { background-color: var(--accent-color); }
 .top-25 { background-color: var(--trending-neutral); }
-/* Container Grafico */
-.trend-chart-container { width: 100px; height: 35px; min-width: 100px; /* border: 1px dotted red; */ /* Rimuovi/commenta bordo debug */ }
+.trend-chart-container { width: 100px; height: 35px; min-width: 100px; }
 .chart-fallback { font-size: 10px; color: #aaa; text-align: center; display: block; line-height: 35px; }
 .score { font-weight: 600; white-space: nowrap; }
 .trend-indicator { margin-left: 0.4rem; font-size: 0.8rem; display: inline-block; width: 1.2em; text-align: center; }
@@ -116,19 +114,19 @@ select { padding: 0.4rem 0.6rem; border: 1px solid var(--border-color); border-r
 .hot-trend td:first-child { border-left: 3px solid var(--hot-color); }
 .hot-indicator { display: inline-block; background-color: var(--hot-color); color: white; font-weight: bold; font-size: 0.7rem; padding: 1px 4px; border-radius: 3px; margin-left: 5px; vertical-align: middle; line-height: 1; }
 
-/* --- Stili per Entità AI Collapsible + Scorrimento Interno --- */
-.extracted-entities.collapsible {
-    font-size: 0.8rem; color: #555; margin-top: 6px; line-height: 1.4;
-    display: block; width: 100%; overflow: hidden; box-sizing: border-box;
-    padding: 0; cursor: default; max-height: 0;
-    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+/* --- Stili SEMPLIFICATI per Entità AI (visibili sotto) --- */
+.extracted-entities {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 5px; /* Spazio da main-entity */
+    line-height: 1.3; /* Leggermente compatto */
+    display: block;  /* Sta sotto */
+    white-space: normal; /* Permette al testo di andare a capo! */
+    word-break: break-word; /* Forza a capo per parole lunghe */
 }
-.extracted-entities.collapsible.visible { max-height: 40px; padding: 3px 0; }
-.scrolling-text-inner { display: inline-block; white-space: nowrap; padding-left: 100%; animation: none; }
-.extracted-entities.collapsible.visible .scrolling-text-inner { animation: marquee-scroll-inner 25s linear infinite; }
-@keyframes marquee-scroll-inner { 0% { transform: translateX(0%); } 100% { transform: translateX(-210%); } }
-.extracted-entities.collapsible:hover .scrolling-text-inner { animation-play-state: paused; }
-/* --- Fine Stili Collapsible --- */
+/* Rimosse tutte le regole per .collapsible, .visible, .scrolling-text-inner, @keyframes */
+/* --- Fine Stili Entità AI --- */
+
 
 /* Messaggi e Footer */
 .no-results-message { text-align: center; padding: 20px; color: var(--text-light); font-style: italic; background-color: var(--card-color); border: 1px solid var(--border-color); border-radius: 6px; margin-top: 1rem; }
@@ -139,10 +137,9 @@ footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--tex
 
 /* Responsive */
 @media (max-width: 992px) {
+    /* Nascondi 4h, 7d */
     .trends-table th:nth-child(6), .trends-table td:nth-child(6),
     .trends-table th:nth-child(7), .trends-table td:nth-child(7) { display: none; }
-    .trends-table .trend-cell { width: auto; min-width: 180px; }
-    .trends-table th:nth-child(3) { width: auto; }
     .trend-chart-container { width: 90px; height: 30px; }
 }
 
@@ -160,21 +157,21 @@ footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--tex
     /* Nascondi 1h e Grafico */
     .trends-table th:nth-child(5), .trends-table td:nth-child(5),
     .trends-table th:nth-child(8), .trends-table td:nth-child(8) { display: none; }
-    .trends-table th, .trends-table td { padding: 0.5rem 0.4rem; font-size: 0.8rem; }
+
+    /* Aumenta padding verticale per fare spazio a entità */
+    .trends-table th, .trends-table td { padding: 0.8rem 0.5rem; font-size: 0.8rem; } /* Aumentato padding */
+    .trends-table .trend-cell { padding-top: 0.8rem; padding-bottom: 0.8rem; } /* Padding extra per cella trend */
+
     .rank-badge { font-size: 0.7rem; padding: 0.1rem 0.3rem; min-width: 1.4rem;}
     .score { font-size: 0.85rem; }
-    .extracted-entities { font-size: 0.75rem; }
-    .extracted-entities.collapsible.visible .scrolling-text-inner { animation-duration: 20s; }
+    .extracted-entities { font-size: 0.75rem; line-height: 1.4; } /* Aggiusta line-height se necessario */
     .hot-indicator { font-size: 0.65rem; }
-    .trends-table .trend-cell { min-width: 150px; }
-    .toggle-ai-btn { font-size: 0.85em; }
 }
 
 @media (max-width: 480px) {
      /* Nascondi Rank */
      .trends-table th:nth-child(2), .trends-table td:nth-child(2) { display: none; }
-     .trends-table th, .trends-table td { padding: 0.4rem 0.3rem; font-size: 0.75rem; }
-     .trends-table .trend-cell { min-width: auto; } /* Lascia che si adatti */
+     .trends-table th, .trends-table td { padding: 0.6rem 0.4rem; font-size: 0.75rem; } /* Aumentato padding anche qui */
+     .trends-table .trend-cell { padding-top: 0.6rem; padding-bottom: 0.6rem; min-width: 150px;} /* Min width per cella trend */
      .score { font-size: 0.8rem; }
-     .extracted-entities.collapsible.visible .scrolling-text-inner { animation-duration: 15s; }
 }
