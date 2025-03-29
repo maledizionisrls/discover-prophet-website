@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof trendData === 'undefined' || typeof runMetadata === 'undefined') {
         console.error('Errore critico: file data.js non caricato o vuoto.');
         displayErrorMessage("Errore nel caricamento dei dati (data.js mancante o non valido). Impossibile visualizzare la dashboard.");
-        return; // Interrompi esecuzione se i dati mancano
+        return;
     }
     if (typeof trendData !== 'object' || !Array.isArray(trendData)) {
          console.error('Errore critico: trendData in data.js non è un array valido.');
@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
         currentYearEl.textContent = new Date().getFullYear();
     }
     loadMetadata();
-    // Aggiungi un try-catch attorno a renderTrendsTable per sicurezza
     try {
         renderTrendsTable(trendData);
     } catch (error) {
@@ -35,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function displayErrorMessage(message) {
     const tableBody = document.getElementById('trendsTableBody');
     if(tableBody) {
-        tableBody.innerHTML = `<tr class="error-row"><td colspan="8" style="text-align: center; padding: 30px; color: red;">${escapeHtml(message)}</td></tr>`;
+        tableBody.innerHTML = `<tr class="error-row"><td colspan="8">${escapeHtml(message)}</td></tr>`; // Usa colspan 8 per sicurezza
     }
     const controls = document.querySelector('.controls'); if(controls) controls.style.display = 'none';
     const stats = document.querySelector('.stats-container'); if(stats) stats.style.display = 'none';
@@ -89,14 +88,14 @@ function setupEventListeners() {
         if (sortBy) sortBy.addEventListener('change', sortTable);
         if (sortOrder) sortOrder.addEventListener('change', sortTable);
 
-        // RIMOSSO event listener per '.toggle-ai-btn'
+        // NESSUN event listener per il toggle qui
 
     } catch (error) {
         console.error("Errore durante setupEventListeners:", error);
     }
 }
 
-// Renderizza la tabella delle tendenze (SENZA bottone toggle)
+// Renderizza la tabella delle tendenze (SENZA toggle, SENZA testo HOT)
 function renderTrendsTable(data) {
     const tableBody = document.getElementById('trendsTableBody');
     if (!tableBody) { console.error("Elemento 'trendsTableBody' non trovato."); return; }
@@ -118,9 +117,9 @@ function renderTrendsTable(data) {
         row.dataset.score7d = String(item.score_7d || 0);
         row.dataset.aiEntities = String(item.extracted_entities || '').toLowerCase();
 
-        // Logica HOT (versione originale, meno restrittiva)
-        const isHot = isEntityHotOriginal(item.score_1h, item.score_4h, item.score_7d); // Usa funzione originale
-        if (isHot) row.classList.add('hot-trend');
+        // Applica classe .hot-trend se necessario (USA VERSIONE ORIGINALE/MENO RESTRITTIVA)
+        const isHot = isEntityHotOriginal(item.score_1h, item.score_4h, item.score_7d);
+        if (isHot) row.classList.add('hot-trend'); // Questa classe applica lo sfondo giallo
 
         // Badge Rank
         let rankBadgeClass = '';
@@ -131,16 +130,16 @@ function renderTrendsTable(data) {
         // Entità principale
         let entityDisplay = escapeHtml(item.entity || 'N/A');
 
-        // --- LOGICA SEMPLIFICATA PER extracted_entities ---
+        // --- LOGICA SEMPLIFICATA PER VISUALIZZARE extracted_entities ---
         let extractedEntitiesHtml = '';
         if (item.extracted_entities && typeof item.extracted_entities === 'string' && item.extracted_entities.trim() !== '') {
              const entitiesCleaned = item.extracted_entities.trim();
-             // Crea semplicemente il div, senza classi 'collapsible' o 'visible'
+             // Crea semplicemente il div, SENZA classi extra
              extractedEntitiesHtml = `<div class="extracted-entities" title="Entità suggerite da AI">${escapeHtml(entitiesCleaned)}</div>`;
         }
         // --- FINE LOGICA SEMPLIFICATA ---
 
-        // Costruzione HTML riga (SENZA .main-entity-container e toggleButtonHtml)
+        // Costruzione HTML riga (SENZA toggle button E SENZA SPAN HOT)
         row.innerHTML = `
             <td>${index + 1}</td>
             <td><span class="rank-badge ${rankBadgeClass}">${item.rank || 0}</span></td>
@@ -149,8 +148,7 @@ function renderTrendsTable(data) {
                  ${extractedEntitiesHtml} </td>
             <td class="score">
                 ${(item.discover_score || 0).toFixed(3)} ${trendIndicator}
-                ${isHot ? '<span class="hot-indicator" title="Trend in forte crescita recente">HOT</span>' : ''}
-            </td>
+                </td>
             <td>${(item.score_1h || 0).toFixed(1)}</td>
             <td>${(item.score_4h || 0).toFixed(1)}</td>
             <td>${(item.score_7d || 0).toFixed(1)}</td>
@@ -161,12 +159,15 @@ function renderTrendsTable(data) {
         tableBody.appendChild(row);
     });
 
-    // Creazione grafici (assicurati che questa parte sia corretta)
+    // Creazione grafici (assicurati che questa parte sia robusta)
     console.log("Avvio creazione grafici...");
     requestAnimationFrame(() => {
         console.log(`Inizio loop creazione grafici per ${data.length} elementi.`);
         if (typeof Chart === 'undefined') {
-             console.error("Chart.js non è caricato!"); // Verifica caricamento libreria
+             console.error("Chart.js non è caricato!");
+             // Mostra errore all'utente nella prima cella grafico?
+             const firstChartContainer = document.getElementById('chart-0');
+             if (firstChartContainer) firstChartContainer.innerHTML = '<span class="chart-fallback" style="color:red;">ChartJS Err!</span>';
              return;
         }
         data.forEach((item, index) => {
@@ -177,8 +178,7 @@ function renderTrendsTable(data) {
                  if(container) { // Controlla se il container esiste
                     createTrendChart(containerId, chartData);
                  } else {
-                    // Non stampare warning per ogni grafico su mobile dove la colonna è nascosta
-                    // console.warn(`Container ${containerId} non trovato nel DOM.`);
+                    // Non loggare warning per ogni grafico su mobile (colonna nascosta)
                  }
             } catch (chartError) {
                  console.error(`Errore durante la chiamata a createTrendChart per ${containerId}:`, chartError);
@@ -209,7 +209,7 @@ function isEntityHotOriginal(score1h, score4h, score7d) {
 // Crea un grafico di tendenza per una entità
 function createTrendChart(containerId, dataPoints) {
     const container = document.getElementById(containerId);
-    if (!container) return;
+    if (!container) return; // Esce se il container non esiste nel DOM
 
     container.innerHTML = ''; // Pulisce container
     const canvas = document.createElement('canvas');
@@ -219,7 +219,7 @@ function createTrendChart(containerId, dataPoints) {
     const chartContext = canvas.getContext('2d');
     if (!chartContext) {
         console.error(`Impossibile ottenere il contesto 2D per ${containerId}`);
-        container.innerHTML = `<span class="chart-fallback">Ctx Err</span>`;
+        container.innerHTML = `<span class="chart-fallback">Ctx Err</span>`; // Fallback
         return;
     }
 
