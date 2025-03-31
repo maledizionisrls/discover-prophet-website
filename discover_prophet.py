@@ -2,7 +2,7 @@
 
 # 🚀 Script Ottimizzato per Google Trends - V7.7 (Docs Only & OpenAI)
 #    Lavora direttamente con i file nella cartella 'docs'.
-#    Eliminata la cartella 'templates' e la logica di copia file.
+#    Eliminata la cartella 'templates' e la logica di copia file. 
 #    Genera solo 'docs/data.js'.
 #    Integra OpenAI per estrarre entità chiave dalle query di tendenza.
 #    Legge la chiave API OpenAI dalla variabile d'ambiente OPENAI_API_KEY.
@@ -104,7 +104,7 @@ if FETCH_OPENAI_ENTITIES:
             FETCH_OPENAI_ENTITIES = False
 
 # --- Parametri Formula Discover Score V7.5 ---
-V7D_PENALTY_K = 15.0
+V7D_PENALTY_K = 50.0
 V7D_PENALTY_EPSILON = 0.1
 
 # --- Parametri Gestione Proxy e Concorrenza ---
