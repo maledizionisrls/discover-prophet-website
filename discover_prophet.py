@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# 🚀 Script Ottimizzato per Google Trends - V7.8 (Docs Only & OpenAI + Saturation Score)
+# 🚀 Script Ottimizzato per Google Trends - V7.9 (Docs Only & OpenAI + Saturation Score Corretto)
 #    Lavora direttamente con i file nella cartella 'docs'.
 #    Eliminata la cartella 'templates' e la logica di copia file.
 #    Genera solo 'docs/data.js'.
 #    Integra OpenAI per estrarre entità chiave dalle query di tendenza.
 #    Legge la chiave API OpenAI dalla variabile d'ambiente OPENAI_API_KEY.
 #    **Formula V7.9 per Discover Score (Numeratore Pesato).**
-#    **NUOVO: Aggiunge il calcolo della Saturazione tramite scraping SERP intitle.**
+#    **Corretto: Calcolo Saturazione usa Headers specifici da ConsistentBrowserProfile.**
 
 # --- Import Librerie Essenziali ---
 import requests
@@ -99,13 +99,14 @@ OPENAI_MAX_RETRIES = 3
 OPENAI_REQUEST_TIMEOUT = 30
 MAX_OPENAI_THREADS = 10
 
-# --- Parametri Calcolo Saturazione (NUOVO) ---
+# --- Parametri Calcolo Saturazione (NUOVO & CORRETTO) ---
 FETCH_SATURATION_SCORE = True # ATTIVA/DISATTIVA il calcolo della saturazione
 N_PROCESS_FOR_SATURATION = TOP_N_FINAL_DISPLAY # Calcola solo per le top N finali
-MAX_THREADS_SATURATION = 20 # Numero di thread per lo scraping SERP (regolare con cautela!)
+MAX_THREADS_SATURATION = 15 # Numero di thread per lo scraping SERP (RIDOTTO PER TEST!)
 SATURATION_IMPERSONATE_BROWSER = 'chrome124' # Profilo browser per curl_cffi
-SATURATION_REQUEST_TIMEOUT = 40 # Timeout per le richieste SERP
+SATURATION_REQUEST_TIMEOUT = 45 # Timeout per le richieste SERP (AUMENTATO LEGGERMENTE)
 SATURATION_MAX_RETRIES_PER_KEYWORD = 3 # Tentativi per singola keyword nello scraping saturazione
+SATURATION_DELAY_BETWEEN_REQUESTS = (5.0, 10.0) # Delay tra richieste SERP (AUMENTATO)
 
 # --- Chiave API OpenAI (LEGGI DA VARIABILE D'AMBIENTE!) ---
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -135,23 +136,22 @@ WEIGHT_V7D_NUMERATOR = 1.5 # Nuovi pesi per il numeratore V7.9
 
 # --- Parametri Gestione Proxy e Concorrenza ---
 MAX_CONCURRENT_PROXIES = 210
-PROXY_USE_COOLDOWN = 7
+PROXY_USE_COOLDOWN = 7 # Cooldown base
+PROXY_FAILURE_THRESHOLD = 3 # Fallimenti consecutivi prima di aumentare cooldown
+PROXY_FAILURE_COOLDOWN_MULTIPLIER = 1.5 # Moltiplicatore per cooldown esteso (AUMENTATO)
 MAX_THREADS_PYTRENDS = 80
 
 # --- Parametri Ritardi e Pause ---
-MIN_DELAY_BETWEEN_REQUESTS = 0
-MAX_DELAY_BETWEEN_REQUESTS = 2.0
-ENTITY_EXTRACTION_INITIAL_WAIT = 5
-SATURATION_DELAY_BETWEEN_REQUESTS = (2.0, 5.0) # Delay tra richieste SERP
+MIN_DELAY_BETWEEN_REQUESTS = 0 # Delay per Pytrends/Estrazione iniziale
+MAX_DELAY_BETWEEN_REQUESTS = 2.0 # Delay per Pytrends/Estrazione iniziale
+ENTITY_EXTRACTION_INITIAL_WAIT = 5 # Attesa iniziale per estrazione entità
 
 # --- Parametri Gestione Errori e Tentativi ---
 ENTITY_EXTRACTION_MAX_RETRIES = 15
 MAX_RETRIES_PYTRENDS_CONTEXT = 8
 INITIAL_BACKOFF_SECONDS_429 = 5
 BACKOFF_MULTIPLIER_429 = 1.2
-MAX_WAIT_SECONDS = 20
-PROXY_FAILURE_THRESHOLD = 3
-PROXY_FAILURE_COOLDOWN_MULTIPLIER = 1.2
+MAX_WAIT_SECONDS = 20 # Attesa massima generica
 
 # --- Parametri Timeout Connessioni ---
 ENTITY_EXTRACTION_CONNECT_TIMEOUT = 20
@@ -204,7 +204,7 @@ print(f"Generati {len(proxies_list_with_geo)} proxy con geo.")
 COUNTRY_LOCALE_MAP = {'IT': {'hl': 'it-IT', 'tz': 60}, 'US': {'hl': 'en-US', 'tz': -300}, 'GB': {'hl': 'en-GB', 'tz': 0}, 'FR': {'hl': 'fr-FR', 'tz': 60}, 'DE': {'hl': 'de-DE', 'tz': 60}, 'ES': {'hl': 'es-ES', 'tz': 60}, 'JP': {'hl': 'ja-JP', 'tz': 540}, 'AU': {'hl': 'en-AU', 'tz': 600}, 'CA': {'hl': 'en-CA', 'tz': -300}, 'BR': {'hl': 'pt-BR', 'tz': -180}, 'IN': {'hl': 'en-IN', 'tz': 330}, 'MA': {'hl': 'fr-MA', 'tz': 0}, 'HN': {'hl': 'es-HN', 'tz': -360}, 'BS': {'hl': 'en-BS', 'tz': -300}, 'TO': {'hl': 'en-TO', 'tz': 780}, 'BE': {'hl': 'fr-BE', 'tz': 60}, 'OM': {'hl': 'ar-OM', 'tz': 240}, 'GM': {'hl': 'en-GM', 'tz': 0}, 'LU': {'hl': 'fr-LU', 'tz': 60}, 'BN': {'hl': 'ms-BN', 'tz': 480}, 'SZ': {'hl': 'en-SZ', 'tz': 120}, 'MN': {'hl': 'mn-MN', 'tz': 480}, 'EG': {'hl': 'ar-EG', 'tz': 120}, 'AT': {'hl': 'de-AT', 'tz': 60}, 'IE': {'hl': 'en-IE', 'tz': 0}, 'KW': {'hl': 'ar-KW', 'tz': 180}, 'MM': {'hl': 'my-MM', 'tz': 390}, 'LV': {'hl': 'lv-LV', 'tz': 120}, 'RW': {'hl': 'rw-RW', 'tz': 120}, 'KR': {'hl': 'ko-KR', 'tz': 540}, 'TJ': {'hl': 'tg-TJ', 'tz': 300}, 'MH': {'hl': 'en-MH', 'tz': 720}, 'ZA': {'hl': 'en-ZA', 'tz': 120}, 'FI': {'hl': 'fi-FI', 'tz': 120}, 'DEFAULT': {'hl': 'en-US', 'tz': 0}}
 def get_locale_for_geo(geo_code): return COUNTRY_LOCALE_MAP.get(geo_code.upper(), COUNTRY_LOCALE_MAP['DEFAULT'])
 
-# --- Classi AdvancedProxyManager e ConsistentBrowserProfile (Invariate) ---
+# --- Classi AdvancedProxyManager e ConsistentBrowserProfile (Invariate tranne get_proxy) ---
 class AdvancedProxyManager:
     def __init__(self, proxy_geo_list, max_concurrent, cooldown_seconds): self.max_concurrent=max_concurrent; self.cooldown_seconds=cooldown_seconds; self.lock=threading.Lock(); self.all_proxies={i['proxy']: i['geo'] for i in proxy_geo_list}; self.available_proxies=deque(self.all_proxies.keys()); random.shuffle(list(self.available_proxies)); self.active_proxies={}; self.cooldown_proxies={}; self.proxy_consecutive_failures=defaultdict(int); self.proxy_stats=defaultdict(lambda: {"success":0,"fail_429":0,"fail_5xx":0,"fail_other":0,"fail_timeout":0,"fail_proxy_error":0,"fail_parse":0}); self.active_sessions={}; print(f"AdvProxyManager: {len(self.all_proxies)} proxies, MaxConc: {self.max_concurrent}, CD: {self.cooldown_seconds}s")
     def _check_cooldown(self): ct=time.time(); reactivate=[]; [reactivate.append(p) for p, et in list(self.cooldown_proxies.items()) if ct >= et]; [self.available_proxies.append(p) for p in reactivate if self.cooldown_proxies.pop(p,None)]
@@ -216,27 +216,58 @@ class AdvancedProxyManager:
                 try: prof=ConsistentBrowserProfile(geo)
                 except Exception as e: print(f"     Profilo err {geo}: {e}. Uso def."); prof=ConsistentBrowserProfile('DEFAULT')
                 scr=None;
-                try: bcfg={'browser':'chrome','platform':prof.os if prof.os in ['windows','darwin','linux'] else 'windows','mobile':False,'desktop':True,'user_agent':prof.user_agent}; scr=cloudscraper.create_scraper(browser=bcfg,delay=random.uniform(0.5,1.5)); scr.headers.update(prof.get_headers());
-                except Exception as e: print(f"     Scraper err {geo} ({type(e).__name__}). Uso base."); scr=requests.Session(); scr.headers.update(prof.get_headers());
-                if p_url: scr.proxies={'http':p_url,'https':p_url}
-                self.active_sessions[p_str]={'scraper':scr,'profile':prof, 'proxy_url': p_url}; return p_str, geo, self.active_sessions[p_str] # Restituisce anche proxy_url
+                # Tenta di creare cloudscraper ma non è essenziale per questa funzione, serve solo il profilo e l'url
+                # Manteniamo la logica per compatibilità ma potremmo rimuoverla se non serve più altrove
+                try:
+                    bcfg={'browser':'chrome','platform':prof.os if prof.os in ['windows','darwin','linux'] else 'windows','mobile':False,'desktop':True,'user_agent':prof.user_agent}
+                    scr=cloudscraper.create_scraper(browser=bcfg,delay=random.uniform(0.5,1.5))
+                    scr.headers.update(prof.get_headers());
+                except Exception as e:
+                    # print(f"     Scraper err {geo} ({type(e).__name__}). Uso base.") # Meno verboso
+                    scr=requests.Session() # Crea una sessione base solo per placeholder
+                    scr.headers.update(prof.get_headers());
+                if p_url: scr.proxies={'http':p_url,'https':p_url} # Imposta proxy anche sulla sessione placeholder
+                # Memorizza tutto ciò che serve: scraper (anche se placeholder), profilo e url proxy formattato
+                self.active_sessions[p_str]={'scraper':scr, 'profile':prof, 'proxy_url': p_url}
+                return p_str, geo, self.active_sessions[p_str] # Restituisce tutto il necessario
             else: return None
     def get_pytrends_session(self,p_str,prof): p_url=get_proxy_url(p_str); p_list=[p_url] if p_url else []; params=prof.get_pytrends_params(); return TrendReq(hl=params['hl'],tz=params['tz'],timeout=(PYTRENDS_CONNECT_TIMEOUT,PYTRENDS_READ_TIMEOUT),retries=PYTRENDS_RETRIES,backoff_factor=PYTRENDS_BACKOFF_FACTOR,proxies=p_list)
     def release_proxy(self,p_str,success=True,status_code=None,error_type=None):
         with self.lock:
             if p_str not in self.all_proxies: warnings.warn(f"Release proxy non gestito: {p_str}", UserWarning); return
-            if p_str in self.active_sessions: s_data=self.active_sessions.pop(p_str); [s_data['scraper'].close() for k in ['scraper'] if k in s_data and hasattr(s_data['scraper'],'close')]
+            if p_str in self.active_sessions:
+                s_data=self.active_sessions.pop(p_str)
+                # Chiudi scraper solo se è un'istanza di cloudscraper o requests.Session che potrebbe avere connessioni aperte
+                if isinstance(s_data.get('scraper'), (cloudscraper.CloudScraper, requests.Session)):
+                    try: s_data['scraper'].close()
+                    except: pass # Ignora errori chiusura
             if p_str in self.active_proxies: del self.active_proxies[p_str]
             cd_end=time.time()+self.cooldown_seconds; geo=self.all_proxies.get(p_str,'N/A');
             if success: self.proxy_stats[p_str]["success"]+=1; self.proxy_consecutive_failures[p_str]=0
             else:
                 self.proxy_consecutive_failures[p_str]+=1; fails=self.proxy_consecutive_failures[p_str];
-                if error_type=='429_related' or status_code==429: self.proxy_stats[p_str]["fail_429"]+=1; cd_end=time.time()+(self.cooldown_seconds*4)
-                elif error_type=='Timeout': self.proxy_stats[p_str]["fail_timeout"]+=1; cd_end=time.time()+(self.cooldown_seconds*2)
-                elif error_type=='ProxyError' or (isinstance(status_code,int) and 500<=status_code<=599): self.proxy_stats[p_str]["fail_proxy_error"]+=1; cd_end=time.time()+(self.cooldown_seconds*3)
-                elif error_type=='parse_fail' or error_type=='empty_data': self.proxy_stats[p_str]["fail_parse"]+=1; cd_end=time.time()+(self.cooldown_seconds*1.5)
-                else: self.proxy_stats[p_str]["fail_other"]+=1; cd_end=time.time()+(self.cooldown_seconds*1.2)
-                if fails>=PROXY_FAILURE_THRESHOLD: mult=1+(PROXY_FAILURE_COOLDOWN_MULTIPLIER*(fails-PROXY_FAILURE_THRESHOLD+1)); add_cd=self.cooldown_seconds*mult; ct=time.time(); base_dur=cd_end-ct; final_dur=base_dur+add_cd; cd_end=ct+final_dur; print(f"     INFO: Proxy {geo} ({p_str[-10:]}) ha {fails} fails cons. CD esteso a {final_dur:.0f}s.")
+                # Categorizzazione errori migliorata per cooldown differenziato
+                if error_type=='429_related' or status_code==429 or '429' in str(error_type):
+                    self.proxy_stats[p_str]["fail_429"]+=1; cd_end=time.time()+(self.cooldown_seconds*5) # Cooldown più lungo per 429
+                elif error_type=='Timeout' or 'Timeout' in str(error_type):
+                    self.proxy_stats[p_str]["fail_timeout"]+=1; cd_end=time.time()+(self.cooldown_seconds*2)
+                elif error_type=='ProxyError' or 'Proxy' in str(error_type) or (isinstance(status_code,int) and 500<=status_code<=599):
+                    self.proxy_stats[p_str]["fail_proxy_error"]+=1; cd_end=time.time()+(self.cooldown_seconds*3)
+                elif error_type=='parse_fail' or error_type=='empty_data' or 'Parse' in str(error_type):
+                    self.proxy_stats[p_str]["fail_parse"]+=1; cd_end=time.time()+(self.cooldown_seconds*1.5)
+                elif 'Redirect Blocco' in str(error_type) or 'Verifica Connessione' in str(error_type) or 'Consent' in str(error_type):
+                     self.proxy_stats[p_str]["fail_proxy_error"]+=1 # Considera blocco come errore proxy grave
+                     cd_end=time.time()+(self.cooldown_seconds*4) # Cooldown lungo per blocco
+                else: # Altri errori (es. connessione, generici)
+                    self.proxy_stats[p_str]["fail_other"]+=1; cd_end=time.time()+(self.cooldown_seconds*1.2)
+
+                # Aumenta cooldown esponenzialmente se i fallimenti consecutivi superano la soglia
+                if fails>=PROXY_FAILURE_THRESHOLD:
+                    mult = 1 + (PROXY_FAILURE_COOLDOWN_MULTIPLIER**(fails - PROXY_FAILURE_THRESHOLD + 1)) # Esponenziale
+                    add_cd=self.cooldown_seconds * mult
+                    ct=time.time(); base_dur=cd_end-ct; final_dur=min(base_dur+add_cd, 3600) # Limita cooldown massimo a 1 ora
+                    cd_end=ct+final_dur;
+                    print(f"     INFO: Proxy {geo} ({p_str[-10:]}) ha {fails} fails cons. CD esteso a {final_dur:.0f}s.")
             self.cooldown_proxies[p_str]=cd_end
     def get_proxy_stats_summary(self):
         with self.lock:
@@ -250,11 +281,55 @@ class ConsistentBrowserProfile:
     def __init__(self,geo_code):
         if not geo_code or not isinstance(geo_code,str): geo_code='DEFAULT'
         else: geo_code=geo_code.upper()
-        self.geo_code=geo_code; self.locale_info=get_locale_for_geo(self.geo_code); pos_os=self.GEO_OS_PREFERENCE.get(self.geo_code,self.GEO_OS_PREFERENCE['DEFAULT']); os_g=random.choice(pos_os); self.os=random.choice(self.OS_MAP.get(os_g,['windows']))[0]; self.browser='chrome'; self.user_agent=self.FALLBACK_USER_AGENT;
-        try: ua=UserAgent(use_external_data=False,browsers=['chrome']); self.user_agent=ua.chrome
-        except: pass
-        lang_base=self.locale_info['hl'].split('-')[0]; self.accept_language=f"{self.locale_info['hl']},{lang_base};q=0.9,en;q=0.8"
-    def get_headers(self): return {'User-Agent':self.user_agent,'Accept-Language':self.accept_language,'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7','Accept-Encoding':'gzip, deflate, br','Connection':'keep-alive','Sec-CH-UA':f'"Chromium";v="{random.randint(118,122)}", "Google Chrome";v="{random.randint(118,122)}", "Not?A_Brand";v="99"','Sec-CH-UA-Mobile':'?0','Sec-CH-UA-Platform':f'"{self.os.capitalize()}"','Sec-Fetch-Dest':'document','Sec-Fetch-Mode':'navigate','Sec-Fetch-Site':random.choice(['none','same-origin']),'Sec-Fetch-User':'?1','Upgrade-Insecure-Requests':'1','Cache-Control':'max-age=0',}
+        self.geo_code=geo_code; self.locale_info=get_locale_for_geo(self.geo_code); pos_os=self.GEO_OS_PREFERENCE.get(self.geo_code,self.GEO_OS_PREFERENCE['DEFAULT']); os_g=random.choice(pos_os); self.os=random.choice(self.OS_MAP.get(os_g,['windows'])); self.browser='chrome'; self.user_agent=self.FALLBACK_USER_AGENT;
+        try:
+            # Usa fake-useragent se disponibile
+            ua_gen=UserAgent(use_external_data=False, browsers=['chrome'], os=[self.os] if self.os in ['windows','macos','linux'] else None)
+            if self.os == 'windows': self.user_agent=ua_gen.chrome
+            elif self.os == 'macos': self.user_agent=ua_gen.chrome # fake-useragent potrebbe non differenziare UA chrome per macos specificamente
+            elif self.os == 'linux': self.user_agent=ua_gen.chrome # fake-useragent potrebbe non differenziare UA chrome per linux specificamente
+            else: self.user_agent=ua_gen.chrome # Fallback
+        except:
+             # Fallback manuale se fake-useragent fallisce o non è installato
+             chrome_version = f"{random.randint(120, 125)}.0.0.0"
+             if self.os == 'windows':
+                 self.user_agent = f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_version} Safari/537.36"
+             elif self.os == 'macos':
+                 # Nota: la versione macOS nell'UA spesso non è aggiornatissima, usiamo un valore comune
+                 self.user_agent = f"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_version} Safari/537.36"
+             elif self.os == 'linux':
+                 self.user_agent = f"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_version} Safari/537.36"
+             else: # Fallback generico
+                 self.user_agent = self.FALLBACK_USER_AGENT
+
+        lang_base=self.locale_info['hl'].split('-')[0]; self.accept_language=f"{self.locale_info['hl']},{lang_base};q=0.9,en;q=0.8" # Lingua basata su geo
+    def get_headers(self):
+         # Genera header Sec-CH-UA basati sull'UA selezionato
+         ua_lower = self.user_agent.lower()
+         brand = "Google Chrome" if "chrome" in ua_lower else "Chromium"
+         try:
+             version_match = re.search(r"chrome/(\d+)", ua_lower)
+             version = version_match.group(1) if version_match else "124" # Fallback version
+         except: version = "124"
+
+         sec_ch_ua = f'"{brand}";v="{version}", "Not-A.Brand";v="99", "Chromium";v="{version}"' # Formato comune
+
+         return {
+             'User-Agent':self.user_agent,
+             'Accept-Language':self.accept_language, # Usa lingua da geo
+             'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+             'Accept-Encoding':'gzip, deflate, br, zstd', # Aggiunto zstd
+             'Connection':'keep-alive',
+             'Sec-CH-UA': sec_ch_ua, # Header CH UA dinamico
+             'Sec-CH-UA-Mobile':'?0',
+             'Sec-CH-UA-Platform': f'"{self.os.capitalize()}"', # Platform da OS rilevato
+             'Sec-Fetch-Dest':'document',
+             'Sec-Fetch-Mode':'navigate',
+             'Sec-Fetch-Site':random.choice(['none','same-origin']), #'cross-site' è meno comune per navigazione diretta
+             'Sec-Fetch-User':'?1',
+             'Upgrade-Insecure-Requests':'1',
+             'Cache-Control':'max-age=0',
+             }
     def get_pytrends_params(self): return {'hl':self.locale_info['hl'],'tz':self.locale_info['tz']}
 
 # --- Inizializzazione Manager Globale ---
@@ -279,7 +354,9 @@ def extract_ordered_entities(max_retries=ENTITY_EXTRACTION_MAX_RETRIES, initial_
         proxy_info, status_code, error_type_str, release_success = None, None, None, False; scraper, session_data, geo_code = None, None, None
         try:
             get_proxy_attempts = 0
-            while proxy_info is None and get_proxy_attempts < 5: get_proxy_attempts += 1; proxy_info = proxy_manager.get_proxy(); time.sleep(random.uniform(2, 5) if proxy_info is None else 0)
+            while proxy_info is None and get_proxy_attempts < 5:
+                 get_proxy_attempts += 1; proxy_info = proxy_manager.get_proxy();
+                 if proxy_info is None: time.sleep(random.uniform(2, 5)) # Attendi solo se non trovi proxy
             if proxy_info is None: print("   Impossibile ottenere proxy per estrazione iniziale. Attesa..."); time.sleep(min(current_wait * 1.5, MAX_WAIT_SECONDS / 2)); current_wait *= 1.5; continue
             proxy_str, geo_code, session_data = proxy_info; scraper = session_data['scraper']; print(f"   Tentativo estrazione con proxy: {geo_code} ({proxy_str[-10:]})")
             time.sleep(random.uniform(0.5, 1.5)); target_url = "https://trends.google.com/tv/?geo=IT"; res = None; max_internal_retries = 2
@@ -291,32 +368,61 @@ def extract_ordered_entities(max_retries=ENTITY_EXTRACTION_MAX_RETRIES, initial_
                 except (requests.exceptions.Timeout, socket.timeout) as e_timeout_internal:
                     print(f"      Timeout interno req {internal_attempt + 1}/{max_internal_retries}: {type(e_timeout_internal).__name__}"); res = None; status_code = None
                     if internal_attempt < max_internal_retries - 1: time.sleep(2)
-                    else: print(f"      Falliti tutti retry interni (Timeout)."); raise e_timeout_internal
+                    else: print(f"      Falliti tutti retry interni (Timeout)."); error_type_str = 'Timeout'; raise e_timeout_internal # Propaga errore specifico
+                except (requests.exceptions.ProxyError, requests.exceptions.ConnectionError) as e_proxy_internal:
+                     print(f"      Proxy/Conn interno req {internal_attempt + 1}/{max_internal_retries}: {type(e_proxy_internal).__name__}"); res = None; status_code = None
+                     if internal_attempt < max_internal_retries - 1: time.sleep(2)
+                     else: print(f"      Falliti tutti retry interni (Proxy/Conn)."); error_type_str = 'ProxyError'; raise e_proxy_internal # Propaga errore specifico
                 except Exception as e_int:
                     print(f"      Errore interno req {internal_attempt + 1}/{max_internal_retries}: {type(e_int).__name__} - {str(e_int)[:100]}"); res = None; status_code = None
                     if internal_attempt < max_internal_retries - 1: time.sleep(2)
-                    else: print(f"      Falliti tutti retry interni (Exception)."); raise e_int
-            if res is None or res.status_code != 200: status_code = res.status_code if res else None; raise Exception(f"Req fallita dopo retry interni. Status: {status_code}")
-            status_code = res.status_code; soup = BeautifulSoup(res.text, 'html.parser'); scripts = soup.find_all('script'); found_data = False; ordered_entities_found = []
+                    else: print(f"      Falliti tutti retry interni (Exception)."); error_type_str = 'OtherError'; raise e_int # Propaga errore generico
+            if res is None or res.status_code != 200:
+                 if status_code is None: status_code = res.status_code if res else None # Prova a recuperare status
+                 if error_type_str is None: error_type_str = f"FailedAfterRetry_{status_code}" # Imposta un tipo di errore se non già definito
+                 raise Exception(f"Req fallita dopo retry interni. Status: {status_code}, ErrType: {error_type_str}")
+
+            status_code = res.status_code; # Status code è sicuramente 200 qui
+            error_type_str = None # Resetta tipo errore, la richiesta è andata a buon fine
+            soup = BeautifulSoup(res.text, 'html.parser'); scripts = soup.find_all('script'); found_data = False; ordered_entities_found = []
             for script in scripts:
                 if script.string and 'AF_initDataCallback' in script.string and 'key: \'ds:0\'' in script.string:
                     try:
                         match = re.search(r"data:(.*), sideChannel:", script.string, re.DOTALL)
-                        if match: json_text = match.group(1).strip().rstrip(','); data = json.loads(json_text)
-                        if isinstance(data, list) and len(data) > 1 and isinstance(data[1], list):
-                            entities = [item[0] for item in data[1] if isinstance(item, list) and item and isinstance(item[0], str)]
-                            if entities: ordered_entities_found = entities; found_data = True; break
-                    except Exception as e_parse: print(f"      Parse JSON err (Proxy: {geo_code}): {e_parse}"); error_type_str = 'parse_fail'
-            if found_data and ordered_entities_found: print(f"   Estratte {len(ordered_entities_found)} entità ordinate via {geo_code}."); release_success = True; return ordered_entities_found
-            else: print(f"   Status 200 ma dati non trovati/parsati via {geo_code}."); error_type_str = 'parse_fail'; wait_time = min(current_wait * 1.5, MAX_WAIT_SECONDS / 2); time.sleep(wait_time); current_wait = wait_time * 1.2
+                        if match:
+                            json_text = match.group(1).strip().rstrip(',')
+                            data = json.loads(json_text)
+                            if isinstance(data, list) and len(data) > 1 and isinstance(data[1], list):
+                                entities = [item[0] for item in data[1] if isinstance(item, list) and item and isinstance(item[0], str)]
+                                if entities:
+                                    ordered_entities_found = entities; found_data = True; break # Successo, esci
+                    except json.JSONDecodeError as e_json:
+                         print(f"      Parse JSON err (Proxy: {geo_code}): {e_json}"); error_type_str = 'parse_fail' # Errore JSON, ma non necessariamente colpa del proxy
+                         break # Inutile continuare a ciclare script se uno è corrotto
+                    except Exception as e_parse:
+                         print(f"      Parse Data Structure err (Proxy: {geo_code}): {e_parse}"); error_type_str = 'parse_fail'
+                         break # Errore inaspettato nell'estrazione dati
+            if found_data and ordered_entities_found:
+                 print(f"   Estratte {len(ordered_entities_found)} entità ordinate via {geo_code}."); release_success = True; return ordered_entities_found
+            else:
+                 # Se non ha trovato dati o entità, considera un fallimento di parsing
+                 print(f"   Status 200 ma dati non trovati/parsati via {geo_code}."); error_type_str = 'parse_fail'; # Imposta errore per release proxy
+                 wait_time = min(current_wait * 1.5, MAX_WAIT_SECONDS / 2); time.sleep(wait_time); current_wait = wait_time * 1.2
         except Exception as e:
-            error_type_str = type(e).__name__; print(f"!! Errore estrazione (Tentativo {attempts}, Proxy: {geo_code}): {error_type_str}: {e} !!"); # traceback.print_exc();
+            # Cattura eccezioni sollevate dai tentativi interni o dalla richiesta iniziale
+            if error_type_str is None: error_type_str = type(e).__name__ # Imposta tipo errore se non già definito
+            print(f"!! Errore estrazione (Tentativo {attempts}, Proxy: {geo_code}): {error_type_str}: {e} !!");
+            # traceback.print_exc(); # Abilitare per debug dettagliato
             wait_time = min(current_wait * 1.2, MAX_WAIT_SECONDS / 2); time.sleep(wait_time); current_wait = wait_time * 1.2
+            # Non re-impostare error_type_str qui, usa quello già determinato o dal tipo eccezione
             if isinstance(e, (requests.exceptions.ProxyError, requests.exceptions.ConnectionError)): error_type_str = 'ProxyError'
             elif isinstance(e, requests.exceptions.Timeout): error_type_str = 'Timeout'
-            if 'res' not in locals() or res is None: status_code = None
+            # status_code potrebbe essere già stato impostato, non sovrascriverlo
+            if 'res' not in locals() or res is None: status_code = None # Assicurati che status_code sia None se res non esiste
         finally:
-            if proxy_info: proxy_manager.release_proxy(proxy_info[0], success=release_success, status_code=status_code, error_type=error_type_str); proxy_info = None
+            if proxy_info:
+                # Usa l'error_type_str definito nel blocco try o except
+                proxy_manager.release_proxy(proxy_info[0], success=release_success, status_code=status_code, error_type=error_type_str); proxy_info = None
     print(f"!!! Estrazione entità ORDINATE fallita dopo {max_retries} tentativi. !!!"); return None
 
 # --- Funzione get_trends_scores (Invariata) ---
@@ -330,20 +436,22 @@ def get_trends_scores(keywords, timeframe):
         attempts += 1; proxy_info, status_code, error_type_str, release_success = None, None, None, False; pytrends, session_data, geo_code = None, None, None
         try:
             get_proxy_attempts = 0
-            while proxy_info is None and get_proxy_attempts < 5: get_proxy_attempts += 1; proxy_info = proxy_manager.get_proxy(); time.sleep(random.uniform(2, 5) if proxy_info is None else 0)
+            while proxy_info is None and get_proxy_attempts < 5:
+                 get_proxy_attempts += 1; proxy_info = proxy_manager.get_proxy();
+                 if proxy_info is None: time.sleep(random.uniform(2, 5))
             if proxy_info is None: print(f"       [CTX KW:{kw_hash} T{attempts}] No proxy for context. Skip."); time.sleep(min(current_backoff_other * 1.5, MAX_WAIT_SECONDS / 2)); current_backoff_other *= 1.2; continue
             proxy_str, geo_code, session_data = proxy_info
             if proxy_str in proxy_attempts_set: proxy_manager.release_proxy(proxy_str, success=False, error_type="duplicato_interno"); proxy_info = None; continue
             proxy_attempts_set.add(proxy_str); profile = session_data['profile']
             try: pytrends = proxy_manager.get_pytrends_session(proxy_str, profile)
-            except Exception as e_session: print(f"       [CTX KW:{kw_hash} T{attempts}] Session err (Proxy: {geo_code}): {e_session}"); proxy_manager.release_proxy(proxy_str, success=False, error_type="pytrends_session_error"); proxy_info = None; continue
+            except Exception as e_session: print(f"       [CTX KW:{kw_hash} T{attempts}] Session err (Proxy: {geo_code}): {e_session}"); error_type_str="pytrends_session_error"; raise # Rilancia l'errore per farlo catturare sotto e rilasciare il proxy
             base_delay = random.uniform(MIN_DELAY_BETWEEN_REQUESTS, MAX_DELAY_BETWEEN_REQUESTS);
             time.sleep(base_delay)
             shuffled = keywords.copy(); random.shuffle(shuffled); pytrends.build_payload(shuffled, timeframe=timeframe, geo='IT', gprop='')
             df = pytrends.interest_over_time()
-            if df.empty or all(c == 'isPartial' for c in df.columns): print(f"       [CTX KW:{kw_hash} T{attempts}] Empty data (Proxy: {geo_code})."); error_type_str = 'empty_data'; time.sleep(current_backoff_other); current_backoff_other = min(current_backoff_other * 1.2, MAX_WAIT_SECONDS / 4)
+            if df.empty or all(c == 'isPartial' for c in df.columns): print(f"       [CTX KW:{kw_hash} T{attempts}] Empty data (Proxy: {geo_code})."); error_type_str = 'empty_data'; time.sleep(current_backoff_other); current_backoff_other = min(current_backoff_other * 1.2, MAX_WAIT_SECONDS / 4); # Non sollevare eccezione, è un fallimento 'soft'
             else: scores = df.drop(columns=['isPartial'], errors='ignore').mean().to_dict(); final = {kw: scores.get(kw, 0) for kw in keywords}; elapsed = time.time() - start_time;
-            release_success = True; return final
+            release_success = True; return final # Esce qui se successo o dati vuoti
         except requests.exceptions.HTTPError as http_err:
             status_code = http_err.response.status_code if hasattr(http_err, 'response') and http_err.response else None; print(f"     !![CTX KW:{kw_hash} T{attempts}] HTTP Err {status_code or 'N/A'} (Proxy: {geo_code}).")
             if status_code == 429: error_type_str = '429_related'; wait = min(current_backoff_429, MAX_WAIT_SECONDS); print(f"          -> 429! Wait: {wait:.1f}s..."); time.sleep(wait); current_backoff_429 = min(current_backoff_429 * BACKOFF_MULTIPLIER_429, MAX_WAIT_SECONDS * 1.5)
@@ -354,13 +462,15 @@ def get_trends_scores(keywords, timeframe):
             error_type_str = 'ProxyError'; status_code = 502 if '502' in str(proxy_err) else None
             print(f"     !![CTX KW:{kw_hash} T{attempts}] Proxy/Conn Err (Proxy: {geo_code}): {type(proxy_err).__name__} - {str(proxy_err)[:100]}")
             wait = min(current_backoff_other * 1.5, MAX_WAIT_SECONDS / 2); print(f"          -> Proxy Err. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other * 1.5, MAX_WAIT_SECONDS)
-        except Exception as e:
+        except Exception as e: # Cattura anche l'errore della sessione rilanciato
             msg = str(e); error_type_str = type(e).__name__; is_429 = '429' in msg or ('response' in dir(e) and hasattr(e.response, 'status_code') and e.response.status_code == 429) ; print(f"!! [CTX KW:{kw_hash} T{attempts}] UNEXPECTED Err (Proxy: {geo_code}): {error_type_str}: {msg[:150]}...")
             if is_429: error_type_str = '429_related'; wait = min(current_backoff_429, MAX_WAIT_SECONDS); print(f"          -> 429 DETECTED! Wait: {wait:.1f}s..."); time.sleep(wait); current_backoff_429 = min(current_backoff_429 * BACKOFF_MULTIPLIER_429, MAX_WAIT_SECONDS * 1.5)
             elif isinstance(e, AttributeError): error_type_str = 'parse_fail'; wait = min(current_backoff_other, MAX_WAIT_SECONDS/2); print(f"          -> Attr Err. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other*1.5, MAX_WAIT_SECONDS)
-            else: wait = min(current_backoff_other, MAX_WAIT_SECONDS/2); print(f"          -> Generic Err. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other*1.5, MAX_WAIT_SECONDS)
+            else: wait = min(current_backoff_other, MAX_WAIT_SECONDS/2); print(f"          -> Generic Err ({error_type_str}). Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other*1.5, MAX_WAIT_SECONDS)
         finally:
             if proxy_info: proxy_manager.release_proxy(proxy_info[0], success=release_success, status_code=status_code, error_type=error_type_str); proxy_info = None
+        # Se arrivi qui, significa che c'è stato un errore e il ciclo while continua (o finisce)
+    # Se esci dal ciclo while senza successo
     print(f"!!! [CTX KW:{kw_hash}] Failed {attempts} context attempts for {kw_list_str} ({timeframe}). Returning scores as 0.")
     return {kw: 0 for kw in keywords}
 
@@ -384,9 +494,11 @@ def get_all_context_scores(entities_subset, timeframe, max_threads=MAX_THREADS_P
             try:
                 result = future.result(timeout=MAX_WAIT_SECONDS * 2)
                 if result and any(s > 0 for s in result.values()): all_scores.update(result)
-                else: failed_count += 1; failed_groups.append(group); [all_scores.setdefault(e, 0) for e in group]
-            except concurrent.futures.TimeoutError: print(f"\n!!! Timeout recupero risultato CONTESTO {group} ({timeframe}) !!!"); failed_count += 1; failed_groups.append(group); [all_scores.setdefault(e, 0) for e in group]
-            except Exception as exc: print(f"\n!!! Errore recupero CONTESTO {group} ({timeframe}): {exc} !!!"); failed_count += 1; failed_groups.append(group); [all_scores.setdefault(e, 0) for e in group]
+                else: # Considera 0 e None come fallimenti parziali del gruppo
+                     failed_count += 1; failed_groups.append(group); [all_scores.setdefault(e, 0) for e in group if e not in all_scores] # Aggiungi 0 solo se non già presente
+            except concurrent.futures.TimeoutError: print(f"\n!!! Timeout recupero risultato CONTESTO {group} ({timeframe}) !!!"); failed_count += 1; failed_groups.append(group); [all_scores.setdefault(e, 0) for e in group if e not in all_scores]
+            except Exception as exc: print(f"\n!!! Errore recupero CONTESTO {group} ({timeframe}): {exc} !!!"); failed_count += 1; failed_groups.append(group); [all_scores.setdefault(e, 0) for e in group if e not in all_scores]
+        # Retry logic invariata
         if failed_groups and failed_count > 0 and failed_count < total_tasks:
             print(f"\n--- Riprovando {len(failed_groups)} gruppi CONTESTO falliti per {timeframe} ---");
             retry_failed_count = len(failed_groups); initial_failed_count = failed_count; retry_futures = {}
@@ -401,7 +513,10 @@ def get_all_context_scores(entities_subset, timeframe, max_threads=MAX_THREADS_P
             failed_count = retry_failed_count
             print(f"--- Retry CONTESTO {timeframe} completato. Falliti finali: {failed_count} ---")
         else: print(f"--- Raccolta score CONTESTO {timeframe} completata. ({total_tasks} task, {failed_count} falliti) ---")
-    return {entity: all_scores.get(entity, 0) for entity in entity_list}
+    # Assicura che tutte le entità richieste abbiano un valore (0 se non trovato)
+    final_result = {entity: all_scores.get(entity, 0) for entity in entity_list}
+    return final_result
+
 
 # ==============================================================================
 # ==================== FUNZIONI INTEGRAZIONE OPENAI (Invariate) ================
@@ -493,82 +608,87 @@ def get_entities_with_openai(trend_list, max_workers=MAX_OPENAI_THREADS):
     return extracted_entities_map
 
 # ==============================================================================
-# ================== FUNZIONI PER SCRAPING SATURAZIONE (NUOVE) ==================
+# ================== FUNZIONI PER SCRAPING SATURAZIONE (CORRETTE) ===============
 # ==============================================================================
 
-# --- Parsing Risultati SERP (Adattato dal tuo script di test) ---
+# --- Parsing Risultati SERP (Adattato dal tuo script di test, invariato rispetto a prima) ---
 def parse_serp_result_stats(html_content):
     """Estrae il numero di risultati dal div #result-stats (o simili)."""
-    # NOTA: Ho rimosso i print di debug verbosi per pulizia
     try:
         soup = BeautifulSoup(html_content, 'html.parser')
         result_stats_div = None
         raw_stats_text = "N/D (No Div)"
 
         if not soup.body:
-            # print("   [Parse SAT FATAL] Tag <body> non trovato!")
             return None, "Body HTML mancante"
 
-        # Prova con ID
         result_stats_div = soup.find('div', id='result-stats')
-
-        # Prova con classe se ID fallisce
         if not result_stats_div:
             result_stats_div = soup.find('div', class_='result-stats')
-
-        # Prova euristica se ancora non trovato
         if not result_stats_div:
              possible_divs = soup.find_all('div')
              for div in possible_divs:
                  div_text = div.get_text(separator=" ", strip=True).lower()
-                 if 'risultat' in div_text and ('circa' in div_text or re.search(r'\d', div_text)):
+                 # Cerca "risultati" e un numero o "circa"
+                 if 'risultat' in div_text and (re.search(r'\d', div_text) or 'circa' in div_text):
                      result_stats_div = div
                      break # Trovato euristicamente
 
         if result_stats_div:
             stats_text = result_stats_div.get_text(separator=" ", strip=True)
             raw_stats_text = stats_text
-            # Regex migliorata per gestire 'Circa X risultati' o solo 'X risultati'
-            match = re.search(r'(?:Circa\s*)?([\d\.]+)\s+risultat', stats_text.replace('\xa0', ' '))
+            match = re.search(r'(?:Circa\s*)?([\d\.,]+)\s+risultat', stats_text.replace('\xa0', ' '))
             if match:
-                num_str = match.group(1).replace('.', '').replace(',', '') # Rimuovi punti e virgole
+                num_str = match.group(1).replace('.', '').replace(',', '') # Rimuovi separatori migliaia
                 if num_str.isdigit():
                     return int(num_str), raw_stats_text
-            # Gestione esplicita 'Nessun risultato trovato'
             if "nessun risultato trovato per" in stats_text.lower() or "nessun risultato" in stats_text.lower():
                  return 0, raw_stats_text
-            # Se non matcha ma c'è il div, forse formato strano? Restituisci None ma logga
-            # print(f"   [Parse SAT WARN] Div trovato ma num non estratto: '{stats_text}'")
-            return None, raw_stats_text # Fallito parsing numero
+            # Fallito parsing numero ma div trovato
+            return None, raw_stats_text
         else:
             # Nessun div trovato
-            return None, raw_stats_text # Fallito trovamento div
+             # Aggiungi un controllo per "Nessun risultato trovato per..." fuori da un div specifico
+             body_text_lower = soup.body.get_text(separator=" ", strip=True).lower()
+             if "nessun risultato trovato per" in body_text_lower:
+                  return 0, "Nessun risultato (rilevato nel body)"
+             return None, raw_stats_text
 
     except Exception as e:
-        print(f"   [Parse SAT ERR] Errore durante parsing HTML: {e}")
-        # traceback.print_exc() # Troppo verboso in produzione
+        print(f"   [Parse SAT ERR] Errore durante parsing HTML: {type(e).__name__}")
         return None, f"Errore Parsing Eccezione: {type(e).__name__}"
 
-# --- Funzione Scraping SERP con curl_cffi (Adattata e integrata) ---
-def fetch_intitle_serp_count(keyword, proxy_url=None, impersonate_browser='chrome124', timeout=30):
+# --- Funzione Scraping SERP con curl_cffi (CORRETTA: USA HEADERS DA PROFILO) ---
+def fetch_intitle_serp_count(keyword, proxy_url=None, browser_profile=None, impersonate_browser='chrome124', timeout=30):
     """
-    Esegue UNA richiesta SERP usando curl_cffi + headers specifici + proxy.
-    Restituisce il conteggio o None in caso di errore.
+    Esegue UNA richiesta SERP usando curl_cffi + HEADERS DA PROFILO + proxy.
+    Restituisce il conteggio o (None, error_reason).
     """
-    if impersonate_get is None: return None # Salta se curl_cffi non c'è
+    if impersonate_get is None: return None, "curl_cffi non disponibile"
 
-    search_term = f'intitle:"{keyword}"' # Assicura virgolette attorno alla keyword
+    search_term = f'intitle:"{keyword}"'
     encoded_query = quote_plus(search_term)
-    # Cerca nelle ultime 24 ore (tbs=qdr:d) e solo pagine in italiano (lr=lang_it)
-    target_url = f"https://www.google.it/search?q={encoded_query}&hl=it&gl=it&lr=lang_it&tbs=qdr:d,lr:lang_1it&num=10" # num=10 è sufficiente
+    target_url = f"https://www.google.it/search?q={encoded_query}&hl=it&gl=it&lr=lang_it&tbs=qdr:d,lr:lang_1it&num=10"
 
-    headers = {
-        "Referer": "https://www.google.com/",
-        "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Accept-Encoding": "gzip, deflate, br, zstd",
-         # Usa un UA consistente o quello dal profilo se disponibile
-        "User-Agent": f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{random.randint(120, 125)}.0.0.0 Safari/537.36"
-    }
+    # === INIZIO MODIFICA HEADERS ===
+    # Headers: USA QUELLI DAL PROFILO SE DISPONIBILE!
+    if browser_profile:
+        headers = browser_profile.get_headers()
+        # Assicuriamoci che ci siano alcuni header fondamentali
+        headers["Referer"] = "https://www.google.com/"
+        if "Accept-Encoding" not in headers:
+             headers["Accept-Encoding"] = "gzip, deflate, br, zstd"
+        # print(f"   [SAT Debug KW: {keyword[:20]}] Usando headers da Profilo Geo {browser_profile.geo_code}") # Debug Verboso
+    else:
+        # Fallback (non dovrebbe succedere se chiamato correttamente)
+        headers = {
+            "Referer": "https://www.google.com/",
+            "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Accept-Encoding": "gzip, deflate, br, zstd",
+            "User-Agent": f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{random.randint(120, 125)}.0.0.0 Safari/537.36"
+        }
+        # print(f"   [SAT Debug KW: {keyword[:20]}] Usando headers di FALLBACK") # Debug
+    # === FINE MODIFICA HEADERS ===
 
     html_content = None
     status_code = None
@@ -578,186 +698,204 @@ def fetch_intitle_serp_count(keyword, proxy_url=None, impersonate_browser='chrom
     proxies_dict = None
     if proxy_url:
         proxies_dict = {'http': proxy_url, 'https': proxy_url}
-        # print(f"   [SAT Debug] Usando proxy: {proxy_url}") # Debug Proxy
 
     try:
+        # print(f"   [SAT REQ KW: {keyword[:20]}] URL: {target_url} Proxy: {proxy_url is not None} Profile: {browser_profile is not None}") # Debug richiesta
         response = impersonate_get(
             target_url,
-            headers=headers,
+            headers=headers, # Usa gli headers definiti sopra (da profilo o fallback)
             impersonate=impersonate_browser,
-            proxies=proxies_dict, # Passa il proxy qui
+            proxies=proxies_dict,
             timeout=timeout,
-            allow_redirects=True
+            allow_redirects=True,
+            verify=False # Aggiunto per evitare potenziali problemi SSL con alcuni proxy/destinazioni
         )
         status_code = response.status_code
         final_url = response.url
 
         try:
             html_content = response.text
-        except Exception: # Gestisce potenziali errori di decodifica
+        except Exception:
             html_content = response.content.decode('utf-8', errors='ignore')
 
         if status_code == 200:
+            # Controlla reindirizzamenti a pagine di blocco/consenso/verifica
             if "consent.google.com" in final_url or "/sorry/" in final_url or "ipv4.google.com" in final_url:
-                 # print(f"   [SAT WARN KW: {keyword}] Reindirizzato a pagina consenso/blocco: {final_url}")
-                 error_reason = f"Redirect Blocco ({status_code})"
-                 return None, error_reason # Impossibile trovare risultati
-            if "<title>Verifica la connessione</title>" in html_content:
-                 # print(f"   [SAT WARN KW: {keyword}] Pagina 'Verifica Connessione'")
+                 error_reason = f"Redirect Blocco ({status_code}, URL: {final_url})"
+                 return None, error_reason
+            if "<title>Verifica la connessione</title>" in html_content or "<title>Connection check</title>" in html_content :
                  error_reason = f"Verifica Connessione ({status_code})"
                  return None, error_reason
+            if "Il computer o la rete potrebbero inviare query automatiche." in html_content:
+                 error_reason = f"Query Automatiche Rilevate ({status_code})"
+                 return None, error_reason
 
+            # Se non bloccato, prova a parsare
             count, raw_text = parse_serp_result_stats(html_content)
 
             if count is not None:
+                # print(f"   [SAT OK KW: {keyword[:20]}] Count: {count}") # Debug Successo
                 return count, None # Successo
             else:
-                # print(f"   [SAT ERR KW: {keyword}] Parsing fallito (status 200). Raw: '{raw_text}'")
+                # Parsing fallito anche con status 200
                 error_reason = f"Parse Fail ({status_code}, Raw: {raw_text[:50]}...)"
-                # Salva HTML per debug manuale se necessario
-                # filename = f"serp_FAIL_debug_{keyword.replace(' ', '_')[:20]}.html"; open(filename, 'w', encoding='utf-8').write(html_content)
-                # print(f"   [Debug FALLIMENTO SAT] HTML salvato.")
+                # Opzionale: salva HTML per debug
+                # try: filename = f"serp_FAIL_PARSE_{keyword.replace(' ', '_')[:20]}.html"; open(filename, 'w', encoding='utf-8').write(html_content)
+                # except: pass
                 return None, error_reason
         else:
-            # print(f"   [SAT ERR KW: {keyword}] Status code non 200: {status_code}")
+            # Status code non 200
             error_reason = f"Status {status_code}"
             return None, error_reason
 
-    except RequestsError as e: # Errore specifico di curl_cffi/requests
-         # Gestisce timeout, errori proxy, connessione etc.
-         # print(f"   [SAT ERR KW: {keyword}] Errore Richiesta/Connessione (curl_cffi): {type(e).__name__}")
-         error_reason = f"RequestExc: {type(e).__name__}"
+    except RequestsError as e:
+         error_reason = f"RequestExc: {type(e).__name__} ({str(e)[:50]}...)"
          return None, error_reason
     except Exception as e_main:
-         # print(f"   [SAT ERR KW: {keyword}] Errore Inatteso scraping: {type(e_main).__name__}")
+         error_reason = f"GenericExc: {type(e_main).__name__} ({str(e_main)[:50]}...)"
          # traceback.print_exc() # Debug
-         error_reason = f"GenericExc: {type(e_main).__name__}"
          return None, error_reason
 
-# --- Funzione di Normalizzazione ---
+# --- Funzione di Normalizzazione (Invariata rispetto a prima) ---
 def normalize_scores(scores_dict, min_val=1, max_val=100):
     """Normalizza un dizionario di punteggi su scala min_val-max_val."""
-    scores = np.array([v for v in scores_dict.values() if v is not None and v >= 0], dtype=float) # Ignora None e negativi
+    # Filtra valori non validi (None, negativi) ma mantieni le chiavi
+    valid_scores = {k: v for k, v in scores_dict.items() if v is not None and v >= 0}
+    score_values = np.array(list(valid_scores.values()), dtype=float)
 
-    if len(scores) == 0: # Nessun punteggio valido
-        return {k: (min_val + max_val) / 2 for k in scores_dict} # Ritorna valore medio
+    if len(score_values) == 0: # Nessun punteggio valido
+        # Assegna un valore medio o minimo a tutti? Usiamo il minimo (1) per indicare bassa saturazione
+        return {k: min_val for k in scores_dict}
 
-    min_score = np.min(scores)
-    max_score = np.max(scores)
+    min_score = np.min(score_values)
+    max_score = np.max(score_values)
 
-    if min_score == max_score: # Tutti i punteggi sono uguali
-        # Se tutti 0, assegna min_val, altrimenti max_val (o medio?)
-        # Assegnamo il minimo (meno saturo) se tutti uguali e > 0, o 0 se tutti 0
-        norm_value = min_val if max_score == 0 else min_val # Se tutti uguali e >0, considerali poco saturi
-        return {k: norm_value if v is not None and v >= 0 else min_val for k, v in scores_dict.items()}
-
-    # Normalizzazione lineare standard
-    normalized_scores = {}
-    for k, v in scores_dict.items():
-        if v is not None and v >= 0:
-            # Formula: min_val + (v - min_score) * (max_val - min_val) / (max_score - min_score)
-            # Scala invertita: più risultati = punteggio più alto (più saturazione)
+    # Se tutti i punteggi validi sono uguali
+    if min_score == max_score:
+        # Se tutti 0, assegna min_val (1). Se tutti uguali > 0, assegna comunque min_val (bassa saturazione relativa)
+        norm_value = min_val
+        normalized_scores = {k: norm_value for k in valid_scores}
+    else:
+        # Normalizzazione lineare standard (più risultati = punteggio più alto = più saturazione)
+        normalized_scores = {}
+        for k, v in valid_scores.items():
             normalized = min_val + (v - min_score) * (max_val - min_val) / (max_score - min_score)
             normalized_scores[k] = normalized
-        else:
-             # Assegna un valore medio per quelli falliti? O minimo? Usiamo il medio.
-             normalized_scores[k] = (min_val + max_val) / 2
 
-    return normalized_scores
+    # Ricostruisci il dizionario finale, assegnando un valore ai falliti (None o negativi nell'input)
+    final_normalized_dict = {}
+    fallback_score = min_val # Assegna il valore minimo ai falliti
+    for k in scores_dict.keys():
+        final_normalized_dict[k] = normalized_scores.get(k, fallback_score)
 
-# --- Funzione Principale per Ottenere e Normalizzare Saturazione ---
+    return final_normalized_dict
+
+# --- Funzione Principale per Ottenere e Normalizzare Saturazione (CORRETTA: PASSA PROFILO) ---
 def fetch_and_normalize_saturation_scores(entities_list, proxy_manager_instance, max_threads=MAX_THREADS_SATURATION):
     """
-    Ottiene i conteggi SERP intitle per la lista di entità usando proxy e li normalizza.
+    Ottiene i conteggi SERP intitle per la lista di entità usando proxy e HEADERS CORRETTI, poi normalizza.
     Restituisce un dizionario {entita: saturation_score_normalizzato}.
     """
     if not FETCH_SATURATION_SCORE:
         print("\n--- Calcolo Saturazione Saltato (disattivato o curl_cffi mancante) ---")
         return {entity: 0 for entity in entities_list} # Ritorna 0 per tutti
 
-    print(f"\n--- Avvio Calcolo Saturazione per {len(entities_list)} Entità (Max Threads: {max_threads}) ---")
-    raw_results = {} # {entity: count}
+    print(f"\n--- Avvio Calcolo Saturazione per {len(entities_list)} Entità (Max Threads: {max_threads}, Headers da Profilo) ---")
+    raw_results = {} # {entity: count} - Usiamo None per fallimento iniziale
     futures = {}
     sem = threading.Semaphore(max_threads)
     lock = threading.Lock() # Lock per aggiornare raw_results
 
     def fetch_single_saturation(entity):
-        """Wrapper per ottenere un proxy e chiamare lo scraper SERP."""
+        """Wrapper per ottenere un proxy e profilo, chiamare lo scraper SERP."""
         nonlocal raw_results
         attempts = 0
-        result_count = None
+        result_count = None # Inizializza a None (fallimento)
         last_error = "Max Retries Reached"
 
         while attempts < SATURATION_MAX_RETRIES_PER_KEYWORD:
             attempts += 1
             proxy_info, proxy_str, geo_code = None, None, None
             release_success = False
-            status_code_proxy = None
+            status_code_proxy = None # Non direttamente disponibile qui
             error_type_proxy = None
             proxy_url = None
+            browser_profile = None # Inizializza profilo
 
             try:
-                # 1. Ottieni Proxy
+                # 1. Ottieni Proxy e Profilo
                 get_proxy_attempts = 0
                 while proxy_info is None and get_proxy_attempts < 3:
                     get_proxy_attempts += 1
                     proxy_info = proxy_manager_instance.get_proxy()
                     if proxy_info:
                          proxy_str, geo_code, session_data = proxy_info
-                         proxy_url = session_data.get('proxy_url') # Ottieni l'URL del proxy formattato
-                         break
-                    else: time.sleep(random.uniform(3,6)) # Attesa se non ci sono proxy
-                if not proxy_info or not proxy_url:
-                    # print(f"   [SAT SKIP KW: {entity} T{attempts}] No proxy available.")
-                    last_error = "No Proxy Available"
+                         proxy_url = session_data.get('proxy_url')
+                         browser_profile = session_data.get('profile') # <-- Recupera il profilo!
+                         if not proxy_url or not browser_profile: # Verifica essenziale
+                              print(f"   [SAT WARN KW: {entity[:20]}] Proxy {geo_code} ottenuto ma mancano dati sessione (url/profilo). Rilascio.")
+                              error_type_proxy = "IncompleteSessionData"
+                              proxy_info = None # Impedisce uso
+                              release_success = False # Rilascia come fallito
+                              # Non rilasciare qui, verrà fatto nel finally
+                         else:
+                              break # Trovato proxy valido con dati
+                    else: time.sleep(random.uniform(3,6))
+
+                if not proxy_info: # Se dopo i tentativi non hai proxy valido
+                    # print(f"   [SAT SKIP KW: {entity[:20]} T{attempts}] No valid proxy/profile available.")
+                    last_error = "No Proxy/Profile Available"
                     time.sleep(random.uniform(SATURATION_DELAY_BETWEEN_REQUESTS[0], SATURATION_DELAY_BETWEEN_REQUESTS[1]))
                     continue # Prova il prossimo tentativo (potrebbe liberarsi un proxy)
 
-                # print(f"   [SAT KW: {entity} T{attempts}] Using proxy {geo_code} ({proxy_str[-10:]})") # Debug
+                # print(f"   [SAT KW: {entity[:20]} T{attempts}] Using proxy {geo_code} ({proxy_str[-10:]}) Profile: {browser_profile.os}/{browser_profile.geo_code}") # Debug
 
-                # 2. Chiama lo Scraper SERP
+                # 2. Chiama lo Scraper SERP passando il profilo
                 time.sleep(random.uniform(SATURATION_DELAY_BETWEEN_REQUESTS[0], SATURATION_DELAY_BETWEEN_REQUESTS[1]))
                 count, error_reason = fetch_intitle_serp_count(
                     entity,
                     proxy_url=proxy_url,
+                    browser_profile=browser_profile, # <-- Passa il profilo!
                     impersonate_browser=SATURATION_IMPERSONATE_BROWSER,
                     timeout=SATURATION_REQUEST_TIMEOUT
                 )
 
-                # 3. Gestisci Risultato e Rilascia Proxy
+                # 3. Gestisci Risultato
                 if count is not None:
-                    result_count = count
+                    result_count = count # Memorizza il conteggio valido
                     release_success = True
                     last_error = None # Successo
-                    # print(f"   [SAT OK KW: {entity} T{attempts}] Count: {count} via {geo_code}") # Debug
                     break # Esce dal ciclo while dei tentativi
                 else:
-                    # print(f"   [SAT FAIL KW: {entity} T{attempts}] Reason: {error_reason} via {geo_code}") # Debug
+                    # Fallimento nello scraping
                     release_success = False
                     error_type_proxy = error_reason if error_reason else "Unknown SERP Fail"
-                    last_error = error_type_proxy # Memorizza l'ultimo errore
+                    last_error = error_type_proxy # Memorizza l'ultimo errore per questo tentativo
+                    # print(f"   [SAT FAIL KW: {entity[:20]} T{attempts}] Reason: {error_type_proxy} via {geo_code}") # Debug fallimento tentativo
 
             except Exception as e_wrap:
-                # print(f"   [SAT WRAP ERR KW: {entity} T{attempts}] {type(e_wrap).__name__}") # Debug
+                # Errore nel wrapper stesso (raro)
+                print(f"   [SAT WRAP ERR KW: {entity[:20]} T{attempts}] {type(e_wrap).__name__}: {e_wrap}") # Debug
                 release_success = False
                 error_type_proxy = f"WrapperExc: {type(e_wrap).__name__}"
                 last_error = error_type_proxy
             finally:
+                # Rilascia sempre il proxy se è stato ottenuto
                 if proxy_info:
                     proxy_manager_instance.release_proxy(
                         proxy_str,
                         success=release_success,
-                        status_code=None, # Non abbiamo uno status code diretto qui
-                        error_type=error_type_proxy
+                        status_code=None,
+                        error_type=error_type_proxy # Passa l'ultimo errore riscontrato
                     )
+
+            # Se sei qui e result_count è ancora None, il tentativo è fallito, continua il ciclo while
 
         # Fine tentativi per questa keyword
         with lock:
-             if result_count is not None:
-                 raw_results[entity] = result_count
-             else:
-                 raw_results[entity] = -1 # Usa -1 per indicare fallimento totale per questa keyword
-                 # print(f"!!! [SAT TOTAL FAIL KW: {entity}] Last error: {last_error}")
+             raw_results[entity] = result_count # Salva il risultato (count o None se fallito)
+             if result_count is None:
+                  print(f"!!! [SAT TOTAL FAIL KW: {entity[:30]}] Last error: {last_error}") # Logga fallimento finale
 
     # Sottometti i task
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
@@ -765,20 +903,19 @@ def fetch_and_normalize_saturation_scores(entities_list, proxy_manager_instance,
         for entity in entities_list:
              future = executor.submit(fetch_single_saturation, entity)
              futures[future] = entity
-             time.sleep(random.uniform(0.05, 0.2)) # Piccolo delay tra sottomissioni
+             time.sleep(random.uniform(0.1, 0.3)) # Piccolo delay tra sottomissioni (leggermente aumentato)
 
         # Attendi risultati
         print("  Attesa completamento task SERP Saturazione...")
         success_count = 0
         fail_count = 0
+        # Il risultato viene già messo in raw_results nel thread, qui aspettiamo solo il completamento
         for future in tqdm(concurrent.futures.as_completed(futures), total=len(entities_list), desc="Calcolo Saturazione", unit="kw"):
              entity = futures[future]
-             # Il risultato è già in raw_results grazie al lock
-             # Qui potremmo verificare se è fallito o meno
              try:
-                 # future.result() # Solo per propagare eventuali eccezioni non gestite nel wrapper
-                 with lock:
-                     if raw_results.get(entity, -1) != -1:
+                 future.result() # Controlla se ci sono state eccezioni non gestite nel wrapper
+                 with lock: # Controlla il risultato effettivo
+                     if raw_results.get(entity) is not None:
                          success_count += 1
                      else:
                          fail_count += 1
@@ -789,32 +926,16 @@ def fetch_and_normalize_saturation_scores(entities_list, proxy_manager_instance,
 
     print(f"--- Calcolo Saturazione completato ({success_count} successi, {fail_count} falliti) ---")
 
-    # Filtra i risultati falliti (-1) prima della normalizzazione
-    valid_raw_results = {k: v for k, v in raw_results.items() if v != -1}
-    failed_keywords = {k for k, v in raw_results.items() if v == -1}
-
-    if not valid_raw_results:
-         print("  ATTENZIONE: Nessun risultato SERP valido ottenuto. Saturazione sarà 0 per tutti.")
-         return {entity: 0 for entity in entities_list}
-
-    # Normalizza solo i risultati validi
-    print(f"  Normalizzazione {len(valid_raw_results)} risultati SERP validi...")
-    normalized_scores = normalize_scores(valid_raw_results, min_val=1, max_val=100)
-
-    # Ricostruisci il dizionario finale, assegnando 0 (o valore medio?) ai falliti
-    final_saturation_scores = {}
-    avg_fail_score = 0 # Punteggio da assegnare in caso di fallimento (0 = meno saturo)
-    for entity in entities_list:
-         if entity in normalized_scores:
-             final_saturation_scores[entity] = normalized_scores[entity]
-         else:
-             final_saturation_scores[entity] = avg_fail_score # Assegna 0 ai falliti
+    # Normalizza i risultati (la funzione normalize ora gestisce None/falliti)
+    print(f"  Normalizzazione {len(raw_results)} risultati SERP...")
+    final_saturation_scores = normalize_scores(raw_results, min_val=1, max_val=100)
 
     print("--- Normalizzazione Saturazione completata ---")
     return final_saturation_scores
 
+
 # ==============================================================================
-# ==================== FUNZIONE OUTPUT HTML (AGGIORNATA) =======================
+# ==================== FUNZIONE OUTPUT HTML (AGGIORNATA PER SATURAZIONE) =======
 # ==============================================================================
 
 def generate_html_output(df_final, runtime_info=None):
@@ -826,21 +947,18 @@ def generate_html_output(df_final, runtime_info=None):
     try:
         os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-        # Verifica file base (opzionale ma utile)
-        # ... (codice verifica omesso per brevità)
-
         # Prepara la lista di trend per il template
         trend_list = []
-        # Aggiungi 'Saturation_Score' alle colonne richieste/opzionali
         required_cols = ['Rank', 'Entita', 'Discover_Score', 'Score_Avg_now 1-H', 'Score_Avg_now 4-H', 'Score_Avg_now 7-d', 'Extracted_Entities', 'Saturation_Score']
         available_cols = df_final.columns
         missing_warned = False
         for col in required_cols:
-             if col not in available_cols and col != 'Saturation_Score': # Non avvisare se manca solo saturazione (potrebbe essere disattivata)
+             if col not in available_cols and col != 'Saturation_Score': # Non avvisare se manca solo saturazione
                   if not missing_warned:
                      warnings.warn(f"Colonne mancanti nel DF finale: {', '.join([c for c in required_cols if c not in available_cols and c != 'Saturation_Score'])}. Default usati.", UserWarning)
                      missing_warned = True
 
+        # Usa solo le righe passate (potrebbero essere già le top N)
         for _, row in df_final.iterrows():
             trend_data = {
                 'rank': int(row.get('Rank', 0)),
@@ -849,23 +967,25 @@ def generate_html_output(df_final, runtime_info=None):
                 'score_1h': float(row.get('Score_Avg_now 1-H', 0)),
                 'score_4h': float(row.get('Score_Avg_now 4-H', 0)),
                 'score_7d': float(row.get('Score_Avg_now 7-d', 0)),
-                'saturation_score': float(row.get('Saturation_Score', 0)), # Aggiunto! Default a 0 se non trovato
+                'saturation_score': float(row.get('Saturation_Score', 0)), # Usa valore normalizzato (default 1 se fallito)
                 'extracted_entities': row.get('Extracted_Entities', '')
             }
             trend_list.append(trend_data)
 
         # Prepara i metadati della run
         run_metadata = {
-            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'trends_count': len(trend_list),
-            'top_score': max((t['discover_score'] for t in trend_list), default=0),
-            'runtime_minutes': (runtime_info['end_time'] - runtime_info['start_time']) / 60 if runtime_info and 'start_time' in runtime_info and 'end_time' in runtime_info else 0,
-            'proxies_used': len(proxy_manager.all_proxies) if proxy_manager else 0,
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S %Z'), # Aggiunge Timezone
+            'trends_count': len(trend_list), # Numero di trend in data.js (potrebbe essere TOP_N)
+            'total_trends_processed': runtime_info.get('total_trends_processed', len(trend_list)), # Numero totale processato prima del taglio
+            'top_discover_score': max((t['discover_score'] for t in trend_list), default=0),
+            'runtime_seconds': (runtime_info['end_time'] - runtime_info['start_time']) if runtime_info and 'start_time' in runtime_info and 'end_time' in runtime_info else 0,
+            'proxies_available': len(proxy_manager.all_proxies) if proxy_manager else 0,
             'openai_enabled': FETCH_OPENAI_ENTITIES,
             'openai_model': OPENAI_MODEL if FETCH_OPENAI_ENTITIES else 'N/A',
-            'saturation_enabled': FETCH_SATURATION_SCORE, # Aggiunto metadato
-            'saturation_browser': SATURATION_IMPERSONATE_BROWSER if FETCH_SATURATION_SCORE else 'N/A' # Aggiunto metadato
+            'saturation_enabled': FETCH_SATURATION_SCORE,
+            'saturation_browser': SATURATION_IMPERSONATE_BROWSER if FETCH_SATURATION_SCORE else 'N/A'
         }
+        run_metadata['runtime_minutes'] = round(run_metadata['runtime_seconds'] / 60, 2) # Aggiunge minuti arrotondati
 
         # Prepara il contenuto di data.js
         js_data = f"const trendData = {json.dumps(trend_list, indent=2, ensure_ascii=False)};\n\n"
@@ -888,16 +1008,17 @@ def generate_html_output(df_final, runtime_info=None):
         return False
 
 # ==============================================================================
-# ==================== SCRIPT PRINCIPALE (V7.8 - + Saturazione) ================
+# ==================== SCRIPT PRINCIPALE (V7.9 - Saturazione Corretta) =========
 # ==============================================================================
 if __name__ == "__main__":
     main_start_time = time.time()
     runtime_info = {'start_time': main_start_time}
+    total_trends_processed = 0 # Contatore per metadati
 
     # Validazioni iniziali parametri
     if FETCH_VOLUME_CONTEXT:
         if not CONTEXT_TIMEFRAMES: warnings.warn("CONTEXT_TIMEFRAMES vuoto. Contesto disattivato.", UserWarning); FETCH_VOLUME_CONTEXT = False
-        if CONTEXT_N_RUNS <= 0: raise ValueError("CONTEXT_N_RUNS >= 1")
+        if CONTEXT_N_RUNS <= 0: warnings.warn("CONTEXT_N_RUNS <= 0. Contesto disattivato.", UserWarning); FETCH_VOLUME_CONTEXT = False
     if FETCH_OPENAI_ENTITIES:
         if N_PROCESS_FOR_OPENAI <= 0: warnings.warn("N_PROCESS_FOR_OPENAI <= 0. OpenAI disattivato.", UserWarning); FETCH_OPENAI_ENTITIES = False
         if not client: warnings.warn("Client OpenAI non inizializzato. OpenAI disattivato.", UserWarning); FETCH_OPENAI_ENTITIES = False
@@ -905,13 +1026,13 @@ if __name__ == "__main__":
         if N_PROCESS_FOR_SATURATION <= 0: warnings.warn("N_PROCESS_FOR_SATURATION <= 0. Saturazione disattivata.", UserWarning); FETCH_SATURATION_SCORE = False
         if impersonate_get is None: warnings.warn("curl_cffi non importato. Saturazione disattivata.", UserWarning); FETCH_SATURATION_SCORE = False
 
-    print(f"--- Avvio script Discover Prophet V7.8 (Docs Only & OpenAI & Saturazione) ---")
+    print(f"--- Avvio script Discover Prophet V7.9 (Docs Only & OpenAI & Saturazione Corretta) ---")
     print(f"Formula Discover Score: V7.9 (Numeratore Pesato: V4h={WEIGHT_V4H_NUMERATOR}, V7d={WEIGHT_V7D_NUMERATOR}; Denominatore K={V7D_PENALTY_K}, epsilon={V7D_PENALTY_EPSILON})")
     print(f"Modalità: Lavora direttamente su '{OUTPUT_DIR}', genera solo 'data.js'.")
     print(f"Estrazione Contesto Volume: {'ATTIVA' if FETCH_VOLUME_CONTEXT else 'DISATTIVATA'} (Top {N_PROCESS_FOR_CONTEXT}, Runs: {CONTEXT_N_RUNS})")
     print(f"Estrazione Entità OpenAI: {'ATTIVA' if FETCH_OPENAI_ENTITIES else 'DISATTIVATA'} (Top {N_PROCESS_FOR_OPENAI}, Modello: {OPENAI_MODEL if FETCH_OPENAI_ENTITIES else 'N/A'})")
-    print(f"Calcolo Saturazione SERP: {'ATTIVO' if FETCH_SATURATION_SCORE else 'DISATTIVATO'} (Top {N_PROCESS_FOR_SATURATION}, Browser: {SATURATION_IMPERSONATE_BROWSER if FETCH_SATURATION_SCORE else 'N/A'})")
-    print(f"Config Proxy: MaxConc={MAX_CONCURRENT_PROXIES}, CD={PROXY_USE_COOLDOWN}s")
+    print(f"Calcolo Saturazione SERP: {'ATTIVO' if FETCH_SATURATION_SCORE else 'DISATTIVATO'} (Top {N_PROCESS_FOR_SATURATION}, Browser: {SATURATION_IMPERSONATE_BROWSER if FETCH_SATURATION_SCORE else 'N/A'}, Threads: {MAX_THREADS_SATURATION})")
+    print(f"Config Proxy: MaxConc={MAX_CONCURRENT_PROXIES}, CD={PROXY_USE_COOLDOWN}s, FailThr={PROXY_FAILURE_THRESHOLD}, CDMult={PROXY_FAILURE_COOLDOWN_MULTIPLIER}")
     print(f"Config Threads: Pytrends={MAX_THREADS_PYTRENDS}, OpenAI={MAX_OPENAI_THREADS}, Saturazione={MAX_THREADS_SATURATION}")
     print(f"Output: '{OUTPUT_DIR}', Checkpoints: '{CHECKPOINT_DIR}'")
 
@@ -926,9 +1047,11 @@ if __name__ == "__main__":
         # --- 1. Estrazione Lista Ordinata ---
         ordered_entities = extract_ordered_entities()
         if not ordered_entities: raise Exception("Estrazione iniziale fallita.")
-        print(f"\nLista Ordinata Iniziale Estratta ({len(ordered_entities)} entità).")
+        total_trends_processed = len(ordered_entities) # Memorizza numero totale entità
+        runtime_info['total_trends_processed'] = total_trends_processed # Per metadati
+        print(f"\nLista Ordinata Iniziale Estratta ({total_trends_processed} entità).")
         try:
-            df_initial = pd.DataFrame({'Rank': range(1, len(ordered_entities) + 1), 'Entita': ordered_entities})
+            df_initial = pd.DataFrame({'Rank': range(1, total_trends_processed + 1), 'Entita': ordered_entities})
             df_initial.to_csv(os.path.join(CHECKPOINT_DIR, "01_entities_ordered_extracted.csv"), index=False, encoding='utf-8-sig')
             print(f"  Checkpoint lista ordinata iniziale salvato.")
         except Exception as e: print(f"  Errore salvataggio checkpoint lista ordinata: {e}")
@@ -938,56 +1061,81 @@ if __name__ == "__main__":
         for tf in CONTEXT_TIMEFRAMES: df_final[f'Score_Avg_{tf}'] = 0.0
         df_final['Extracted_Entities'] = ''
         df_final['Discover_Score'] = 0.0
-        df_final['Saturation_Score'] = 0.0 # Inizializza colonna saturazione
+        df_final['Saturation_Score'] = 1.0 # Inizializza colonna saturazione (1 = minimo default)
 
         # --- 2. Raccolta Score di Contesto (se attivo) ---
         if FETCH_VOLUME_CONTEXT and N_PROCESS_FOR_CONTEXT > 0 and CONTEXT_TIMEFRAMES:
             print(f"\n--- Avvio Raccolta Score Contesto per Top {N_PROCESS_FOR_CONTEXT} Entità ---")
             entities_for_context = ordered_entities[:N_PROCESS_FOR_CONTEXT]
-            timeframe_context_results = defaultdict(lambda: defaultdict(list))
+            timeframe_context_results = defaultdict(lambda: defaultdict(list)) # Usa lambda per sicurezza
             for run in range(1, CONTEXT_N_RUNS + 1):
                 print(f"\n===== INIZIO RACCOLTA CONTESTO - RUN {run}/{CONTEXT_N_RUNS} ====="); rst = time.time()
                 run_scores = {}
                 for tf in CONTEXT_TIMEFRAMES:
+                    # Assicurati che entities_for_context non sia vuoto
+                    if not entities_for_context:
+                        print(f"    WARN: Nessuna entità per contesto {tf} in run {run}.")
+                        continue
                     scores = get_all_context_scores(entities_for_context, tf)
                     run_scores[tf] = scores
-                    for entity, score in scores.items(): timeframe_context_results[tf][entity].append(score)
+                    # Aggiorna i risultati aggregati
+                    for entity, score in scores.items():
+                        if entity in entities_for_context: # Assicura che l'entità sia tra quelle richieste
+                             timeframe_context_results[tf][entity].append(score)
                     print(f"    Run {run}/{CONTEXT_N_RUNS}: Contesto {tf} completato.")
+                # Salva checkpoint per la run corrente
                 try:
+                    # Crea df checkpoint solo con entità di contesto
                     df_run_checkpoint = pd.DataFrame(entities_for_context, columns=['Entita'])
-                    for tf, scores_dict in run_scores.items(): df_run_checkpoint[f'Score_{tf.replace(" ","_")}_Run{run}'] = df_run_checkpoint['Entita'].map(scores_dict).fillna(0)
+                    for tf, scores_dict in run_scores.items():
+                        # Mappa i punteggi ottenuti in questa run
+                        df_run_checkpoint[f'Score_{tf.replace(" ","_")}_Run{run}'] = df_run_checkpoint['Entita'].map(scores_dict).fillna(0)
                     chk_filename = f"02_context_run_{run}_scores.csv"
                     df_run_checkpoint.to_csv(os.path.join(CHECKPOINT_DIR, chk_filename), index=False, encoding='utf-8-sig'); print(f"  Checkpoint Run {run} salvato.")
                 except Exception as e: print(f"  Errore salvataggio checkpoint contesto Run {run}: {e}")
                 print(f"===== FINE RACCOLTA CONTESTO - RUN {run}/{CONTEXT_N_RUNS} (Durata: {time.time() - rst:.2f}s) =====")
-                if run < CONTEXT_N_RUNS: time.sleep(random.uniform(5, 15))
+                if run < CONTEXT_N_RUNS: time.sleep(random.uniform(5, 15)) # Pausa tra le run
+            # Calcola medie finali
             print("\n  Calcolo Score Medi di Contesto dalle Run...")
             for tf_agg in CONTEXT_TIMEFRAMES:
                 sc_avg_col = f'Score_Avg_{tf_agg}'
+                # Calcola media solo per entità con almeno un risultato
                 avg_scores_map = {entity: np.mean(scores) if scores else 0 for entity, scores in timeframe_context_results[tf_agg].items()}
+                # Mappa le medie sul DataFrame principale
                 df_final[sc_avg_col] = df_final['Entita'].map(avg_scores_map).fillna(0)
                 print(f"    Media contesto per {tf_agg} calcolata.")
             print("--- Fine Raccolta Score Contesto ---")
+            # Salva checkpoint medie
             try:
                 cols_to_save = ['Rank', 'Entita'] + [f'Score_Avg_{tf}' for tf in CONTEXT_TIMEFRAMES]
-                df_final[cols_to_save].head(N_PROCESS_FOR_CONTEXT).to_csv(os.path.join(CHECKPOINT_DIR, "03_context_averages.csv"), index=False, encoding='utf-8-sig'); print(f"  Checkpoint medie contesto salvato.")
+                # Salva solo le righe per cui è stato calcolato il contesto
+                df_final.loc[df_final['Entita'].isin(entities_for_context), cols_to_save].to_csv(os.path.join(CHECKPOINT_DIR, "03_context_averages.csv"), index=False, encoding='utf-8-sig'); print(f"  Checkpoint medie contesto salvato.")
             except Exception as e: print(f"  Errore salvataggio checkpoint medie contesto: {e}")
         else:
             print("\n--- Raccolta Score Contesto Saltata ---")
+            # Assicura che le colonne esistano anche se saltato
             for tf in CONTEXT_TIMEFRAMES:
                 if f'Score_Avg_{tf}' not in df_final.columns: df_final[f'Score_Avg_{tf}'] = 0.0
 
         # --- 2.B Estrazione Entità con OpenAI (se attiva) ---
         if FETCH_OPENAI_ENTITIES:
+            # Processa solo le entità per cui potremmo aver calcolato contesto (o N_PROCESS_FOR_OPENAI)
             entities_to_process_openai = ordered_entities[:N_PROCESS_FOR_OPENAI]
-            extracted_entities_map = get_entities_with_openai(entities_to_process_openai)
-            df_final['Extracted_Entities'] = df_final['Entita'].map(extracted_entities_map).fillna('')
-            print("  Entità OpenAI mappate nel DataFrame.")
-            try:
-                df_openai_chk = df_final.loc[df_final['Entita'].isin(entities_to_process_openai), ['Entita', 'Extracted_Entities']]
-                chk_filename = "04_openai_extracted_entities.csv"
-                df_openai_chk.to_csv(os.path.join(CHECKPOINT_DIR, chk_filename), index=False, encoding='utf-8-sig'); print(f"  Checkpoint entità OpenAI salvato.")
-            except Exception as e: print(f"  Errore salvataggio checkpoint entità OpenAI: {e}")
+            if entities_to_process_openai:
+                 extracted_entities_map = get_entities_with_openai(entities_to_process_openai)
+                 df_final['Extracted_Entities'] = df_final['Entita'].map(extracted_entities_map).fillna('')
+                 print("  Entità OpenAI mappate nel DataFrame.")
+                 # Salva Checkpoint OpenAI
+                 try:
+                     df_openai_chk = df_final.loc[df_final['Entita'].isin(entities_to_process_openai), ['Entita', 'Extracted_Entities']]
+                     chk_filename = "04_openai_extracted_entities.csv"
+                     df_openai_chk.to_csv(os.path.join(CHECKPOINT_DIR, chk_filename), index=False, encoding='utf-8-sig'); print(f"  Checkpoint entità OpenAI salvato.")
+                 except Exception as e: print(f"  Errore salvataggio checkpoint entità OpenAI: {e}")
+            else: print("  Nessuna entità specificata per OpenAI.")
+        else:
+            print("\n--- Estrazione Entità OpenAI Saltata ---")
+            df_final['Extracted_Entities'] = '' # Assicura colonna vuota
+
 
         # --- 3. Calcolo Heuristic Discover Score ---
         print("\n  Calcolo Heuristic Discover Score V7.9 (Numeratore Pesato)...")
@@ -1013,65 +1161,73 @@ if __name__ == "__main__":
             print(f"\n  DataFrame finale ordinato per '{discover_score_col}'.")
         else: print(f"\n  ATTENZIONE: Colonna '{discover_score_col}' non trovata per l'ordinamento.")
 
-        # --- 5. NUOVO: Calcolo Saturazione Score (se attivo) ---
+        # --- 5. Calcolo Saturazione Score (se attivo) ---
         if FETCH_SATURATION_SCORE:
+            # Prendi le prime N entità DOPO l'ordinamento per Discover Score
             entities_for_saturation = df_final['Entita'].head(N_PROCESS_FOR_SATURATION).tolist()
             if entities_for_saturation:
                  saturation_scores_normalized = fetch_and_normalize_saturation_scores(
                      entities_for_saturation,
                      proxy_manager # Passa l'istanza del manager
                  )
-                 df_final['Saturation_Score'] = df_final['Entita'].map(saturation_scores_normalized).fillna(0) # Mappa i punteggi, default 0 per gli altri
+                 # Mappa i punteggi sul DataFrame completo (fillna gestirà quelle non processate)
+                 df_final['Saturation_Score'] = df_final['Entita'].map(saturation_scores_normalized).fillna(1.0) # Default 1 se non mappato
                  print("  Punteggi di Saturazione mappati nel DataFrame.")
+                 # Salva Checkpoint Saturazione
                  try:
                     chk_filename = "05_saturation_scores.csv"
                     cols_sat = ['Entita', 'Saturation_Score']
+                    # Salva solo le entità per cui è stata tentata la saturazione
                     df_final.loc[df_final['Entita'].isin(entities_for_saturation), cols_sat].to_csv(os.path.join(CHECKPOINT_DIR, chk_filename), index=False, encoding='utf-8-sig')
                     print(f"  Checkpoint punteggi saturazione salvato.")
                  except Exception as e: print(f"  Errore salvataggio checkpoint saturazione: {e}")
             else:
-                 print("  Nessuna entità da processare per la saturazione.")
+                 print("  Nessuna entità da processare per la saturazione (lista vuota?).")
+                 df_final['Saturation_Score'] = 1.0 # Assicura default
         else:
             print("\n--- Calcolo Saturazione Score Saltato ---")
-            df_final['Saturation_Score'] = 0 # Assicura che la colonna esista e sia 0
+            df_final['Saturation_Score'] = 1.0 # Assicura che la colonna esista e abbia valore minimo
 
 
         # --- 6. Salva il DataFrame finale completo come CSV ---
         try:
-            # Rinomina il file per includere anche la saturazione se calcolata
             base_filename = "final_sorted_data_v7.9_score"
             if FETCH_SATURATION_SCORE: base_filename += "_with_saturation"
-            backup_filename = f"06_{base_filename}.csv" # Cambiato numero checkpoint
+            backup_filename = f"06_{base_filename}.csv"
             df_final.to_csv(os.path.join(CHECKPOINT_DIR, backup_filename), index=False, encoding='utf-8-sig')
             print(f"\nDataFrame finale completo salvato: {os.path.join(CHECKPOINT_DIR, backup_filename)}")
         except Exception as e: print(f"\n!!! Errore salvataggio CSV finale completo: {e} !!!")
 
         # --- 7. Genera l'output data.js ---
-        runtime_info['end_time'] = time.time()
-        html_result = generate_html_output(df_final.head(TOP_N_FINAL_DISPLAY), runtime_info) # Passa solo il top N a data.js
+        runtime_info['end_time'] = time.time() # Fine tempo esecuzione principale
+        # Passa solo le top N righe a data.js per mantenere il file leggero
+        df_output = df_final.head(TOP_N_FINAL_DISPLAY).copy()
+        html_result = generate_html_output(df_output, runtime_info)
 
-        # --- 8. Stampa Top N Finale ---
+        # --- 8. Stampa Top N Finale a Console ---
         print(f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score, con Saturazione se attiva) ---")
-        # Aggiungi 'Saturation_Score' alle colonne da mostrare
         cols_to_show = [c for c in ['Discover_Score', 'Saturation_Score', 'Rank', 'Entita', 'Extracted_Entities', 'Score_Avg_now 1-H', 'Score_Avg_now 4-H', 'Score_Avg_now 7-d'] if c in df_final.columns]
         try:
-            pd.set_option('display.max_rows', TOP_N_FINAL_DISPLAY + 5); pd.set_option('display.width', 200); pd.set_option('display.max_colwidth', 45); pd.set_option('display.float_format', '{:.2f}'.format) # Formato float più compatto
+            pd.set_option('display.max_rows', TOP_N_FINAL_DISPLAY + 5); pd.set_option('display.width', 200); pd.set_option('display.max_colwidth', 45); pd.set_option('display.float_format', '{:.2f}'.format)
+            # Stampa le top N dal DataFrame completo (df_final)
             print(df_final[cols_to_show].head(TOP_N_FINAL_DISPLAY).to_string(index=False))
         except Exception as e_print: print(f"Errore stampa finale: {e_print}")
-        finally: pd.reset_option('all')
+        finally: pd.reset_option('all') # Resetta opzioni display pandas
 
     except Exception as main_exc:
         print(f"\n\n!!! ERRORE CRITICO SCRIPT: {type(main_exc).__name__} - {main_exc} !!!"); traceback.print_exc()
     finally:
+        # Blocco Stampa Statistiche Proxy (invariato)
         print("\n--- Statistiche Proxy Rilevate (Fine Esecuzione) ---")
         try:
             if 'proxy_manager' in locals() and proxy_manager:
                 ps = proxy_manager.get_proxy_stats_summary(); total_requests = ps.get('total_success', 0) + ps.get('total_fail_429', 0) + ps.get('total_fail_proxy_timeout', 0) + ps.get('total_fail_other_parse', 0); success_rate = (ps.get('total_success', 0) / total_requests * 100) if total_requests > 0 else 0
                 print(f"Req Tot Proxy: {total_requests}, Successi: {ps.get('total_success', 0)} ({success_rate:.1f}%)"); print(f"  Fail: 429={ps.get('total_fail_429', 0)}, Proxy/Timeout={ps.get('total_fail_proxy_timeout', 0)}, Altri/Parse={ps.get('total_fail_other_parse', 0)}")
                 tfp = ps.get('top_failing_proxies', {});
-                if tfp: print("Top Failing Proxies:"); [print(f"  - {pid}: Succ:{d['success']}, FailsCons:{d['consecutive_fails']} (429:{d['fail_429']}, P/T:{d['fail_proxy/timeout']}, O/P:{d['fail_other/parse']})") for pid, d in list(tfp.items())[:5]]
+                if tfp: print("Top Failing Proxies:"); [print(f"  - {pid}: Succ:{d['success']}, FailsCons:{d['consecutive_fails']} (429:{d['fail_429']}, P/T:{d['fail_proxy/timeout']}, O/P:{d['fail_other/parse']})") for pid, d in list(tfp.items())[:5]] # Mostra solo top 5
             else: print("Proxy Manager non disponibile per statistiche.")
         except Exception as stats_exc: print(f"Errore stampa stats proxy: {stats_exc}")
 
+        # Blocco Tempo Esecuzione (invariato)
         main_end_time = time.time(); total_duration = main_end_time - main_start_time
-        print(f"\n--- Script V7.8 (Score V7.9 + Saturazione) completato in {total_duration:.2f} sec ({total_duration/60:.2f} min) ---")
+        print(f"\n--- Script V7.9 (Score V7.9 + Saturazione Corretta) completato in {total_duration:.2f} sec ({total_duration/60:.2f} min) ---")
