@@ -353,7 +353,7 @@ def get_trends_scores(keywords, timeframe):
 def get_all_context_scores(entities_subset, timeframe, max_threads=MAX_THREADS_PYTRENDS):
     """Ottiene i punteggi per tutte le entità in parallelo per un dato timeframe."""
     all_scores = {}; entity_list = list(set(entities_subset)); random.shuffle(entity_list)
-    group_size = 4; groups = [entity_list[i:i+group_size] for i in range(0, len(entity_list), group_size)]
+    group_size = 3; groups = [entity_list[i:i+group_size] for i in range(0, len(entity_list), group_size)]
     print(f"\n--- Raccolta score CONTESTO: {timeframe} ({len(groups)} gruppi / {len(entity_list)} entità / {max_threads} threads) ---")
     sem = threading.Semaphore(max_threads)
     def get_trends_scores_safe(kw, tf):
