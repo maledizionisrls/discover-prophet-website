@@ -2,11 +2,11 @@
 
 # 🚀 Script Ottimizzato per Google Trends - V7.7 (Docs Only & OpenAI)
 #    Lavora direttamente con i file nella cartella 'docs'.
-#    Eliminata la cartella 'templates' e la logica di copia file. 
+#    Eliminata la cartella 'templates' e la logica di copia file.
 #    Genera solo 'docs/data.js'.
 #    Integra OpenAI per estrarre entità chiave dalle query di tendenza.
 #    Legge la chiave API OpenAI dalla variabile d'ambiente OPENAI_API_KEY.
-#    Formula V7.5 per Discover Score.
+#    **Formula V7.9 per Discover Score (Numeratore Pesato).**
 
 # --- Import Librerie Essenziali ---
 import requests
@@ -103,9 +103,12 @@ if FETCH_OPENAI_ENTITIES:
             warnings.warn(f"Errore inizializzazione client OpenAI: {e}. Estrazione saltata.", UserWarning)
             FETCH_OPENAI_ENTITIES = False
 
-# --- Parametri Formula Discover Score V7.5 ---
-V7D_PENALTY_K = 50.0
-V7D_PENALTY_EPSILON = 0.1
+# --- Parametri Formula Discover Score V7.9 ---
+V7D_PENALTY_K = 50.0 # Mantenuto per il denominatore
+V7D_PENALTY_EPSILON = 0.1 # Mantenuto per il denominatore
+# Nuovi pesi per il numeratore V7.9
+WEIGHT_V4H_NUMERATOR = 0.5
+WEIGHT_V7D_NUMERATOR = 1.5
 
 # --- Parametri Gestione Proxy e Concorrenza ---
 MAX_CONCURRENT_PROXIES = 210
@@ -141,19 +144,27 @@ PYTRENDS_BACKOFF_FACTOR = 0.2
 # ==============================================================================
 
 # ==============================================================================
-# ==================== FUNZIONE CALCOLO DISCOVER SCORE (V7.5) ==================
+# ============= FUNZIONE CALCOLO DISCOVER SCORE (V7.9 - Numeratore Pesato) ======
 # ==============================================================================
-def calculate_discover_score(rank_series, score_4h, score_7d, k_penalty=V7D_PENALTY_K, epsilon=V7D_PENALTY_EPSILON):
-    """Calcola l'Heuristic Discover Score V7.5."""
-    formula_str = f"(1 + V4h + V7d) / log1p(Rank * max(1, {k_penalty:.1f} / (V7d + {epsilon:.1f})))"
-    # print(f"        Applicando Formula V7.5: {formula_str}") # Meno verboso
+def calculate_discover_score(rank_series, score_4h, score_7d, k_penalty=V7D_PENALTY_K, epsilon=V7D_PENALTY_EPSILON, weight_v4h=WEIGHT_V4H_NUMERATOR, weight_v7d=WEIGHT_V7D_NUMERATOR):
+    """Calcola l'Heuristic Discover Score V7.9 (Numeratore Pesato)."""
+
+    # --- Calcolo Denominatore (basato su V7.5) ---
+    # Utilizza ancora k_penalty ed epsilon per penalizzare rank bassi con basso V7d
     low_v7d_penalty_factor = np.maximum(1.0, k_penalty / (score_7d + epsilon))
     effective_rank = rank_series * low_v7d_penalty_factor
     denominator = np.log1p(effective_rank)
-    denominator = np.maximum(denominator, 1e-9)
-    numerator = 1 + score_4h + score_7d
+    denominator = np.maximum(denominator, 1e-9) # Evita divisione per zero
+
+    # --- Calcolo Numeratore MODIFICATO (V7.9) ---
+    # Diamo più peso a V7d (1.5) e meno a V4h (0.5)
+    numerator = 1 + (score_4h * weight_v4h) + (score_7d * weight_v7d)
+    # print(f"           Applicando Numeratore Pesato: 1 + V4h*{weight_v4h} + V7d*{weight_v7d}") # Meno verboso
+
+    # --- Calcolo Score Finale ---
     discover_score = numerator / denominator
-    discover_score = discover_score.fillna(0)
+    discover_score = discover_score.fillna(0) # Gestisce eventuali NaN
+
     return discover_score
 # ==============================================================================
 
@@ -187,10 +198,10 @@ class AdvancedProxyManager:
             if len(self.active_proxies)<self.max_concurrent and self.available_proxies:
                 p_str=self.available_proxies.popleft(); geo=self.all_proxies[p_str]; self.active_proxies[p_str]=time.time(); p_url=get_proxy_url(p_str);
                 try: prof=ConsistentBrowserProfile(geo)
-                except Exception as e: print(f"     Profilo err {geo}: {e}. Uso def."); prof=ConsistentBrowserProfile('DEFAULT')
+                except Exception as e: print(f"      Profilo err {geo}: {e}. Uso def."); prof=ConsistentBrowserProfile('DEFAULT')
                 scr=None;
                 try: bcfg={'browser':'chrome','platform':prof.os if prof.os in ['windows','darwin','linux'] else 'windows','mobile':False,'desktop':True,'user_agent':prof.user_agent}; scr=cloudscraper.create_scraper(browser=bcfg,delay=random.uniform(0.5,1.5)); scr.headers.update(prof.get_headers());
-                except Exception as e: print(f"     Scraper err {geo} ({type(e).__name__}). Uso base."); scr=requests.Session(); scr.headers.update(prof.get_headers());
+                except Exception as e: print(f"      Scraper err {geo} ({type(e).__name__}). Uso base."); scr=requests.Session(); scr.headers.update(prof.get_headers());
                 if p_url: scr.proxies={'http':p_url,'https':p_url}
                 self.active_sessions[p_str]={'scraper':scr,'profile':prof}; return p_str, geo, self.active_sessions[p_str]
             else: return None
@@ -209,7 +220,7 @@ class AdvancedProxyManager:
                 elif error_type=='ProxyError' or (isinstance(status_code,int) and 500<=status_code<=599): self.proxy_stats[p_str]["fail_proxy_error"]+=1; cd_end=time.time()+(self.cooldown_seconds*3)
                 elif error_type=='parse_fail' or error_type=='empty_data': self.proxy_stats[p_str]["fail_parse"]+=1; cd_end=time.time()+(self.cooldown_seconds*1.5)
                 else: self.proxy_stats[p_str]["fail_other"]+=1; cd_end=time.time()+(self.cooldown_seconds*1.2)
-                if fails>=PROXY_FAILURE_THRESHOLD: mult=1+(PROXY_FAILURE_COOLDOWN_MULTIPLIER*(fails-PROXY_FAILURE_THRESHOLD+1)); add_cd=self.cooldown_seconds*mult; ct=time.time(); base_dur=cd_end-ct; final_dur=base_dur+add_cd; cd_end=ct+final_dur; print(f"     INFO: Proxy {geo} ({p_str[-10:]}) ha {fails} fails cons. CD esteso a {final_dur:.0f}s.")
+                if fails>=PROXY_FAILURE_THRESHOLD: mult=1+(PROXY_FAILURE_COOLDOWN_MULTIPLIER*(fails-PROXY_FAILURE_THRESHOLD+1)); add_cd=self.cooldown_seconds*mult; ct=time.time(); base_dur=cd_end-ct; final_dur=base_dur+add_cd; cd_end=ct+final_dur; print(f"      INFO: Proxy {geo} ({p_str[-10:]}) ha {fails} fails cons. CD esteso a {final_dur:.0f}s.")
             self.cooldown_proxies[p_str]=cd_end
     def get_proxy_stats_summary(self):
         with self.lock:
@@ -320,19 +331,19 @@ def get_trends_scores(keywords, timeframe):
             release_success = True; return final
         except requests.exceptions.HTTPError as http_err:
             status_code = http_err.response.status_code if hasattr(http_err, 'response') and http_err.response else None; print(f"      !![CTX KW:{kw_hash} T{attempts}] HTTP Err {status_code or 'N/A'} (Proxy: {geo_code}).")
-            if status_code == 429: error_type_str = '429_related'; wait = min(current_backoff_429, MAX_WAIT_SECONDS); print(f"        -> 429! Wait: {wait:.1f}s..."); time.sleep(wait); current_backoff_429 = min(current_backoff_429 * BACKOFF_MULTIPLIER_429, MAX_WAIT_SECONDS * 1.5)
-            elif status_code and 500 <= status_code <= 599: error_type_str = 'ProxyError'; wait = min(current_backoff_other*1.5, MAX_WAIT_SECONDS/2); print(f"        -> 5xx Err {status_code}. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other*1.5, MAX_WAIT_SECONDS)
-            else: error_type_str = f"HTTP_{status_code or 'N/A'}"; wait = min(current_backoff_other*1.5, MAX_WAIT_SECONDS/2); print(f"        -> HTTP Err {status_code}. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other*1.5, MAX_WAIT_SECONDS)
-        except (requests.exceptions.Timeout, socket.timeout) as timeout_err: error_type_str = 'Timeout'; print(f"      !![CTX KW:{kw_hash} T{attempts}] Timeout (Proxy: {geo_code}): {timeout_err}"); wait = min(current_backoff_other*1.2, MAX_WAIT_SECONDS/2); print(f"        -> Timeout. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = wait * 1.2
+            if status_code == 429: error_type_str = '429_related'; wait = min(current_backoff_429, MAX_WAIT_SECONDS); print(f"          -> 429! Wait: {wait:.1f}s..."); time.sleep(wait); current_backoff_429 = min(current_backoff_429 * BACKOFF_MULTIPLIER_429, MAX_WAIT_SECONDS * 1.5)
+            elif status_code and 500 <= status_code <= 599: error_type_str = 'ProxyError'; wait = min(current_backoff_other*1.5, MAX_WAIT_SECONDS/2); print(f"          -> 5xx Err {status_code}. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other*1.5, MAX_WAIT_SECONDS)
+            else: error_type_str = f"HTTP_{status_code or 'N/A'}"; wait = min(current_backoff_other*1.5, MAX_WAIT_SECONDS/2); print(f"          -> HTTP Err {status_code}. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other*1.5, MAX_WAIT_SECONDS)
+        except (requests.exceptions.Timeout, socket.timeout) as timeout_err: error_type_str = 'Timeout'; print(f"      !![CTX KW:{kw_hash} T{attempts}] Timeout (Proxy: {geo_code}): {timeout_err}"); wait = min(current_backoff_other*1.2, MAX_WAIT_SECONDS/2); print(f"          -> Timeout. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = wait * 1.2
         except (requests.exceptions.ProxyError, requests.exceptions.ConnectionError, ConnectionRefusedError, OSError) as proxy_err:
             error_type_str = 'ProxyError'; status_code = 502 if '502' in str(proxy_err) else None
             print(f"      !![CTX KW:{kw_hash} T{attempts}] Proxy/Conn Err (Proxy: {geo_code}): {type(proxy_err).__name__} - {str(proxy_err)[:100]}")
-            wait = min(current_backoff_other * 1.5, MAX_WAIT_SECONDS / 2); print(f"        -> Proxy Err. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other * 1.5, MAX_WAIT_SECONDS)
+            wait = min(current_backoff_other * 1.5, MAX_WAIT_SECONDS / 2); print(f"          -> Proxy Err. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other * 1.5, MAX_WAIT_SECONDS)
         except Exception as e:
             msg = str(e); error_type_str = type(e).__name__; is_429 = '429' in msg or ('response' in dir(e) and hasattr(e.response, 'status_code') and e.response.status_code == 429) ; print(f"!! [CTX KW:{kw_hash} T{attempts}] UNEXPECTED Err (Proxy: {geo_code}): {error_type_str}: {msg[:150]}...")
-            if is_429: error_type_str = '429_related'; wait = min(current_backoff_429, MAX_WAIT_SECONDS); print(f"        -> 429 DETECTED! Wait: {wait:.1f}s..."); time.sleep(wait); current_backoff_429 = min(current_backoff_429 * BACKOFF_MULTIPLIER_429, MAX_WAIT_SECONDS * 1.5)
-            elif isinstance(e, AttributeError): error_type_str = 'parse_fail'; wait = min(current_backoff_other, MAX_WAIT_SECONDS/2); print(f"        -> Attr Err. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other*1.5, MAX_WAIT_SECONDS)
-            else: wait = min(current_backoff_other, MAX_WAIT_SECONDS/2); print(f"        -> Generic Err. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other*1.5, MAX_WAIT_SECONDS)
+            if is_429: error_type_str = '429_related'; wait = min(current_backoff_429, MAX_WAIT_SECONDS); print(f"          -> 429 DETECTED! Wait: {wait:.1f}s..."); time.sleep(wait); current_backoff_429 = min(current_backoff_429 * BACKOFF_MULTIPLIER_429, MAX_WAIT_SECONDS * 1.5)
+            elif isinstance(e, AttributeError): error_type_str = 'parse_fail'; wait = min(current_backoff_other, MAX_WAIT_SECONDS/2); print(f"          -> Attr Err. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other*1.5, MAX_WAIT_SECONDS)
+            else: wait = min(current_backoff_other, MAX_WAIT_SECONDS/2); print(f"          -> Generic Err. Wait {wait:.1f}s..."); time.sleep(wait); current_backoff_other = min(current_backoff_other*1.5, MAX_WAIT_SECONDS)
         finally:
             if proxy_info: proxy_manager.release_proxy(proxy_info[0], success=release_success, status_code=status_code, error_type=error_type_str); proxy_info = None
     print(f"!!! [CTX KW:{kw_hash}] Failed {attempts} context attempts for {kw_list_str} ({timeframe}). Returning scores as 0.")
@@ -365,13 +376,13 @@ def get_all_context_scores(entities_subset, timeframe, max_threads=MAX_THREADS_P
             print(f"\n--- Riprovando {len(failed_groups)} gruppi CONTESTO falliti per {timeframe} ---");
             retry_failed_count = len(failed_groups); initial_failed_count = failed_count; retry_futures = {}
             with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads // 2 + 1) as retry_executor:
-                 for group in failed_groups: time.sleep(random.uniform(0.5, 1.5)); future = retry_executor.submit(get_trends_scores_safe, group, timeframe); retry_futures[future] = group
-                 for future in tqdm(concurrent.futures.as_completed(retry_futures), total=len(failed_groups), desc=f"Retry Ctx {timeframe}", unit="group"):
-                      group = retry_futures[future]
-                      try:
-                          result = future.result(timeout=MAX_WAIT_SECONDS * 2.5)
-                          if result and any(s > 0 for s in result.values()): all_scores.update(result); retry_failed_count -= 1;
-                      except Exception as retry_exc: print(f"      Errore retry ctx {group}: {retry_exc}")
+                for group in failed_groups: time.sleep(random.uniform(0.5, 1.5)); future = retry_executor.submit(get_trends_scores_safe, group, timeframe); retry_futures[future] = group
+                for future in tqdm(concurrent.futures.as_completed(retry_futures), total=len(failed_groups), desc=f"Retry Ctx {timeframe}", unit="group"):
+                    group = retry_futures[future]
+                    try:
+                        result = future.result(timeout=MAX_WAIT_SECONDS * 2.5)
+                        if result and any(s > 0 for s in result.values()): all_scores.update(result); retry_failed_count -= 1;
+                    except Exception as retry_exc: print(f"      Errore retry ctx {group}: {retry_exc}")
             failed_count = retry_failed_count
             print(f"--- Retry CONTESTO {timeframe} completato. Falliti finali: {failed_count} ---")
         else: print(f"--- Raccolta score CONTESTO {timeframe} completata. ({total_tasks} task, {failed_count} falliti) ---")
@@ -386,8 +397,8 @@ def get_single_entity_openai(trend_string, model=OPENAI_MODEL, max_retries=OPENA
     Restituisce una stringa di entità separate da ' - ' o None in caso di fallimento.
     """
     if not client: # Verifica se il client è stato inizializzato
-         # print("      [OpenAI SKIP] Client non inizializzato.") # Debug
-         return None
+        # print("      [OpenAI SKIP] Client non inizializzato.") # Debug
+        return None
 
     # Prompt ottimizzato per estrarre 3-5 entità chiave separate da ' - '
     prompt = f"""Data la seguente query di ricerca Google Trends, estrai le 3-5 entità o concetti chiave più importanti (persone, luoghi, eventi, organizzazioni, temi principali). Elencali separati da " - " (spazio trattino spazio). Sii conciso e pertinente alla query. Non aggiungere introduzioni, spiegazioni o virgolette attorno alla lista. Esempio: Se la query è "Meteo Roma prossimi giorni", la risposta dovrebbe essere "Meteo - Roma - Previsioni". Query di input: "{trend_string}" """
@@ -428,20 +439,20 @@ def get_single_entity_openai(trend_string, model=OPENAI_MODEL, max_retries=OPENA
             if attempts >= max_retries: print(f"  !! [OpenAI Timeout] Fallito dopo {max_retries} tentativi per '{trend_string}'."); return None
             time.sleep(3 * attempts) # Backoff più aggressivo per Timeout
         except openai.APIConnectionError as e:
-             print(f"  !! [OpenAI Connection Err] Tentativo {attempts}/{max_retries} per '{trend_string}': {e}. Attesa...")
-             if attempts >= max_retries: print(f"  !! [OpenAI Connection Err] Fallito dopo {max_retries} tentativi per '{trend_string}'."); return None
-             time.sleep(5 * attempts) # Backoff più lungo per errori di connessione
+              print(f"  !! [OpenAI Connection Err] Tentativo {attempts}/{max_retries} per '{trend_string}': {e}. Attesa...")
+              if attempts >= max_retries: print(f"  !! [OpenAI Connection Err] Fallito dopo {max_retries} tentativi per '{trend_string}'."); return None
+              time.sleep(5 * attempts) # Backoff più lungo per errori di connessione
         except openai.RateLimitError:
-             print(f"  !! [OpenAI Rate Limit] Tentativo {attempts}/{max_retries} per '{trend_string}'. Attesa lunga...")
-             if attempts >= max_retries: print(f"  !! [OpenAI Rate Limit] Fallito dopo {max_retries} tentativi per '{trend_string}'."); return None
-             time.sleep(15 * attempts) # Backoff molto lungo
+              print(f"  !! [OpenAI Rate Limit] Tentativo {attempts}/{max_retries} per '{trend_string}'. Attesa lunga...")
+              if attempts >= max_retries: print(f"  !! [OpenAI Rate Limit] Fallito dopo {max_retries} tentativi per '{trend_string}'."); return None
+              time.sleep(15 * attempts) # Backoff molto lungo
         except openai.APIStatusError as e:
-             print(f"  !! [OpenAI Status Err {e.status_code}] Tentativo {attempts}/{max_retries} per '{trend_string}': {e.message}. Attesa...")
-             if attempts >= max_retries: print(f"  !! [OpenAI Status Err] Fallito dopo {max_retries} tentativi per '{trend_string}'."); return None
-             if e.status_code >= 500 or e.status_code in [401, 403]:
-                  print(f"  !! Errore {e.status_code} non recuperabile. Interruzione tentativi per '{trend_string}'.")
-                  return None
-             time.sleep(5 * attempts)
+              print(f"  !! [OpenAI Status Err {e.status_code}] Tentativo {attempts}/{max_retries} per '{trend_string}': {e.message}. Attesa...")
+              if attempts >= max_retries: print(f"  !! [OpenAI Status Err] Fallito dopo {max_retries} tentativi per '{trend_string}'."); return None
+              if e.status_code >= 500 or e.status_code in [401, 403]:
+                    print(f"  !! Errore {e.status_code} non recuperabile. Interruzione tentativi per '{trend_string}'.")
+                    return None
+              time.sleep(5 * attempts)
         except Exception as e:
             print(f"  !! [OpenAI Generic Err] Tentativo {attempts}/{max_retries} per '{trend_string}': {type(e).__name__} - {e}")
             if attempts >= max_retries: print(f"  !! [OpenAI Generic Err] Fallito dopo {max_retries} tentativi per '{trend_string}'."); return None
@@ -456,8 +467,8 @@ def get_entities_with_openai(trend_list, max_workers=MAX_OPENAI_THREADS):
     Restituisce un dizionario {trend_string: extracted_entities_string}.
     """
     if not client or not FETCH_OPENAI_ENTITIES:
-         print("\n--- Estrazione Entità OpenAI Saltata ---")
-         return {}
+        print("\n--- Estrazione Entità OpenAI Saltata ---")
+        return {}
 
     print(f"\n--- Avvio Estrazione Entità OpenAI ({len(trend_list)} trends, Max Workers: {max_workers}, Modello: {OPENAI_MODEL}) ---")
     extracted_entities_map = {}
@@ -489,7 +500,7 @@ def get_entities_with_openai(trend_list, max_workers=MAX_OPENAI_THREADS):
                     result = result_raw
                     successful_count += 1
             except concurrent.futures.TimeoutError:
-                 print(f"\n!!! Timeout globale OpenAI per '{trend}' !!!")
+                print(f"\n!!! Timeout globale OpenAI per '{trend}' !!!")
             except Exception as exc:
                 print(f"\n!!! Errore recupero risultato OpenAI per '{trend}': {exc} !!!")
             extracted_entities_map[trend] = result # Mappa sempre, vuoto se fallito/non trovato
@@ -515,9 +526,9 @@ def generate_html_output(df_final, runtime_info=None):
         # Verifica (opzionale ma consigliata) che i file base esistano in docs/
         base_files_ok = True
         for file_name in [OUTPUT_FILENAME, "style.css", "script.js"]:
-             if not os.path.exists(os.path.join(OUTPUT_DIR, file_name)):
-                 warnings.warn(f"File base '{file_name}' non trovato in '{OUTPUT_DIR}'. L'output potrebbe non funzionare correttamente.", UserWarning)
-                 base_files_ok = False
+            if not os.path.exists(os.path.join(OUTPUT_DIR, file_name)):
+                warnings.warn(f"File base '{file_name}' non trovato in '{OUTPUT_DIR}'. L'output potrebbe non funzionare correttamente.", UserWarning)
+                base_files_ok = False
         # if not base_files_ok: return False # Potresti decidere di bloccare qui
 
         # Prepara la lista di trend per il template
@@ -526,9 +537,9 @@ def generate_html_output(df_final, runtime_info=None):
         available_cols = df_final.columns
         missing_warned = False
         for col in required_cols:
-             if col not in available_cols and not missing_warned:
-                  warnings.warn(f"Colonne mancanti nel DF finale: {', '.join([c for c in required_cols if c not in available_cols])}. Default usati.", UserWarning)
-                  missing_warned = True
+            if col not in available_cols and not missing_warned:
+                warnings.warn(f"Colonne mancanti nel DF finale: {', '.join([c for c in required_cols if c not in available_cols])}. Default usati.", UserWarning)
+                missing_warned = True
 
         for _, row in df_final.iterrows():
             trend_data = {
@@ -559,11 +570,11 @@ def generate_html_output(df_final, runtime_info=None):
 
         data_js_path = os.path.join(OUTPUT_DIR, 'data.js')
         try:
-             with open(data_js_path, 'w', encoding='utf-8') as f:
-                 f.write(js_data)
+            with open(data_js_path, 'w', encoding='utf-8') as f:
+                f.write(js_data)
         except Exception as e_write:
-             print(f"!!! Errore scrittura file {data_js_path}: {e_write} !!!")
-             return False
+            print(f"!!! Errore scrittura file {data_js_path}: {e_write} !!!")
+            return False
 
         print(f"\nFile dati '{os.path.basename(data_js_path)}' generato/aggiornato con successo in '{OUTPUT_DIR}'.")
         print(f"Apri '{os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)}' nel browser per visualizzare.")
@@ -589,7 +600,7 @@ if __name__ == "__main__":
         if not client: warnings.warn("Client OpenAI non inizializzato. OpenAI disattivato.", UserWarning); FETCH_OPENAI_ENTITIES = False
 
     print(f"--- Avvio script Discover Prophet V7.7 (Docs Only & OpenAI) ---")
-    print(f"Formula Discover Score: V7.5 (K={V7D_PENALTY_K}, epsilon={V7D_PENALTY_EPSILON})")
+    print(f"Formula Discover Score: V7.9 (Numeratore Pesato: V4h={WEIGHT_V4H_NUMERATOR}, V7d={WEIGHT_V7D_NUMERATOR}; Denominatore K={V7D_PENALTY_K}, epsilon={V7D_PENALTY_EPSILON})")
     print(f"Modalità: Lavora direttamente su '{OUTPUT_DIR}', genera solo 'data.js'.")
     print(f"Estrazione Contesto Volume: {'ATTIVA' if FETCH_VOLUME_CONTEXT else 'DISATTIVATA'} (Top {N_PROCESS_FOR_CONTEXT}, Runs: {CONTEXT_N_RUNS})")
     print(f"Estrazione Entità OpenAI: {'ATTIVA' if FETCH_OPENAI_ENTITIES else 'DISATTIVATA'} (Top {N_PROCESS_FOR_OPENAI}, Modello: {OPENAI_MODEL if FETCH_OPENAI_ENTITIES else 'N/A'})")
@@ -610,9 +621,9 @@ if __name__ == "__main__":
         if not ordered_entities: raise Exception("Estrazione iniziale fallita.")
         print(f"\nLista Ordinata Iniziale Estratta ({len(ordered_entities)} entità).")
         try:
-             df_initial = pd.DataFrame({'Rank': range(1, len(ordered_entities) + 1), 'Entita': ordered_entities})
-             df_initial.to_csv(os.path.join(CHECKPOINT_DIR, "01_entities_ordered_extracted.csv"), index=False, encoding='utf-8-sig')
-             print(f"  Checkpoint lista ordinata iniziale salvato.")
+            df_initial = pd.DataFrame({'Rank': range(1, len(ordered_entities) + 1), 'Entita': ordered_entities})
+            df_initial.to_csv(os.path.join(CHECKPOINT_DIR, "01_entities_ordered_extracted.csv"), index=False, encoding='utf-8-sig')
+            print(f"  Checkpoint lista ordinata iniziale salvato.")
         except Exception as e: print(f"  Errore salvataggio checkpoint lista ordinata: {e}")
 
         # Prepara DataFrame finale e inizializza colonne
@@ -650,13 +661,13 @@ if __name__ == "__main__":
                 print(f"    Media contesto per {tf_agg} calcolata.")
             print("--- Fine Raccolta Score Contesto ---")
             try:
-                 cols_to_save = ['Rank', 'Entita'] + [f'Score_Avg_{tf}' for tf in CONTEXT_TIMEFRAMES]
-                 df_final[cols_to_save].head(N_PROCESS_FOR_CONTEXT).to_csv(os.path.join(CHECKPOINT_DIR, "03_context_averages.csv"), index=False, encoding='utf-8-sig'); print(f"  Checkpoint medie contesto salvato.")
+                cols_to_save = ['Rank', 'Entita'] + [f'Score_Avg_{tf}' for tf in CONTEXT_TIMEFRAMES]
+                df_final[cols_to_save].head(N_PROCESS_FOR_CONTEXT).to_csv(os.path.join(CHECKPOINT_DIR, "03_context_averages.csv"), index=False, encoding='utf-8-sig'); print(f"  Checkpoint medie contesto salvato.")
             except Exception as e: print(f"  Errore salvataggio checkpoint medie contesto: {e}")
         else:
             print("\n--- Raccolta Score Contesto Saltata ---")
             for tf in CONTEXT_TIMEFRAMES:
-                 if f'Score_Avg_{tf}' not in df_final.columns: df_final[f'Score_Avg_{tf}'] = 0.0
+                if f'Score_Avg_{tf}' not in df_final.columns: df_final[f'Score_Avg_{tf}'] = 0.0
 
         # --- 2.B Estrazione Entità con OpenAI (se attiva) ---
         if FETCH_OPENAI_ENTITIES:
@@ -665,20 +676,27 @@ if __name__ == "__main__":
             df_final['Extracted_Entities'] = df_final['Entita'].map(extracted_entities_map).fillna('')
             print("  Entità OpenAI mappate nel DataFrame.")
             try:
-                 df_openai_chk = df_final.loc[df_final['Entita'].isin(entities_to_process_openai), ['Entita', 'Extracted_Entities']]
-                 chk_filename = "04_openai_extracted_entities.csv"
-                 df_openai_chk.to_csv(os.path.join(CHECKPOINT_DIR, chk_filename), index=False, encoding='utf-8-sig'); print(f"  Checkpoint entità OpenAI salvato.")
+                df_openai_chk = df_final.loc[df_final['Entita'].isin(entities_to_process_openai), ['Entita', 'Extracted_Entities']]
+                chk_filename = "04_openai_extracted_entities.csv"
+                df_openai_chk.to_csv(os.path.join(CHECKPOINT_DIR, chk_filename), index=False, encoding='utf-8-sig'); print(f"  Checkpoint entità OpenAI salvato.")
             except Exception as e: print(f"  Errore salvataggio checkpoint entità OpenAI: {e}")
 
         # --- 3. Calcolo Heuristic Discover Score ---
-        print("\n  Calcolo Heuristic Discover Score V7.5...")
+        print("\n  Calcolo Heuristic Discover Score V7.9 (Numeratore Pesato)...")
         discover_score_col = 'Discover_Score'; score_4h_col = 'Score_Avg_now 4-H'; score_7d_col = 'Score_Avg_now 7-d'
         if score_4h_col in df_final.columns and score_7d_col in df_final.columns and 'Rank' in df_final.columns:
             score_4h = pd.to_numeric(df_final[score_4h_col], errors='coerce').fillna(0).clip(lower=0)
             score_7d = pd.to_numeric(df_final[score_7d_col], errors='coerce').fillna(0).clip(lower=0)
             rank_series = pd.to_numeric(df_final['Rank'], errors='coerce').fillna(1).clip(lower=1)
-            df_final[discover_score_col] = calculate_discover_score(rank_series, score_4h, score_7d, k_penalty=V7D_PENALTY_K, epsilon=V7D_PENALTY_EPSILON)
-            print(f"    Colonna '{discover_score_col}' calcolata.")
+            # Usa la funzione modificata V7.9
+            df_final[discover_score_col] = calculate_discover_score(
+                rank_series, score_4h, score_7d,
+                k_penalty=V7D_PENALTY_K,
+                epsilon=V7D_PENALTY_EPSILON,
+                weight_v4h=WEIGHT_V4H_NUMERATOR,
+                weight_v7d=WEIGHT_V7D_NUMERATOR
+            )
+            print(f"    Colonna '{discover_score_col}' calcolata con formula V7.9.")
         else:
             missing_cols = [col for col in [score_4h_col, score_7d_col, 'Rank'] if col not in df_final.columns]
             warnings.warn(f"Colonne necessarie ({', '.join(missing_cols)}) per Score mancanti. Score impostato a 0.", UserWarning)
@@ -692,7 +710,7 @@ if __name__ == "__main__":
 
         # --- 5. Salva il DataFrame finale completo come CSV ---
         try:
-            backup_filename = "05_final_sorted_data_v7.7.csv" # Aggiorna versione nel nome file
+            backup_filename = "05_final_sorted_data_v7.9_score.csv" # Aggiorna nome file per riflettere la formula
             df_final.to_csv(os.path.join(CHECKPOINT_DIR, backup_filename), index=False, encoding='utf-8-sig')
             print(f"\nDataFrame finale completo salvato: {os.path.join(CHECKPOINT_DIR, backup_filename)}")
         except Exception as e: print(f"\n!!! Errore salvataggio CSV finale completo: {e} !!!")
@@ -703,7 +721,7 @@ if __name__ == "__main__":
         # Non serve controllare html_result qui perché genera solo data.js
 
         # --- 7. Stampa Top N Finale ---
-        print(f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score Heuristico V7.7) ---")
+        print(f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score Heuristico V7.9) ---") # Aggiornato titolo
         cols_to_show = [c for c in ['Discover_Score', 'Rank', 'Entita', 'Extracted_Entities', 'Score_Avg_now 1-H', 'Score_Avg_now 4-H', 'Score_Avg_now 7-d'] if c in df_final.columns]
         try:
             pd.set_option('display.max_rows', TOP_N_FINAL_DISPLAY + 5); pd.set_option('display.width', 200); pd.set_option('display.max_colwidth', 60); pd.set_option('display.float_format', '{:.3f}'.format)
@@ -724,4 +742,4 @@ if __name__ == "__main__":
             else: print("Proxy Manager non disponibile per statistiche.")
         except Exception as stats_exc: print(f"Errore stampa stats proxy: {stats_exc}")
         main_end_time = time.time(); total_duration = main_end_time - main_start_time
-        print(f"\n--- Script V7.7 completato in {total_duration:.2f} sec ({total_duration/60:.2f} min) ---")
+        print(f"\n--- Script V7.7 (Score V7.9) completato in {total_duration:.2f} sec ({total_duration/60:.2f} min) ---") # Aggiornato titolo
