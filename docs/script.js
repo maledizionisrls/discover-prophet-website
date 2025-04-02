@@ -4,12 +4,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof trendData === 'undefined' || typeof runMetadata === 'undefined') {
         console.error('Errore critico: file data.js non caricato o vuoto.');
         displayErrorMessage("Errore nel caricamento dei dati (data.js mancante o non valido). Impossibile visualizzare la dashboard.");
-        return; // Blocca esecuzione se data.js non è valido
+        return;
     }
     if (typeof trendData !== 'object' || !Array.isArray(trendData)) {
          console.error('Errore critico: trendData in data.js non è un array valido.');
          displayErrorMessage("Errore nel formato dei dati (trendData non è un array). Impossibile visualizzare la dashboard.");
-         return; // Blocca esecuzione
+         return;
     }
 
     // Imposta anno corrente nel footer
@@ -18,19 +18,19 @@ document.addEventListener('DOMContentLoaded', function() {
         currentYearEl.textContent = new Date().getFullYear();
     }
 
-    // Carica metadati e tabella principale
-    loadMetadata();
+    // Carica metadati (inclusa la profezia) e tabella principale
+    loadMetadata(); // Ora carica anche la profezia
     try {
-        renderTrendsTable(trendData); // Chiama la funzione che popola la tabella
+        renderTrendsTable(trendData);
     } catch (error) {
         console.error("Errore durante renderTrendsTable:", error);
         displayErrorMessage("Si è verificato un errore durante la visualizzazione dei dati della tabella.");
     }
 
-    // Imposta ascoltatori eventi (ricerca, ordinamento)
+    // Imposta ascoltatori eventi
     setupEventListeners();
 
-    // Rimuovi messaggio "Caricamento..."
+    // Rimuovi messaggio "Caricamento..." dalla tabella
     const loadingRow = document.querySelector('.loading-row');
     if (loadingRow) {
         loadingRow.remove();
@@ -44,65 +44,153 @@ function displayErrorMessage(message) {
         // Colspan corretto a 9
         tableBody.innerHTML = `<tr class="error-row"><td colspan="9" style="text-align: center; padding: 30px; color: red;">${escapeHtml(message)}</td></tr>`;
     }
-    // Nasconde controlli e statistiche in caso di errore grave
+    // Nasconde controlli e sezione profezia in caso di errore grave sui dati principali
     const controls = document.querySelector('.controls'); if(controls) controls.style.display = 'none';
-    const stats = document.querySelector('.stats-container'); if(stats) stats.style.display = 'none';
+    const prophecyContainer = document.querySelector('.prophecy-container'); if(prophecyContainer) prophecyContainer.style.display = 'none'; // Nasconde anche profezia
 }
 
-// Carica i metadati nelle card statistiche e nell'header
+
+// Carica i metadati nell'header E la profezia
 function loadMetadata() {
     try {
-        // Verifica che runMetadata esista e sia un oggetto
         if (typeof runMetadata === 'object' && runMetadata !== null) {
+            // Aggiorna header info
             document.getElementById('updateTimestamp').textContent = runMetadata.timestamp || 'N/A';
-            document.getElementById('trendsCount').textContent = runMetadata.trends_count !== undefined ? runMetadata.trends_count : '?';
-            document.getElementById('topScore').textContent = (runMetadata.top_score || 0).toFixed(1);
-            document.getElementById('runtimeMinutes').textContent = (runMetadata.runtime_minutes || 0).toFixed(1) + 'm';
-            // Assicurati che la chiave per i proxy corrisponda a quella in data.js generato da Python
-            document.getElementById('proxiesUsed').textContent = runMetadata.pytrends_proxies_used !== undefined ? runMetadata.pytrends_proxies_used : '?';
             const openaiStatusEl = document.getElementById('openaiStatus');
             const openaiModelEl = document.getElementById('openaiModel');
             const openaiInfoP = document.querySelector('.openai-info');
-
-            // Gestione info OpenAI
             if (openaiStatusEl && openaiModelEl && openaiInfoP) {
-                if (runMetadata.openai_enabled) {
+                if (runMetadata.openai_enabled) { // Controlla se OpenAI (per entità o sommario) era attivo
                     openaiStatusEl.textContent = 'ATTIVA';
-                    openaiStatusEl.style.color = '#27ae60'; // Verde
-                    openaiModelEl.textContent = runMetadata.openai_model || 'N/A';
-                    openaiInfoP.style.display = ''; // Mostra paragrafo
+                    openaiStatusEl.style.color = '#27ae60';
+                    openaiModelEl.textContent = runMetadata.openai_model || 'N/A'; // Mostra modello base
+                    openaiInfoP.style.display = '';
                 } else {
                     openaiStatusEl.textContent = 'DISATTIVATA';
-                    openaiStatusEl.style.color = '#e74c3c'; // Rosso
+                    openaiStatusEl.style.color = '#e74c3c';
                     openaiModelEl.textContent = 'N/A';
-                    openaiInfoP.style.display = 'none'; // Nascondi paragrafo
+                    openaiInfoP.style.display = 'none';
                 }
             }
-             // Qui potresti aggiungere la gestione di 'runMetadata.saturation_enabled' se vuoi visualizzare lo stato
+
+            // *** CARICA E GESTISCI LA PROFEZIA ***
+            const prophecyTextEl = document.getElementById('prophecyText');
+            const prophecyToggleBtn = document.getElementById('toggleProphecy');
+            const prophecyText = runMetadata.prophecy_text || "Nessuna profezia disponibile per oggi."; // Testo di fallback
+
+            if (prophecyTextEl && prophecyToggleBtn) {
+                 // Chiama la funzione per impostare testo, troncamento ed evento
+                 setupProphecyDisplay(prophecyText, 'prophecyText', 'toggleProphecy', 250, 120); // Limiti desktop/mobile in caratteri
+            } else {
+                 console.error("Elemento #prophecyText o #toggleProphecy non trovato.");
+            }
+
+            // *** RIMOSSE RIGHE PER AGGIORNARE LE VECCHIE STAT CARD ***
+            // document.getElementById('trendsCount').textContent = ...
+            // document.getElementById('topScore').textContent = ...
+            // document.getElementById('runtimeMinutes').textContent = ...
+            // document.getElementById('proxiesUsed').textContent = ...
+
         } else {
-            // Fallback se runMetadata non è valido
             console.error('Dati metadati (runMetadata) non disponibili o non validi.');
             document.getElementById('updateTimestamp').textContent = 'Errore';
-            document.getElementById('trendsCount').textContent = '?';
-            document.getElementById('topScore').textContent = '0.0';
-            document.getElementById('runtimeMinutes').textContent = '?m';
-            document.getElementById('proxiesUsed').textContent = '?';
+            // Nascondi info AI se metadati mancano
             const openaiInfoP = document.querySelector('.openai-info');
             if(openaiInfoP) openaiInfoP.style.display = 'none';
+            // Mostra errore anche nella profezia
+             const prophecyTextEl = document.getElementById('prophecyText');
+             if (prophecyTextEl) prophecyTextEl.textContent = "Errore nel caricamento dei metadati.";
         }
     } catch (error) {
-        // Gestione errori nel caricamento metadati
         console.error("Errore durante loadMetadata:", error);
-        // Potresti voler mostrare un errore più specifico o semplicemente loggare
     }
 }
 
-// Configura gli ascoltatori degli eventi per ricerca e ordinamento
+// *** NUOVA FUNZIONE: Imposta testo profezia e bottone "Mostra tutto" ***
+function setupProphecyDisplay(fullText, textElementId, buttonElementId, desktopCharLimit, mobileCharLimit) {
+    const paragraph = document.getElementById(textElementId);
+    const button = document.getElementById(buttonElementId);
+
+    if (!paragraph || !button || !fullText) {
+        console.warn("Elementi profezia o testo mancanti.");
+        if(paragraph) paragraph.textContent = fullText || "Profezia non disponibile."; // Mostra testo se esiste
+        return;
+    }
+
+    // Pulisce il testo da eventuali spazi multipli o newline iniziali/finali
+    const cleanedText = fullText.replace(/\s+/g, ' ').trim();
+    paragraph.textContent = cleanedText; // Inizia mostrando tutto
+
+    // Determina limite caratteri in base alla larghezza finestra
+    const charLimit = window.innerWidth < 768 ? mobileCharLimit : desktopCharLimit;
+
+    // Verifica se il testo eccede il limite
+    if (cleanedText.length > charLimit) {
+        // Trova l'ultimo spazio prima del limite per un taglio più pulito
+        let cutOff = cleanedText.lastIndexOf(' ', charLimit);
+        // Se non trova spazi o lo spazio è troppo all'inizio, taglia al limite
+        if (cutOff <= charLimit / 2) {
+            cutOff = charLimit;
+        }
+        const truncatedText = cleanedText.substring(0, cutOff) + '...';
+
+        // Imposta il testo iniziale troncato
+        paragraph.textContent = truncatedText;
+        // Salva testi completi e troncati negli attributi data-*
+        paragraph.dataset.fulltext = cleanedText;
+        paragraph.dataset.truncatedtext = truncatedText;
+        // Imposta lo stato iniziale
+        paragraph.dataset.state = 'truncated';
+        // Imposta e mostra il bottone
+        button.innerHTML = 'Mostra tutto <i class="fas fa-chevron-down"></i>';
+        button.style.display = 'inline-block';
+
+        // Rimuovi eventuali listener precedenti prima di aggiungerne uno nuovo
+        button.removeEventListener('click', handleToggleProphecy); // Rimuove se esiste
+        button.addEventListener('click', handleToggleProphecy); // Aggiunge nuovo
+
+    } else {
+        // Se il testo non eccede, mostra tutto e nascondi il bottone
+        paragraph.textContent = cleanedText;
+        button.style.display = 'none';
+        // Rimuovi eventuali attributi data-* e listener non necessari
+        delete paragraph.dataset.fulltext;
+        delete paragraph.dataset.truncatedtext;
+        delete paragraph.dataset.state;
+        button.removeEventListener('click', handleToggleProphecy);
+    }
+}
+
+// *** NUOVA FUNZIONE: Gestore evento click per bottone Profezia ***
+function handleToggleProphecy(event) {
+    const button = event.currentTarget; // Il bottone cliccato
+    const paragraph = document.getElementById('prophecyText'); // Trova il paragrafo associato
+
+    if (!paragraph || !paragraph.dataset.state) return; // Sicurezza
+
+    const state = paragraph.dataset.state;
+    const fullText = paragraph.dataset.fulltext;
+    const truncatedText = paragraph.dataset.truncatedtext;
+
+    if (state === 'truncated') {
+        // Espandi
+        paragraph.textContent = fullText;
+        button.innerHTML = 'Mostra meno <i class="fas fa-chevron-up"></i>';
+        paragraph.dataset.state = 'expanded';
+    } else {
+        // Comprimi
+        paragraph.textContent = truncatedText;
+        button.innerHTML = 'Mostra tutto <i class="fas fa-chevron-down"></i>';
+        paragraph.dataset.state = 'truncated';
+    }
+}
+
+
+// Configura gli ascoltatori degli eventi (invariato nel contenuto)
 function setupEventListeners() {
     try {
         const searchBox = document.getElementById('searchBox');
         if (searchBox) {
-            // Usa 'input' per reazione immediata alla digitazione
             searchBox.addEventListener('input', () => filterTable(searchBox.value.trim().toLowerCase()));
         }
         const sortBy = document.getElementById('sortBy');
@@ -118,69 +206,54 @@ function setupEventListeners() {
     }
 }
 
-// Renderizza la tabella delle tendenze dai dati forniti
+// Renderizza la tabella delle tendenze (invariato rispetto a versione precedente con saturazione)
 function renderTrendsTable(data) {
     const tableBody = document.getElementById('trendsTableBody');
     if (!tableBody) {
         console.error("Elemento 'trendsTableBody' non trovato nel DOM.");
-        return; // Esce se la tabella non esiste
+        return;
     }
-    tableBody.innerHTML = ''; // Pulisce il corpo della tabella precedente
+    tableBody.innerHTML = '';
 
-    // Gestisce caso in cui non ci sono dati
     if (!data || data.length === 0) {
-         // Colspan corretto a 9
          tableBody.innerHTML = `<tr class="no-data-row"><td colspan="9" style="text-align: center;">Nessun dato disponibile.</td></tr>`;
          return;
     }
 
-    // Itera sui dati e crea una riga per ogni trend
     data.forEach((item, index) => {
         const row = document.createElement('tr');
-
-        // Imposta attributi data-* per ricerca e ordinamento
         row.dataset.entity = String(item.entity || '').toLowerCase();
         row.dataset.rank = String(item.rank || 0);
         row.dataset.discoverScore = String(item.discover_score || 0);
         row.dataset.score1h = String(item.score_1h || 0);
         row.dataset.score4h = String(item.score_4h || 0);
         row.dataset.score7d = String(item.score_7d || 0);
-        // Salva saturation_score come stringa (-1 per errore, altrimenti il numero)
         row.dataset.saturationScore = String(item.saturation_score === -1.0 ? -1 : Math.round(item.saturation_score || 0));
         row.dataset.aiEntities = String(item.extracted_entities || '').toLowerCase();
 
-        // Applica classe 'hot-trend' se le condizioni sono soddisfatte
         const isHot = isEntityHotOriginal(item.score_1h, item.score_4h, item.score_7d);
         if (isHot) {
             row.classList.add('hot-trend');
         }
 
-        // Determina classe per il badge del rank
         let rankBadgeClass = '';
         if (item.rank <= 10) rankBadgeClass = 'top-10';
         else if (item.rank <= 25) rankBadgeClass = 'top-25';
 
-        // Calcola indicatore di tendenza (freccia su/giù/uguale)
         const trendIndicator = calculateTrendIndicator(item.score_1h, item.score_4h);
-        // Prepara nome entità principale (con escape HTML)
         let entityDisplay = escapeHtml(item.entity || 'N/A');
 
-        // Prepara HTML per le entità estratte da AI (se presenti)
         let extractedEntitiesHtml = '';
         if (item.extracted_entities && typeof item.extracted_entities === 'string' && item.extracted_entities.trim() !== '') {
             const entitiesCleaned = item.extracted_entities.trim();
-            // Escape HTML per sicurezza
             extractedEntitiesHtml = `<div class="extracted-entities">${escapeHtml(entitiesCleaned)}</div>`;
         }
 
-        // Formatta il saturation score per la visualizzazione nella cella
-        let saturationDisplay = '-'; // Default per errore (-1) o non definito
+        let saturationDisplay = '-';
         if (item.saturation_score !== undefined && item.saturation_score >= 0) {
-            // Formatta come numero intero con separatore migliaia italiano (punto)
             saturationDisplay = Math.round(item.saturation_score).toLocaleString('it-IT');
         }
 
-        // Costruzione HTML della riga della tabella
         row.innerHTML = `
             <td>${index + 1}</td>
             <td><span class="rank-badge ${rankBadgeClass}">${item.rank || 0}</span></td>
@@ -194,42 +267,35 @@ function renderTrendsTable(data) {
             <td>${(item.score_1h || 0).toFixed(1)}</td>
             <td>${(item.score_4h || 0).toFixed(1)}</td>
             <td>${(item.score_7d || 0).toFixed(1)}</td>
-            <td class="saturation-score">${saturationDisplay}</td> <td>
+            <td class="saturation-score">${saturationDisplay}</td>
+            <td>
                  <div class="trend-chart-container" id="chart-${index}"></div>
             </td>
         `;
-        // Aggiunge la riga completa al corpo della tabella
         tableBody.appendChild(row);
     });
 
-    // Creazione asincrona dei grafici dopo il rendering delle righe
+    // Creazione grafici
     console.log("Avvio creazione grafici...");
-    requestAnimationFrame(() => { // Usa requestAnimationFrame per assicurare che il DOM sia pronto
+    requestAnimationFrame(() => {
         console.log(`Inizio loop creazione grafici per ${data.length} elementi.`);
-        // Verifica se Chart.js è caricato
         if (typeof Chart === 'undefined') {
             console.error("Chart.js non è caricato!");
             const firstChartContainer = document.getElementById('chart-0');
-            // Mostra messaggio di errore nel primo contenitore grafico come fallback
             if (firstChartContainer) firstChartContainer.innerHTML = '<span class="chart-fallback" style="color:red;">ChartJS Err!</span>';
             return;
         }
-        // Itera nuovamente sui dati per creare i grafici
         data.forEach((item, index) => {
             const containerId = `chart-${index}`;
-            // Prepara i dati per il grafico [7d, 4h, 1h]
             const chartData = [Number(item.score_7d) || 0, Number(item.score_4h) || 0, Number(item.score_1h) || 0];
             try {
                 const container = document.getElementById(containerId);
-                // Crea il grafico solo se il contenitore esiste
                 if(container) {
                     createTrendChart(containerId, chartData);
                 }
             } catch (chartError) {
-                // Gestisce errori specifici della creazione del grafico
                 console.error(`Errore durante la chiamata a createTrendChart per ${containerId}:`, chartError);
                 const errorContainer = document.getElementById(containerId);
-                // Mostra messaggio di errore nel contenitore del grafico fallito
                 if(errorContainer) {
                     errorContainer.innerHTML = '<span class="chart-fallback" style="color:red;">Chart Err!</span>';
                 }
@@ -239,200 +305,85 @@ function renderTrendsTable(data) {
     });
 }
 
-// Funzione per determinare se un trend è "hot" (basata su logica originale)
+// Funzione isEntityHot (invariata)
 function isEntityHotOriginal(score1h, score4h, score7d) {
     const s1h = Number(score1h) || 0;
     const s4h = Number(score4h) || 0;
-    // Se lo score 4h è zero, basta che lo score 1h sia > 10
     if (s4h === 0) { return s1h > 10; }
-    // Altrimenti, verifica aumenti significativi rispetto a 4h
-    if (s1h > 30 && s1h > s4h * 1.5) return true; // Score alto e aumento > 50%
-    if (s1h > 15 && s1h > s4h * 2.0) return true; // Score medio e raddoppio
-    if (s1h > 10 && s1h > s4h * 3.0) return true; // Score > 10 e triplicato
-    return false; // Altrimenti non è "hot"
+    if (s1h > 30 && s1h > s4h * 1.5) return true;
+    if (s1h > 15 && s1h > s4h * 2.0) return true;
+    if (s1h > 10 && s1h > s4h * 3.0) return true;
+    return false;
 }
 
-// Crea un singolo grafico di tendenza usando Chart.js
+// Crea un grafico di tendenza (invariata)
 function createTrendChart(containerId, dataPoints) {
     const container = document.getElementById(containerId);
-    if (!container) {
-        console.warn(`Contenitore grafico ${containerId} non trovato.`);
-        return; // Esce se il contenitore non esiste
-    }
-
-    container.innerHTML = ''; // Pulisce eventuale contenuto precedente
+    if (!container) { return; }
+    container.innerHTML = '';
     const canvas = document.createElement('canvas');
-    // Stili per rendere il canvas responsivo al contenitore
-    canvas.style.display = 'block';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+    canvas.style.display = 'block'; canvas.style.width = '100%'; canvas.style.height = '100%';
     container.appendChild(canvas);
     const chartContext = canvas.getContext('2d');
-
-    // Verifica se il contesto 2D è stato ottenuto
-    if (!chartContext) {
-        console.error(`Contesto 2D non ottenuto per ${containerId}`);
-        container.innerHTML = `<span class="chart-fallback">Ctx Err</span>`; // Fallback
-        return;
-    }
-
+    if (!chartContext) { container.innerHTML = `<span class="chart-fallback">Ctx Err</span>`; return; }
     try {
-        // Determina colore linea e gradiente sfondo
         const lineColor = determineTrendColor(dataPoints);
-        const gradient = chartContext.createLinearGradient(0, 0, 0, container.clientHeight || 35); // Usa altezza container o default
-        gradient.addColorStop(0, lineColor + '60'); // Opacità 60% all'inizio
-        gradient.addColorStop(1, lineColor + '05'); // Opacità 5% alla fine
-
-        // Crea il grafico
-        new Chart(chartContext, {
-            type: 'line',
-            data: {
-                labels: ['7d', '4h', '1h'], // Etichette assi (nascoste)
-                datasets: [{
-                    data: dataPoints,           // Dati numerici
-                    borderColor: lineColor,     // Colore linea
-                    backgroundColor: gradient,  // Sfondo sfumato
-                    borderWidth: 2,             // Spessore linea
-                    pointRadius: 3,             // Dimensione punti
-                    pointBackgroundColor: lineColor, // Colore punti
-                    tension: 0.4,               // Curvatura linea
-                    fill: true                  // Riempie area sotto linea
-                }]
-            },
-            options: {
-                responsive: true,           // Adatta a dimensione contenitore
-                maintainAspectRatio: false, // Non mantiene proporzioni fisse
-                plugins: {
-                    legend: { display: false }, // Nasconde legenda
-                    tooltip: {
-                        enabled: true,          // Abilita tooltip al hover
-                        callbacks: {
-                             // Formatta testo tooltip
-                            label: function(context) {
-                                return `Score: ${context.parsed.y.toFixed(1)}`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: { display: false },  // Nasconde asse X
-                    y: { display: false, min: 0 } // Nasconde asse Y, parte da 0
-                }
-            }
-        });
+        const gradient = chartContext.createLinearGradient(0, 0, 0, container.clientHeight || 35);
+        gradient.addColorStop(0, lineColor + '60'); gradient.addColorStop(1, lineColor + '05');
+        new Chart(chartContext, { type: 'line', data: { labels: ['7d', '4h', '1h'], datasets: [{ data: dataPoints, borderColor: lineColor, backgroundColor: gradient, borderWidth: 2, pointRadius: 3, pointBackgroundColor: lineColor, tension: 0.4, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: true, callbacks: { label: function(context) { return `Score: ${context.parsed.y.toFixed(1)}`; } } } }, scales: { x: { display: false }, y: { display: false, min: 0 } } } });
     } catch (error) {
-        // Gestisce errori durante la creazione del grafico specifico
-        console.error(`Errore creazione grafico ${containerId}:`, error);
-        // Mostra i dati numerici come fallback se il grafico fallisce
+        console.error(`Errore grafico ${containerId}:`, error);
         container.innerHTML = `<span class="chart-fallback">${dataPoints.map(p => p.toFixed(0)).join('→')}</span>`;
     }
 }
 
-// Determina il colore della linea del grafico basato sul trend 4h -> 1h
+// Determina colore della linea (invariata)
 function determineTrendColor(dataPoints) {
-    const score4h = dataPoints[1] || 0; // Indice 1 = 4h
-    const score1h = dataPoints[2] || 0; // Indice 2 = 1h
-    if (score1h > score4h * 1.2) { // Aumento significativo (>20%)
-        return '#27ae60'; // Verde
-    } else if (score1h < score4h * 0.8) { // Calo significativo (>20%)
-        return '#e74c3c'; // Rosso
-    } else { // Variazione minore del 20%
-        return '#f39c12'; // Giallo/Arancio (stabile/neutro)
-    }
+    const score4h = dataPoints[1] || 0; const score1h = dataPoints[2] || 0;
+    if (score1h > score4h * 1.2) { return '#27ae60'; }
+    else if (score1h < score4h * 0.8) { return '#e74c3c'; }
+    else { return '#f39c12'; }
 }
 
-// Calcola l'indicatore di tendenza (icona freccia/uguale)
+// Calcola l'indicatore di tendenza (invariata)
 function calculateTrendIndicator(score1h, score4h) {
-    const s1h = Number(score1h) || 0;
-    const s4h = Number(score4h) || 0;
-
-    // Se entrambi 0, è stabile
-    if (s1h === 0 && s4h === 0) {
-        return '<span class="trend-indicator trend-stable" title="Stabile"><i class="fas fa-equals"></i></span>';
-    }
-
-    const diff = s1h - s4h;
-    // Calcola percentuale cambiamento (evita divisione per zero)
-    const percentChange = s4h !== 0 ? (diff / s4h) * 100 : (s1h > 0 ? Infinity : 0); // Se 4h era 0, considera aumento infinito se 1h > 0
-    const absDiff = Math.abs(diff);
-
-    // Considera stabile se la differenza assoluta è piccola E la percentuale è bassa,
-    // O se la variazione percentuale è molto piccola
-    if ((absDiff < 1 && Math.abs(percentChange) < 20) || Math.abs(percentChange) < 5) {
-        return '<span class="trend-indicator trend-stable" title="Stabile"><i class="fas fa-equals"></i></span>';
-    }
-
-    // Gestione Aumento
-    if (diff > 0) {
-        if (percentChange > 100 || percentChange === Infinity || (s4h < 1 && s1h > 5) ) { // Forte aumento (>100% o da quasi zero a > 5)
-            return '<span class="trend-indicator trend-strong-up" title="Forte aumento"><i class="fas fa-arrow-up"></i></span>';
-        } else if (percentChange > 30) { // Aumento medio (>30%)
-            return '<span class="trend-indicator trend-medium-up" title="Aumento medio"><i class="fas fa-arrow-up"></i></span>';
-        } else { // Aumento leggero
-            return '<span class="trend-indicator trend-small-up" title="Leggero aumento"><i class="fas fa-arrow-up"></i></span>';
-        }
-    }
-    // Gestione Calo
-    else {
-        if (percentChange < -50) { // Forte calo (<-50%)
-            return '<span class="trend-indicator trend-strong-down" title="Forte calo"><i class="fas fa-arrow-down"></i></span>';
-        } else if (percentChange < -20) { // Calo medio (<-20%)
-            return '<span class="trend-indicator trend-medium-down" title="Calo medio"><i class="fas fa-arrow-down"></i></span>';
-        } else { // Calo leggero
-            return '<span class="trend-indicator trend-small-down" title="Leggero calo"><i class="fas fa-arrow-down"></i></span>';
-        }
-    }
+    const s1h = Number(score1h) || 0; const s4h = Number(score4h) || 0; if (s1h === 0 && s4h === 0) { return '<span class="trend-indicator trend-stable" title="Stabile"><i class="fas fa-equals"></i></span>'; } const diff = s1h - s4h; const percentChange = s4h !== 0 ? (diff / s4h) * 100 : (s1h > 0 ? Infinity : 0); const absDiff = Math.abs(diff); if ((absDiff < 1 && Math.abs(percentChange) < 20) || Math.abs(percentChange) < 5) { return '<span class="trend-indicator trend-stable" title="Stabile"><i class="fas fa-equals"></i></span>'; } if (diff > 0) { if (percentChange > 100 || percentChange === Infinity || (s4h < 1 && s1h > 5) ) { return '<span class="trend-indicator trend-strong-up" title="Forte aumento"><i class="fas fa-arrow-up"></i></span>'; } else if (percentChange > 30) { return '<span class="trend-indicator trend-medium-up" title="Aumento medio"><i class="fas fa-arrow-up"></i></span>'; } else { return '<span class="trend-indicator trend-small-up" title="Leggero aumento"><i class="fas fa-arrow-up"></i></span>'; } } else { if (percentChange < -50) { return '<span class="trend-indicator trend-strong-down" title="Forte calo"><i class="fas fa-arrow-down"></i></span>'; } else if (percentChange < -20) { return '<span class="trend-indicator trend-medium-down" title="Calo medio"><i class="fas fa-arrow-down"></i></span>'; } else { return '<span class="trend-indicator trend-small-down" title="Leggero calo"><i class="fas fa-arrow-down"></i></span>'; } }
 }
 
-// Filtra le righe della tabella in base al testo di ricerca
+// Filtra la tabella (corretto colspan messaggio)
 function filterTable(searchText) {
     const tableBody = document.getElementById('trendsTableBody');
-    if (!tableBody) return; // Esce se la tabella non esiste
+    if (!tableBody) return;
     const rows = tableBody.querySelectorAll('tr');
-    const noResultsMessage = document.getElementById('noResultsMessage'); // Non usato qui, ma potrebbe servire
+    const noResultsMessage = document.getElementById('noResultsMessage');
     let visibleCount = 0;
 
-    // Rimuovi eventuale riga "Nessun risultato" precedente
     const noResultsRow = tableBody.querySelector('.no-results-row');
-    if (noResultsRow) {
-         noResultsRow.remove();
-    }
+    if (noResultsRow) { noResultsRow.remove(); }
 
-    // Itera sulle righe dati
     rows.forEach(row => {
-        // Salta righe speciali (loading, no-data, error)
         if (row.classList.contains('loading-row') || row.classList.contains('no-data-row') || row.classList.contains('error-row')) return;
-
-        // Ottieni testi da controllare (da attributi data-*)
         const entityText = row.dataset.entity || '';
         const aiEntitiesText = row.dataset.aiEntities || '';
-
-        // Controlla se il testo di ricerca è presente
         if (entityText.includes(searchText) || aiEntitiesText.includes(searchText)) {
-            row.style.display = ''; // Mostra la riga
-            visibleCount++;
+            row.style.display = ''; visibleCount++;
         } else {
-            row.style.display = 'none'; // Nascondi la riga
+            row.style.display = 'none';
         }
     });
 
-    // Rinumera le righe visibili
     let currentIndex = 1;
     rows.forEach(row => {
         if (row.classList.contains('loading-row') || row.classList.contains('no-data-row') || row.classList.contains('error-row')) return;
-        // Se la riga è visibile, aggiorna il numero nella prima cella
         if (row.style.display !== 'none') {
             const cellIndex = row.querySelector('td:first-child');
-            if (cellIndex) {
-                 cellIndex.textContent = currentIndex++;
-            }
+            if (cellIndex) { cellIndex.textContent = currentIndex++; }
         }
     });
 
-    // Mostra messaggio "Nessun risultato" se necessario
     if (visibleCount === 0 && searchText) {
-        let noResultRowInstance = tableBody.querySelector('.no-results-row'); // Ricontrolla se esiste
-        if (!noResultRowInstance) { // Crea solo se non esiste già
+        let noResultRowInstance = tableBody.querySelector('.no-results-row');
+        if (!noResultRowInstance) {
              noResultRowInstance = document.createElement('tr');
              noResultRowInstance.className = 'no-results-row';
              // Colspan corretto a 9
@@ -442,28 +393,20 @@ function filterTable(searchText) {
     }
 }
 
-
-// Ordina le righe della tabella
+// Ordina la tabella (aggiunto case per saturation_score, corretto logica -Infinity)
 function sortTable() {
     const sortBy = document.getElementById('sortBy').value;
     const sortOrder = document.getElementById('sortOrder').value;
-    const isAsc = sortOrder === 'asc'; // true se ascendente, false se decrescente
+    const isAsc = sortOrder === 'asc';
     const tableBody = document.getElementById('trendsTableBody');
-    if (!tableBody) return; // Esce se la tabella non esiste
+    if (!tableBody) return;
 
-    // Prendi tutte le righe dati (escludendo quelle speciali)
     const rows = Array.from(tableBody.querySelectorAll('tr:not(.loading-row):not(.no-data-row):not(.error-row):not(.no-results-row)'));
-
-    // Rimuovi eventuale riga "Nessun risultato" prima di ordinare
     const noResultRow = tableBody.querySelector('.no-results-row');
-    if (noResultRow) {
-        noResultRow.remove();
-    }
+    if (noResultRow) { noResultRow.remove(); }
 
-    // Logica di ordinamento
     rows.sort((a, b) => {
         let valueA, valueB;
-        // Estrai i valori da confrontare dagli attributi data-*
         switch (sortBy) {
             case 'discover_score':
                 valueA = parseFloat(a.dataset.discoverScore || 0);
@@ -474,8 +417,7 @@ function sortTable() {
                 valueB = parseInt(b.dataset.rank || 0);
                 break;
             case 'saturation_score':
-                 // *** Logica Corretta per Saturazione ***
-                 // Assegna -Infinity se il valore è '-1' (errore), altrimenti parsa il numero
+                 // Assegna -Infinity se il valore è '-1', altrimenti parsa il numero. Gestisce NaN/undefined con 0.
                  valueA = a.dataset.saturationScore === '-1' ? -Infinity : parseFloat(a.dataset.saturationScore || 0);
                  valueB = b.dataset.saturationScore === '-1' ? -Infinity : parseFloat(b.dataset.saturationScore || 0);
                  break;
@@ -491,46 +433,34 @@ function sortTable() {
                 valueA = parseFloat(a.dataset.score7d || 0);
                 valueB = parseFloat(b.dataset.score7d || 0);
                 break;
-            default: // Default a discover_score
+            default:
                 valueA = parseFloat(a.dataset.discoverScore || 0);
                 valueB = parseFloat(b.dataset.discoverScore || 0);
         }
 
-        // Confronto standard per numeri
-        if (valueA < valueB) return isAsc ? -1 : 1; // Se A < B, A viene prima in ASC, dopo in DESC
-        if (valueA > valueB) return isAsc ? 1 : -1; // Se A > B, A viene dopo in ASC, prima in DESC
-        return 0; // Mantieni ordine relativo se uguali
+        // Logica di ordinamento standard per numeri (inclusi +/- Infinity)
+        if (valueA < valueB) return isAsc ? -1 : 1;
+        if (valueA > valueB) return isAsc ? 1 : -1;
+        return 0;
     });
 
-    // Riaggiungi le righe ordinate al tbody
-    // Questo le rimuove dalla loro posizione originale e le appende alla fine nell'ordine corretto
     rows.forEach(row => tableBody.appendChild(row));
 
-    // Rinumera le righe (solo quelle visibili dopo l'ordinamento)
     rows.forEach((row, index) => {
         const cellIndex = row.querySelector('td:first-child');
-        if(cellIndex) {
-             cellIndex.textContent = index + 1;
-        }
+        if(cellIndex) { cellIndex.textContent = index + 1; }
     });
 
-    // Riapplica il filtro se era attivo
     const searchBox = document.getElementById('searchBox');
     if (searchBox && searchBox.value) {
         filterTable(searchBox.value.trim().toLowerCase());
     }
 }
 
-
-// Funzione per escape di caratteri HTML potenzialmente dannosi
+// Funzione escapeHtml (invariata)
 function escapeHtml(unsafe) {
-     // Gestisce null o undefined
      if (unsafe === null || typeof unsafe === 'undefined') return '';
-     // Converte in stringa se non lo è già
-     if (typeof unsafe !== 'string') {
-         try { unsafe = String(unsafe); } catch (e) { return ''; }
-     }
-     // Sostituisce i caratteri speciali HTML
+     if (typeof unsafe !== 'string') { try { unsafe = String(unsafe); } catch (e) { return ''; } }
      return unsafe.replace(/&/g, "&amp;")
                   .replace(/</g, "&lt;")
                   .replace(/>/g, "&gt;")
