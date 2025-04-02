@@ -1,4 +1,3 @@
-// Inizializzazione della dashboard
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof trendData === 'undefined' || typeof runMetadata === 'undefined') {
         console.error('Errore critico: file data.js non caricato o vuoto.');
