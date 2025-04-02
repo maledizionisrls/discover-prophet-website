@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# 🚀 Script Ottimizzato per Google Trends - V7.9.1 (Saturation Retry & Logging Enhanced)
+# 🚀 Script Ottimizzato per Google Trends - V7.9.3 (Saturation Retry Increased Patience)
 #     Lavora direttamente con i file nella cartella 'docs'.
 #     Eliminata la cartella 'templates' e la logica di copia file.
 #     Genera solo 'docs/data.js'.
@@ -9,6 +9,8 @@
 #     **Formula V7.9 per Discover Score (Numeratore Pesato).**
 #     **Corretto: Calcolo Saturazione usa Headers specifici da ConsistentBrowserProfile.**
 #     **Migliorato: Retry robusto, logging dettagliato e URL google.com per Saturazione.**
+#     **Fix: Evita crash dovuto a pd.reset_option('all') senza matplotlib.**
+#     **Update: Aumentati tentativi e tempi di backoff per scraping saturazione.**
 
 # --- Import Librerie Essenziali ---
 import requests
@@ -76,6 +78,9 @@ except ImportError:
 warnings.filterwarnings("ignore", category=FutureWarning, module='pytrends')
 warnings.filterwarnings("ignore", category=UserWarning, message='Setting null property')
 warnings.filterwarnings("ignore", message="urllib3 v2 only supports OpenSSL 1.1.1+")
+warnings.filterwarnings("ignore", message="data_manager option is deprecated") # Ignora warning pandas da reset_option specifico
+warnings.filterwarnings("ignore", message="use_inf_as_na option is deprecated") # Ignora warning pandas da reset_option specifico
+
 
 # ==============================================================================
 # ==================== SEZIONE PARAMETRI CONFIGURABILI =========================
@@ -102,16 +107,18 @@ OPENAI_MAX_RETRIES = 3
 OPENAI_REQUEST_TIMEOUT = 30
 MAX_OPENAI_THREADS = 10
 
-# --- Parametri Calcolo Saturazione (Retry & Logging Enhanced) ---
+# --- Parametri Calcolo Saturazione (Retry Increased Patience) ---
 FETCH_SATURATION_SCORE = True # ATTIVA/DISATTIVA il calcolo della saturazione
 N_PROCESS_FOR_SATURATION = TOP_N_FINAL_DISPLAY # Calcola solo per le top N finali DOPO ordinamento Discover Score
 MAX_THREADS_SATURATION = 15 # Numero di thread per lo scraping SERP
 SATURATION_IMPERSONATE_BROWSER = 'chrome124' # Profilo browser per curl_cffi
 SATURATION_REQUEST_TIMEOUT = 45 # Timeout per singola richiesta SERP
-SATURATION_MAX_RETRIES_PER_KEYWORD = 5 # Tentativi MASSIMI per singola keyword nello scraping saturazione (AUMENTATO)
-SATURATION_INITIAL_BACKOFF = 3.0 # Backoff iniziale tra tentativi di saturazione (secondi)
-SATURATION_BACKOFF_MULTIPLIER = 1.5 # Moltiplicatore backoff tra tentativi saturazione
-SATURATION_MAX_BACKOFF = 60.0 # Backoff massimo tra tentativi saturazione (secondi)
+# --- Parametri Retry Saturazione AUMENTATI ---
+SATURATION_MAX_RETRIES_PER_KEYWORD = 7 # Tentativi MASSIMI per singola keyword (ERA 5)
+SATURATION_INITIAL_BACKOFF = 5.0 # Backoff iniziale tra tentativi (ERA 3.0)
+SATURATION_BACKOFF_MULTIPLIER = 1.8 # Moltiplicatore backoff (ERA 1.5)
+SATURATION_MAX_BACKOFF = 90.0 # Backoff massimo (ERA 60.0)
+# --- Fine Parametri Retry Aumentati ---
 SATURATION_SEARCH_URL_BASE = "https://www.google.com" # Usa google.com invece di .it
 
 # --- Chiave API OpenAI (LEGGI DA VARIABILE D'AMBIENTE!) ---
@@ -389,7 +396,7 @@ class ConsistentBrowserProfile:
              'Sec-Fetch-User':'?1',
              'Upgrade-Insecure-Requests':'1',
              'Cache-Control':'max-age=0',
-             # 'Referer': f'{SATURATION_SEARCH_URL_BASE}/' # Aggiunto referer base google.com
+             # 'Referer': f'{SATURATION_SEARCH_URL_BASE}/' # Aggiunto referer base google.com (ora aggiunto dinamicamente in fetch_intitle...)
              }
     def get_pytrends_params(self): return {'hl':self.locale_info['hl'],'tz':self.locale_info['tz']}
 
@@ -671,7 +678,7 @@ def get_entities_with_openai(trend_list, max_workers=MAX_OPENAI_THREADS):
     return extracted_entities_map
 
 # ==============================================================================
-# ============ FUNZIONI PER SCRAPING SATURAZIONE (RETRY & LOGGING ENHANCED) =====
+# ============ FUNZIONI PER SCRAPING SATURAZIONE (RETRY Increased Patience) =====
 # ==============================================================================
 
 # --- Parsing Risultati SERP (Invariato - Ma verifica manuale consigliata su HTML salvati) ---
@@ -930,25 +937,25 @@ def normalize_scores(scores_dict, min_val=1, max_val=100):
     log_print("INFO", f"[SAT NORM] Normalizzazione applicata. {len(valid_scores)} validi, {num_failed} falliti (assegnato {fallback_score}).")
     return final_normalized_dict
 
-# --- Funzione Principale per Ottenere e Normalizzare Saturazione (RETRY Enhanced) ---
+# --- Funzione Principale per Ottenere e Normalizzare Saturazione (RETRY Increased Patience) ---
 def fetch_and_normalize_saturation_scores(entities_list, proxy_manager_instance, max_threads=MAX_THREADS_SATURATION):
     """
     Ottiene i conteggi SERP intitle per la lista di entità usando proxy, HEADERS CORRETTI,
-    RETRY ROBUSTO e logging migliorato, poi normalizza.
+    RETRY ROBUSTO (Increased Patience) e logging migliorato, poi normalizza.
     Restituisce un dizionario {entita: saturation_score_normalizzato}.
     """
     if not FETCH_SATURATION_SCORE:
         log_print("INFO", "\n--- Calcolo Saturazione Saltato (disattivato o curl_cffi mancante) ---")
         return {entity: 1.0 for entity in entities_list} # Ritorna 1 (minimo) per tutti
 
-    log_print("INFO", f"\n--- Avvio Calcolo Saturazione per {len(entities_list)} Entità (Max Threads: {max_threads}, Max Retries/KW: {SATURATION_MAX_RETRIES_PER_KEYWORD}, URL: {SATURATION_SEARCH_URL_BASE}) ---")
+    log_print("INFO", f"\n--- Avvio Calcolo Saturazione per {len(entities_list)} Entità (Max Threads: {max_threads}, Max Retries/KW: {SATURATION_MAX_RETRIES_PER_KEYWORD}, URL: {SATURATION_SEARCH_URL_BASE}, Backoff Init: {SATURATION_INITIAL_BACKOFF}s, Mult: {SATURATION_BACKOFF_MULTIPLIER}, Max: {SATURATION_MAX_BACKOFF}s) ---")
     raw_results = {} # {entity: count} - Usiamo None per fallimento iniziale
     futures = {}
     sem = threading.Semaphore(max_threads)
     lock = threading.Lock() # Lock per aggiornare raw_results
 
     def fetch_single_saturation(entity):
-        """Wrapper con RETRY robusto per ottenere saturazione per una singola entità."""
+        """Wrapper con RETRY robusto (Increased Patience) per ottenere saturazione per una singola entità."""
         nonlocal raw_results
         attempts = 0
         result_count = None # Inizializza a None (fallimento)
@@ -991,15 +998,16 @@ def fetch_and_normalize_saturation_scores(entities_list, proxy_manager_instance,
                     log_print("WARN", f"[SAT WORKER KW: {entity[:20]} T{attempts}] No valid proxy/profile available after get_proxy retries. Saltando questo tentativo.")
                     last_error = "No Proxy/Profile Available"
                     # Non fare break, ma continua al prossimo tentativo del ciclo while esterno
-                    time.sleep(current_backoff) # Applica backoff anche se non abbiamo fatto la richiesta
+                    # Applica backoff anche se non abbiamo fatto la richiesta
+                    wait_time = current_backoff # Salva il backoff attuale
+                    log_print("INFO", f"[SAT WORKER KW: {entity[:20]} T{attempts}] No proxy, attesa {wait_time:.1f}s prima del prossimo tentativo...")
+                    time.sleep(wait_time)
                     current_backoff = min(current_backoff * SATURATION_BACKOFF_MULTIPLIER, SATURATION_MAX_BACKOFF)
                     continue # Prova il prossimo tentativo (potrebbe liberarsi un proxy)
 
                 log_print("DEBUG", f"[SAT WORKER KW: {entity[:20]} T{attempts}] Using proxy {geo_code} ({proxy_str[-10:]}) Profile: {browser_profile.os}/{browser_profile.geo_code}") # Debug
 
                 # 2. Chiama lo Scraper SERP passando il profilo
-                # Non serve più delay qui, il backoff è gestito tra i tentativi
-                # time.sleep(random.uniform(SATURATION_DELAY_BETWEEN_REQUESTS[0], SATURATION_DELAY_BETWEEN_REQUESTS[1]))
                 count, error_reason = fetch_intitle_serp_count(
                     entity,
                     proxy_url=proxy_url,
@@ -1024,10 +1032,10 @@ def fetch_and_normalize_saturation_scores(entities_list, proxy_manager_instance,
 
                     # Applica backoff prima del prossimo tentativo
                     wait_time = current_backoff
-                    # Se l'errore è 429 o Blocco, usa un backoff più lungo
+                    # Se l'errore è 429 o Blocco, usa un backoff potenzialmente più lungo (ma già il moltiplicatore lo aumenta)
                     if "Status 429" in error_type_proxy or "Block Page Detected" in error_type_proxy:
-                         wait_time = max(wait_time, SATURATION_INITIAL_BACKOFF * 2) # Almeno il doppio del backoff iniziale
-                         log_print("INFO", f"[SAT WORKER KW: {entity[:20]} T{attempts}] Errore 429/Blocco rilevato. Backoff aumentato: {wait_time:.1f}s")
+                         # Potremmo aggiungere un minimo fisso più alto qui, es: max(wait_time, 10.0)
+                         log_print("INFO", f"[SAT WORKER KW: {entity[:20]} T{attempts}] Errore 429/Blocco rilevato. Backoff standard applicato: {wait_time:.1f}s")
 
                     log_print("INFO", f"[SAT WORKER KW: {entity[:20]} T{attempts}] Attesa {wait_time:.1f}s prima del prossimo tentativo...")
                     time.sleep(wait_time)
@@ -1042,7 +1050,9 @@ def fetch_and_normalize_saturation_scores(entities_list, proxy_manager_instance,
                 error_type_proxy = f"WrapperExc: {type(e_wrap).__name__}"
                 last_error = error_type_proxy
                 # Applica backoff anche per errori wrapper
-                time.sleep(current_backoff)
+                wait_time = current_backoff # Salva il backoff attuale
+                log_print("INFO", f"[SAT WORKER KW: {entity[:20]} T{attempts}] Errore Wrapper, attesa {wait_time:.1f}s prima del prossimo tentativo...")
+                time.sleep(wait_time)
                 current_backoff = min(current_backoff * SATURATION_BACKOFF_MULTIPLIER, SATURATION_MAX_BACKOFF)
 
             finally:
@@ -1115,19 +1125,22 @@ def generate_html_output(df_final, runtime_info=None):
 
         # Prepara la lista di trend per il template
         trend_list = []
-        required_cols = ['Rank', 'Entita', 'Discover_Score', 'Score_Avg_now 1-H', 'Score_Avg_now 4-H', 'Score_Avg_now 7-d', 'Extracted_Entities', 'Saturation_Score']
+        # Aggiungi 'Rank_Sorted' se esiste, per riferimento nel JS se necessario
+        required_cols = ['Rank', 'Rank_Sorted', 'Entita', 'Discover_Score', 'Score_Avg_now 1-H', 'Score_Avg_now 4-H', 'Score_Avg_now 7-d', 'Extracted_Entities', 'Saturation_Score']
         available_cols = df_final.columns
         missing_warned = False
         for col in required_cols:
-             if col not in available_cols and col != 'Saturation_Score': # Non avvisare se manca solo saturazione
+             # Non avvisare se manca solo saturazione o Rank_Sorted (che è opzionale per JS)
+             if col not in available_cols and col not in ['Saturation_Score', 'Rank_Sorted']:
                  if not missing_warned:
-                     log_print("WARN", f"Colonne mancanti nel DF finale per output: {', '.join([c for c in required_cols if c not in available_cols and c != 'Saturation_Score'])}. Default usati.")
+                     log_print("WARN", f"Colonne mancanti nel DF finale per output: {', '.join([c for c in required_cols if c not in available_cols and c not in ['Saturation_Score', 'Rank_Sorted']])}. Default usati.")
                      missing_warned = True
 
         # Usa solo le righe passate (dovrebbero essere già le top N)
         for _, row in df_final.iterrows():
             trend_data = {
-                'rank': int(row.get('Rank', 0)), # Usa il rank originale, non l'indice del df top N
+                'rank': int(row.get('Rank', 0)), # Usa il rank originale pre-sort
+                'rank_sorted': int(row.get('Rank_Sorted', 0)), # Usa il rank post-sort
                 'entity': row.get('Entita', 'N/A'),
                 'discover_score': float(row.get('Discover_Score', 0)),
                 'score_1h': float(row.get('Score_Avg_now 1-H', 0)),
@@ -1150,7 +1163,8 @@ def generate_html_output(df_final, runtime_info=None):
             'openai_model': OPENAI_MODEL if FETCH_OPENAI_ENTITIES else 'N/A',
             'saturation_enabled': FETCH_SATURATION_SCORE,
             'saturation_browser': SATURATION_IMPERSONATE_BROWSER if FETCH_SATURATION_SCORE else 'N/A',
-            'saturation_url': SATURATION_SEARCH_URL_BASE if FETCH_SATURATION_SCORE else 'N/A' # Aggiunto URL base usato
+            'saturation_url': SATURATION_SEARCH_URL_BASE if FETCH_SATURATION_SCORE else 'N/A', # Aggiunto URL base usato
+            'saturation_retries': SATURATION_MAX_RETRIES_PER_KEYWORD if FETCH_SATURATION_SCORE else 0 # Aggiunto numero retry
         }
         run_metadata['runtime_minutes'] = round(run_metadata['runtime_seconds'] / 60, 2) # Aggiunge minuti arrotondati
 
@@ -1175,7 +1189,7 @@ def generate_html_output(df_final, runtime_info=None):
         return False
 
 # ==============================================================================
-# ==================== SCRIPT PRINCIPALE (V7.9.1 - Logging Enhanced) =========
+# ==================== SCRIPT PRINCIPALE (V7.9.3 - Increased Patience) =========
 # ==============================================================================
 if __name__ == "__main__":
     main_start_time = time.time()
@@ -1194,7 +1208,7 @@ if __name__ == "__main__":
         if impersonate_get is None: log_print("WARN","curl_cffi non importato. Saturazione disattivata."); FETCH_SATURATION_SCORE = False
         if not SATURATION_SEARCH_URL_BASE: log_print("WARN","SATURATION_SEARCH_URL_BASE vuoto. Saturazione disattivata."); FETCH_SATURATION_SCORE = False
 
-    log_print("INFO", f"--- Avvio script Discover Prophet V7.9.1 (Saturation Retry & Logging Enhanced) ---")
+    log_print("INFO", f"--- Avvio script Discover Prophet V7.9.3 (Saturation Retry Increased Patience) ---")
     log_print("INFO", f"Formula Discover Score: V7.9 (Numeratore Pesato: V4h={WEIGHT_V4H_NUMERATOR}, V7d={WEIGHT_V7D_NUMERATOR}; Denominatore K={V7D_PENALTY_K}, epsilon={V7D_PENALTY_EPSILON})")
     log_print("INFO", f"Modalità: Lavora direttamente su '{OUTPUT_DIR}', genera solo 'data.js'.")
     log_print("INFO", f"Estrazione Contesto Volume: {'ATTIVA' if FETCH_VOLUME_CONTEXT else 'DISATTIVATA'} (Top {N_PROCESS_FOR_CONTEXT}, Runs: {CONTEXT_N_RUNS})")
@@ -1371,7 +1385,7 @@ if __name__ == "__main__":
 
         # --- 7. Salva il DataFrame finale completo come CSV ---
         try:
-            base_filename = "final_sorted_data_v7.9.1_score"
+            base_filename = "final_sorted_data_v7.9.3_score" # Aggiornato nome file
             if FETCH_SATURATION_SCORE: base_filename += "_with_saturation"
             backup_filename = f"06_{base_filename}.csv"
             chk_path = os.path.join(CHECKPOINT_DIR, backup_filename)
@@ -1390,12 +1404,35 @@ if __name__ == "__main__":
         log_print("INFO", f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score, con Saturazione se attiva) ---")
         # Usa Rank_Sorted per la stampa a console, ma Rank originale è nel df_output per data.js
         cols_to_show = [c for c in ['Rank_Sorted','Discover_Score', 'Saturation_Score', 'Rank', 'Entita', 'Extracted_Entities', 'Score_Avg_now 1-H', 'Score_Avg_now 4-H', 'Score_Avg_now 7-d'] if c in df_final.columns]
+
+        # ---> FIX: Gestione reset opzioni Pandas <---
+        # Store original options
+        original_options = {
+            'display.max_rows': pd.get_option('display.max_rows'),
+            'display.width': pd.get_option('display.width'),
+            'display.max_colwidth': pd.get_option('display.max_colwidth'),
+            'display.float_format': pd.get_option('display.float_format')
+        }
         try:
-            pd.set_option('display.max_rows', TOP_N_FINAL_DISPLAY + 5); pd.set_option('display.width', 200); pd.set_option('display.max_colwidth', 45); pd.set_option('display.float_format', '{:.2f}'.format)
+            # Set options for printing
+            pd.set_option('display.max_rows', TOP_N_FINAL_DISPLAY + 5)
+            pd.set_option('display.width', 200)
+            pd.set_option('display.max_colwidth', 45)
+            pd.set_option('display.float_format', '{:.2f}'.format)
             # Stampa le top N dal DataFrame completo (df_final)
             print("\n" + df_final[cols_to_show].head(TOP_N_FINAL_DISPLAY).to_string(index=False))
-        except Exception as e_print: log_print("ERROR", f"Errore stampa finale: {e_print}")
-        finally: pd.reset_option('all') # Resetta opzioni display pandas
+        except Exception as e_print:
+            log_print("ERROR", f"Errore stampa finale: {e_print}")
+        finally:
+            # Reset only the options that were changed
+            log_print("DEBUG", "Resetting specific pandas display options.")
+            try:
+                for option, value in original_options.items():
+                    pd.set_option(option, value)
+            except Exception as e_reset:
+                 log_print("WARN", f"Error resetting pandas options: {e_reset}") # Log warning instead of crashing
+            # Vecchia riga che causava il crash:
+            # finally: pd.reset_option('all') # Resetta opzioni display pandas
 
     except Exception as main_exc:
         log_print("ERROR", f"\n\n!!! ERRORE CRITICO SCRIPT: {type(main_exc).__name__} - {main_exc} !!!"); traceback.print_exc()
@@ -1421,4 +1458,4 @@ if __name__ == "__main__":
 
         # Blocco Tempo Esecuzione
         main_end_time = time.time(); total_duration = main_end_time - main_start_time
-        log_print("INFO", f"\n--- Script V7.9.1 completato in {total_duration:.2f} sec ({total_duration/60:.2f} min) ---")
+        log_print("INFO", f"\n--- Script V7.9.3 completato in {total_duration:.2f} sec ({total_duration/60:.2f} min) ---")
