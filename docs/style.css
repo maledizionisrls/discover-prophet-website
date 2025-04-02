@@ -79,12 +79,13 @@ select { padding: 0.4rem 0.6rem; border: 1px solid var(--border-color); border-r
 /* Header Tabella */
 .trends-table th { background-color: #f8f9fa; color: var(--primary-color); font-weight: 600; position: sticky; top: 0; z-index: 10; border-bottom-width: 2px; }
 
-/* *** Cella Saturazione (Opzionale) *** */
+/* *** Stile per la nuova cella Saturazione *** */
 .trends-table .saturation-score {
-    text-align: right; /* Allinea a destra */
+    text-align: right; /* Allinea a destra i numeri */
     font-size: 0.9em;
-    color: var(--text-light);
-    min-width: 60px; /* Larghezza minima per evitare a capo */
+    color: var(--text-light); /* Colore grigio chiaro */
+    min-width: 70px; /* Larghezza minima per evitare a capo del numero */
+    padding-right: 1rem; /* Più padding a destra */
 }
 
 /* Altri stili tabella */
@@ -119,15 +120,15 @@ footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--tex
 
 /* Responsive */
 @media (max-width: 992px) {
-    /* Nascondi 4h(6), 7d(7) */
-    /* La nuova colonna Saturazione (8) resta visibile */
+    /* Nascondi 4h (colonna 6), 7d (colonna 7) */
+    /* La colonna Saturazione (8) rimane visibile */
     .trends-table th:nth-child(6), .trends-table td:nth-child(6),
     .trends-table th:nth-child(7), .trends-table td:nth-child(7) { display: none; }
+    /* Colonne visibili: #, Rank, Trend&AI, DScore, 1h, Saturazione, Chart */
     .trend-chart-container { width: 90px; height: 30px; min-width: 90px; }
-    /* Aumenta padding verticale */
     .trends-table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
     .trends-table .trend-cell { min-width: 160px; padding-top: 0.9rem; padding-bottom: 0.9rem; }
-    .trends-table .saturation-score { padding-top: 0.9rem; padding-bottom: 0.9rem; }
+    .trends-table .saturation-score { padding-top: 0.9rem; padding-bottom: 0.9rem; } /* Applica padding anche qui */
 }
 
 @media (max-width: 768px) {
@@ -142,13 +143,12 @@ footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--tex
     .stat-card .label { font-size: 0.8rem; }
 
     /* Nascondi 1h(5), 4h(6), 7d(7) */
-    /* La nuova colonna Saturazione (8) resta visibile */
+    /* La colonna Saturazione (8) rimane visibile */
     .trends-table th:nth-child(5), .trends-table td:nth-child(5),
     .trends-table th:nth-child(6), .trends-table td:nth-child(6),
     .trends-table th:nth-child(7), .trends-table td:nth-child(7) { display: none; }
-    /* Colonne visibili: #, Rank, Trend&AI, DScore, Saturazione, Chart (6 colonne) */
+    /* Colonne visibili: #, Rank, Trend&AI, DScore, Saturazione, Chart */
 
-    /* Aumenta padding verticale, riduci orizzontale/font */
     .trends-table th, .trends-table td { padding: 0.9rem 0.4rem; font-size: 0.8rem; white-space: nowrap; }
     .trends-table .trend-cell { padding: 0.9rem 0.4rem; white-space: normal; min-width: 140px; }
     .rank-badge { font-size: 0.7rem; padding: 0.1rem 0.3rem; min-width: 1.4rem;}
@@ -156,17 +156,18 @@ footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--tex
     .extracted-entities { font-size: 0.75rem; line-height: 1.4; }
     .trend-chart-container { width: 70px; height: 25px; min-width: 70px;}
     /* Adatta stile saturazione */
-    .trends-table .saturation-score { font-size: 0.8em; padding: 0.9rem 0.4rem; text-align: right; }
+    .trends-table .saturation-score { font-size: 0.8em; padding: 0.9rem 0.4rem; text-align: right; min-width: 50px;}
 }
 
 @media (max-width: 480px) {
      /* Nascondi Rank(2), 1h(5), 4h(6), 7d(7), Saturazione(8) */
+     /* La colonna Saturazione (8) viene nascosta qui */
      .trends-table th:nth-child(2), .trends-table td:nth-child(2),
      .trends-table th:nth-child(5), .trends-table td:nth-child(5),
      .trends-table th:nth-child(6), .trends-table td:nth-child(6),
      .trends-table th:nth-child(7), .trends-table td:nth-child(7),
      .trends-table th:nth-child(8), .trends-table td:nth-child(8) { display: none; } /* *** Aggiunto :nth-child(8) *** */
-     /* Colonne visibili: #, Trend&AI, DScore, Chart (4 colonne) */
+     /* Colonne visibili: #, Trend&AI, DScore, Chart */
 
      .trends-table th, .trends-table td { padding: 0.7rem 0.3rem; font-size: 0.75rem; }
      .trends-table .trend-cell { min-width: 100px; padding: 0.7rem 0.3rem;}
