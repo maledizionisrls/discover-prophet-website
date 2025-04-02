@@ -53,12 +53,83 @@ h1 i { margin-right: 0.6rem; color: var(--secondary-color); }
 
 .dashboard { max-width: 1600px; margin: 1.5rem auto; padding: 0 1.5rem; }
 
-.stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-.stat-card { background-color: var(--card-color); border-radius: 6px; padding: 1.2rem; border: 1px solid var(--border-color); text-align: center; transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-.stat-card:hover { transform: translateY(-2px); box-shadow: 0 3px 6px rgba(0,0,0,0.06); }
-.stat-card .icon { font-size: 1.8rem; margin-bottom: 0.4rem; color: var(--secondary-color); }
-.stat-card .number { font-size: 1.7rem; font-weight: 600; color: var(--primary-color); margin-bottom: 0.4rem; line-height: 1.2; }
-.stat-card .label { color: var(--text-light); font-size: 0.85rem; }
+/* *** RIMOSSI: .stats-container e .stat-card *** */
+
+/* *** NUOVI STILI: Profezia *** */
+.prophecy-container {
+    background-color: var(--card-color);
+    border-radius: 8px;
+    padding: 1.5rem 2rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 3px 10px rgba(44, 62, 80, 0.08); /* Ombra leggermente più accentuata */
+    margin-bottom: 1.5rem;
+    border-left: 5px solid var(--secondary-color); /* Bordo laterale colorato */
+    position: relative; /* Per eventuali posizionamenti assoluti interni */
+}
+
+.prophecy-container h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    font-size: 1.4rem; /* Dimensione titolo */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color); /* Linea separatrice sotto il titolo */
+    padding-bottom: 0.75rem;
+}
+
+.prophecy-container h2 i {
+    margin-right: 0.8rem;
+    color: var(--secondary-color);
+    font-size: 1.3rem;
+}
+
+.prophecy-content {
+    position: relative; /* Contesto per il bottone */
+}
+
+#prophecyText {
+    color: var(--text-color);
+    line-height: 1.7; /* Interlinea leggibile */
+    font-size: 1rem; /* Dimensione testo standard */
+    margin: 0; /* Rimuove margini default paragrafo */
+    padding-bottom: 0.5rem; /* Spazio sotto il testo prima del bottone */
+    /* Effetto WOW Semplice: transizione colore testo? */
+    /* transition: color 0.3s ease-in-out; */
+}
+
+/* Stile per il bottone "Mostra tutto/meno" */
+.toggle-prophecy {
+    background-color: transparent;
+    border: none;
+    color: var(--link-color); /* Usa colore link */
+    cursor: pointer;
+    font-size: 0.85rem; /* Leggermente più piccolo del testo principale */
+    font-weight: 500;
+    padding: 0.2rem 0;
+    margin-top: 0.5rem;
+    display: inline-block;
+    text-decoration: none; /* Rimuove sottolineatura default bottone */
+    transition: color 0.2s ease;
+}
+
+.toggle-prophecy:hover {
+    color: var(--primary-color); /* Scurisce al hover */
+    text-decoration: underline;
+}
+
+.toggle-prophecy i {
+    margin-left: 0.4rem;
+    font-size: 0.8em;
+    transition: transform 0.3s ease; /* Animazione freccia */
+}
+/* Ruota l'icona quando il bottone mostra "Mostra meno" ( JS aggiungerà/rimuoverà questa classe) */
+.toggle-prophecy.expanded i {
+    transform: rotate(180deg);
+}
+/* *** FINE NUOVI STILI PROFEZIA *** */
+
 
 .controls { margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 0.8rem; background-color: var(--card-color); border-radius: 6px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
 .search-box { padding: 0.5rem 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; flex-grow: 1; max-width: 350px; font-size: 0.9rem; }
@@ -79,13 +150,13 @@ select { padding: 0.4rem 0.6rem; border: 1px solid var(--border-color); border-r
 /* Header Tabella */
 .trends-table th { background-color: #f8f9fa; color: var(--primary-color); font-weight: 600; position: sticky; top: 0; z-index: 10; border-bottom-width: 2px; }
 
-/* *** Stile per la nuova cella Saturazione *** */
+/* Cella Saturazione */
 .trends-table .saturation-score {
-    text-align: right; /* Allinea a destra i numeri */
+    text-align: right;
     font-size: 0.9em;
-    color: var(--text-light); /* Colore grigio chiaro */
-    min-width: 70px; /* Larghezza minima per evitare a capo del numero */
-    padding-right: 1rem; /* Più padding a destra */
+    color: var(--text-light);
+    min-width: 70px;
+    padding-right: 1rem;
 }
 
 /* Altri stili tabella */
@@ -104,11 +175,11 @@ select { padding: 0.4rem 0.6rem; border: 1px solid var(--border-color); border-r
 .trend-small-down, .trend-medium-down, .trend-strong-down { color: var(--trending-down); }
 .trend-strong-up i, .trend-strong-down i { font-weight: bold; }
 
-/* Trend HOT (solo sfondo e bordo) */
+/* Trend HOT */
 .hot-trend { background-color: #fff8e1 !important; }
 .hot-trend td:first-child { border-left: 3px solid var(--hot-color); }
 
-/* Entità AI (semplici, sotto, wrappano) */
+/* Entità AI */
 .extracted-entities { font-size: 0.8rem; color: #555; margin-top: 5px; line-height: 1.3; display: block; white-space: normal; word-break: break-word; }
 
 /* Messaggi e Footer */
@@ -120,15 +191,18 @@ footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--tex
 
 /* Responsive */
 @media (max-width: 992px) {
-    /* Nascondi 4h (colonna 6), 7d (colonna 7) */
-    /* La colonna Saturazione (8) rimane visibile */
+    /* Stili Profezia */
+    .prophecy-container { padding: 1.2rem 1.5rem; }
+    .prophecy-container h2 { font-size: 1.3rem; }
+    #prophecyText { font-size: 0.95rem; }
+
+    /* Nascondi 4h(6), 7d(7) */
     .trends-table th:nth-child(6), .trends-table td:nth-child(6),
     .trends-table th:nth-child(7), .trends-table td:nth-child(7) { display: none; }
-    /* Colonne visibili: #, Rank, Trend&AI, DScore, 1h, Saturazione, Chart */
     .trend-chart-container { width: 90px; height: 30px; min-width: 90px; }
     .trends-table td { padding-top: 0.9rem; padding-bottom: 0.9rem; }
     .trends-table .trend-cell { min-width: 160px; padding-top: 0.9rem; padding-bottom: 0.9rem; }
-    .trends-table .saturation-score { padding-top: 0.9rem; padding-bottom: 0.9rem; } /* Applica padding anche qui */
+    .trends-table .saturation-score { padding-top: 0.9rem; padding-bottom: 0.9rem; }
 }
 
 @media (max-width: 768px) {
@@ -136,14 +210,17 @@ footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--tex
     header { padding: 0.8rem 1rem; }
     h1 { font-size: 1.4rem; }
     .dashboard { padding: 0 0.8rem; }
+    /* Stili Profezia mobile */
+    .prophecy-container { padding: 1rem 1.2rem; border-left-width: 4px; }
+    .prophecy-container h2 { font-size: 1.2rem; margin-bottom: 0.8rem; padding-bottom: 0.6rem;}
+    .prophecy-container h2 i { font-size: 1.1rem; margin-right: 0.6rem;}
+    #prophecyText { font-size: 0.9rem; line-height: 1.6; }
+    .toggle-prophecy { font-size: 0.8rem; }
+
     .controls { flex-direction: column; align-items: stretch; gap: 0.8rem; padding: 0.6rem; }
-    .stats-container { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
-    .stat-card { padding: 0.8rem; }
-    .stat-card .number { font-size: 1.4rem; }
-    .stat-card .label { font-size: 0.8rem; }
+    /* .stats-container rimosso */
 
     /* Nascondi 1h(5), 4h(6), 7d(7) */
-    /* La colonna Saturazione (8) rimane visibile */
     .trends-table th:nth-child(5), .trends-table td:nth-child(5),
     .trends-table th:nth-child(6), .trends-table td:nth-child(6),
     .trends-table th:nth-child(7), .trends-table td:nth-child(7) { display: none; }
@@ -155,18 +232,21 @@ footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--tex
     .score { font-size: 0.85rem; }
     .extracted-entities { font-size: 0.75rem; line-height: 1.4; }
     .trend-chart-container { width: 70px; height: 25px; min-width: 70px;}
-    /* Adatta stile saturazione */
     .trends-table .saturation-score { font-size: 0.8em; padding: 0.9rem 0.4rem; text-align: right; min-width: 50px;}
 }
 
 @media (max-width: 480px) {
+     /* Stili Profezia mobile piccolo */
+     .prophecy-container { padding: 0.8rem 1rem; }
+     .prophecy-container h2 { font-size: 1.1rem; margin-bottom: 0.6rem; }
+     #prophecyText { font-size: 0.85rem; }
+
      /* Nascondi Rank(2), 1h(5), 4h(6), 7d(7), Saturazione(8) */
-     /* La colonna Saturazione (8) viene nascosta qui */
      .trends-table th:nth-child(2), .trends-table td:nth-child(2),
      .trends-table th:nth-child(5), .trends-table td:nth-child(5),
      .trends-table th:nth-child(6), .trends-table td:nth-child(6),
      .trends-table th:nth-child(7), .trends-table td:nth-child(7),
-     .trends-table th:nth-child(8), .trends-table td:nth-child(8) { display: none; } /* *** Aggiunto :nth-child(8) *** */
+     .trends-table th:nth-child(8), .trends-table td:nth-child(8) { display: none; }
      /* Colonne visibili: #, Trend&AI, DScore, Chart */
 
      .trends-table th, .trends-table td { padding: 0.7rem 0.3rem; font-size: 0.75rem; }
