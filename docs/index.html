@@ -16,8 +16,7 @@
             <div>
                 <h1><i class="fas fa-chart-line"></i> Discover Prophet</h1>
                 <p class="update-info">Dashboard aggiornata: <span id="updateTimestamp">...</span></p>
-                <p class="update-info openai-info">AI Entity Extraction: <span id="openaiStatus">...</span> (Model: <span id="openaiModel">...</span>)</p>
-            </div>
+                <p class="update-info openai-info">AI Analysis: <span id="openaiStatus">...</span> (Model: <span id="openaiModel">...</span>)</p> </div>
             <div class="header-badge">
                 <span><i class="fab fa-google"></i> Powered by Google Trends & OpenAI</span>
             </div>
@@ -25,13 +24,14 @@
     </header>
 
     <main class="dashboard">
-        <div class="stats-container">
-            <div class="stat-card"> <div class="icon"><i class="fas fa-hashtag"></i></div> <div class="number" id="trendsCount">...</div> <div class="label">Trends Analizzati</div> </div>
-            <div class="stat-card"> <div class="icon"><i class="fas fa-fire"></i></div> <div class="number" id="topScore">...</div> <div class="label">Discover Score Massimo</div> </div>
-            <div class="stat-card"> <div class="icon"><i class="fas fa-clock"></i></div> <div class="number" id="runtimeMinutes">...</div> <div class="label">Tempo di Elaborazione</div> </div>
-            <div class="stat-card"> <div class="icon"><i class="fas fa-server"></i></div> <div class="number" id="proxiesUsed">...</div> <div class="label">Proxy Utilizzati</div> </div>
-        </div>
 
+        <div class="prophecy-container">
+            <h2><i class="fas fa-scroll"></i> Profezie di Oggi</h2>
+            <div class="prophecy-content">
+                <p id="prophecyText">Caricamento profezia...</p>
+                <button id="toggleProphecy" class="toggle-prophecy" style="display: none;">Mostra tutto <i class="fas fa-chevron-down"></i></button>
+            </div>
+        </div>
         <div class="controls">
             <input type="text" id="searchBox" class="search-box" placeholder="Cerca trend o entità AI...">
             <div class="sorting">
@@ -39,7 +39,8 @@
                 <select id="sortBy">
                     <option value="discover_score">Discover Score</option>
                     <option value="rank">Rank Originale</option>
-                    <option value="saturation_score">Saturazione</option> <option value="score_1h">Score 1 ora</option>
+                    <option value="saturation_score">Saturazione</option>
+                    <option value="score_1h">Score 1 ora</option>
                     <option value="score_4h">Score 4 ore</option>
                     <option value="score_7d">Score 7 giorni</option>
                 </select>
@@ -54,7 +55,16 @@
             <table class="trends-table" id="trendsTable">
                 <thead>
                     <tr>
-                        <th>#</th>                   <th>Rank</th>                <th>Trend & <span title="Entità suggerite da AI">Entità AI</span></th> <th>DScore</th>              <th>1h</th>                  <th>4h</th>                  <th>7d</th>                  <th>Saturazione</th>         <th>Trend Chart</th>         </tr>
+                        <th>#</th>
+                        <th>Rank</th>
+                        <th>Trend & <span title="Entità suggerite da AI">Entità AI</span></th>
+                        <th>DScore</th>
+                        <th>1h</th>
+                        <th>4h</th>
+                        <th>7d</th>
+                        <th>Saturazione</th>
+                        <th>Trend Chart</th>
+                    </tr>
                 </thead>
                 <tbody id="trendsTableBody">
                     <tr class="loading-row"> <td colspan="9" style="text-align: center; padding: 30px;"> <i class="fas fa-spinner fa-spin"></i> Caricamento dati... </td> </tr>
@@ -66,7 +76,7 @@
 
     <footer>
          <p>&copy; <span id="currentYear"></span> Discover Prophet - Powered by Google Trends & OpenAI</p>
-         <p class="version">Version 7.8 - Saturation Score Raw</p> </footer>
+         <p class="version">Version 7.9.1 - AI Prophecy</p> </footer>
 
     <script src="data.js"></script>
     <script src="script.js"></script>
