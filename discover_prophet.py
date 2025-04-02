@@ -601,7 +601,7 @@ def get_single_saturation_score(keyword, max_retries=DATA_FOR_SEO_MAX_RETRIES, c
         return -1
 
     url = DATA_FOR_SEO_URL
-    search_keyword = f'intitle:"{keyword}"'
+    search_keyword = f'intitle:"{keyword}" site:.it'
     payload = json.dumps([{
         "keyword": search_keyword, "location_code": DATA_FOR_SEO_LOCATION, "language_code": DATA_FOR_SEO_LANGUAGE,
         "device": "desktop", "os": "windows", "depth": 10, "calculate_rectangles": False,
