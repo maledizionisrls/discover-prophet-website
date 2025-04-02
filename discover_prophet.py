@@ -1,9 +1,11 @@
+# START OF COMPLETE SCRIPT (V7.9.1 - Based on User Provided Code)
+
 # -*- coding: utf-8 -*-
 
-# 🚀 Script Ottimizzato per Google Trends - V7.8 (Docs Only, OpenAI & DataForSEO Saturation)
+# 🚀 Script Ottimizzato per Google Trends - V7.9.1 (Profezie AI sui Top 50)
 #    Lavora direttamente con i file nella cartella 'docs'.
 #    Genera solo 'docs/data.js'.
-#    Integra OpenAI per estrarre entità chiave dalle query di tendenza.
+#    Integra OpenAI per estrarre entità chiave e generare un sommario ("Profezie") basato sui Top 50 (o N_PROCESS_FOR_CONTEXT).
 #    Integra DataForSEO per l'analisi di saturazione (intitle:keyword, qdr:d).
 #    Legge le chiavi API da variabili d'ambiente: OPENAI_API_KEY, DATA_FOR_SEO.
 #    **Formula V7.9 per Discover Score (Numeratore Pesato).**
@@ -76,66 +78,70 @@ CHECKPOINT_DIR = "checkpoint_data" # Directory checkpoint
 
 # --- Parametri Contesto di Volume (Pytrends) ---
 FETCH_VOLUME_CONTEXT = True
-N_PROCESS_FOR_CONTEXT = 50 # Numero di entità da processare per contesto
+N_PROCESS_FOR_CONTEXT = 50 # Numero di entità da processare (usato anche per OpenAI e Saturazione)
 CONTEXT_TIMEFRAMES = ['now 1-H', 'now 4-H', 'now 7-d']
 CONTEXT_N_RUNS = 2
 
 # --- Parametri Integrazione OpenAI ---
-FETCH_OPENAI_ENTITIES = True
-N_PROCESS_FOR_OPENAI = N_PROCESS_FOR_CONTEXT # Numero di entità da processare con OpenAI
-OPENAI_MODEL = "gpt-4o"
+FETCH_OPENAI_ENTITIES = True # Per estrazione entità singole
+FETCH_OPENAI_SUMMARY = True # *** Per generare le "Profezie di Oggi" ***
+# N_PROCESS_FOR_OPENAI = N_PROCESS_FOR_CONTEXT -> Rimosso, usa N_PROCESS_FOR_CONTEXT
+OPENAI_MODEL = "gpt-4o" # Modello usato per estrazione entità
+OPENAI_SUMMARY_MODEL = "gpt-4o" # Modello usato per sommario
 OPENAI_MAX_RETRIES = 3
-OPENAI_REQUEST_TIMEOUT = 30
-MAX_OPENAI_THREADS = 10
+OPENAI_REQUEST_TIMEOUT = 45 # Timeout più lungo per sommario
+MAX_OPENAI_THREADS = 10 # Per estrazione entità parallela
+OPENAI_SUMMARY_MAX_TOKENS = 300 # Max token per la risposta del sommario
+OPENAI_SUMMARY_TEMPERATURE = 0.6 # Temperatura per sommario
 
 # --- Parametri Integrazione DataForSEO (Saturazione) ---
 FETCH_SATURATION = True
-N_PROCESS_FOR_SATURATION = N_PROCESS_FOR_CONTEXT # Numero di entità da processare con DataForSEO
+# N_PROCESS_FOR_SATURATION = N_PROCESS_FOR_CONTEXT -> Rimosso, usa N_PROCESS_FOR_CONTEXT
 DATA_FOR_SEO_URL = "https://api.dataforseo.com/v3/serp/google/organic/live/advanced"
 DATA_FOR_SEO_LOCATION = 2380 # Italia
 DATA_FOR_SEO_LANGUAGE = "it"
 DATA_FOR_SEO_MAX_RETRIES = 3
 DATA_FOR_SEO_CONNECT_TIMEOUT = 10
 DATA_FOR_SEO_READ_TIMEOUT = 20
-DATA_FOR_SEO_REQUEST_TIMEOUT = DATA_FOR_SEO_CONNECT_TIMEOUT + DATA_FOR_SEO_READ_TIMEOUT + 5 # Timeout globale un po' più alto
-MAX_SATURATION_THREADS = 15 # Adattare in base ai limiti API e risorse
+DATA_FOR_SEO_REQUEST_TIMEOUT = DATA_FOR_SEO_CONNECT_TIMEOUT + DATA_FOR_SEO_READ_TIMEOUT + 5
+MAX_SATURATION_THREADS = 15
 
 # --- Chiave API OpenAI (LEGGI DA VARIABILE D'AMBIENTE!) ---
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-openai_client = None # Rinominato per chiarezza
-if FETCH_OPENAI_ENTITIES:
+openai_client = None
+# *** Modificato check per includere FETCH_OPENAI_SUMMARY ***
+if FETCH_OPENAI_ENTITIES or FETCH_OPENAI_SUMMARY:
     if not OPENAI_API_KEY:
-        warnings.warn("FETCH_OPENAI_ENTITIES=True ma OPENAI_API_KEY non impostata! Estrazione OpenAI saltata.", UserWarning)
+        warnings.warn("FETCH_OPENAI_ENTITIES o FETCH_OPENAI_SUMMARY sono True ma OPENAI_API_KEY non impostata! Funzionalità OpenAI saltate.", UserWarning)
         FETCH_OPENAI_ENTITIES = False
+        FETCH_OPENAI_SUMMARY = False
     else:
         try:
             openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
-            print(f"Client OpenAI inizializzato (Modello: {OPENAI_MODEL}).")
+            print(f"Client OpenAI inizializzato (Modello base: {OPENAI_MODEL}).")
         except Exception as e:
-            warnings.warn(f"Errore inizializzazione client OpenAI: {e}. Estrazione OpenAI saltata.", UserWarning)
+            warnings.warn(f"Errore inizializzazione client OpenAI: {e}. Funzionalità OpenAI saltate.", UserWarning)
             FETCH_OPENAI_ENTITIES = False
+            FETCH_OPENAI_SUMMARY = False
 
 # --- Chiave API DataForSEO (LEGGI DA VARIABILE D'AMBIENTE!) ---
-# Deve contenere la stringa 'Basic xxxxxxxxxxxxxxxxxxxxxxxx==' completa
 DATA_FOR_SEO_AUTH = os.getenv("DATA_FOR_SEO")
 if FETCH_SATURATION:
     if not DATA_FOR_SEO_AUTH:
         warnings.warn("FETCH_SATURATION=True ma DATA_FOR_SEO non impostata! Analisi Saturazione saltata.", UserWarning)
         FETCH_SATURATION = False
     else:
-        # Verifica base (opzionale): controlla che inizi con 'Basic '
         if not DATA_FOR_SEO_AUTH.startswith('Basic '):
              warnings.warn("Formato DATA_FOR_SEO non sembra corretto (dovrebbe iniziare con 'Basic '). Analisi Saturazione saltata.", UserWarning)
              FETCH_SATURATION = False
         else:
             print("Credenziali DataForSEO caricate.")
 
-
 # --- Parametri Formula Discover Score V7.9 ---
-V7D_PENALTY_K = 50.0 # Mantenuto per il denominatore
-V7D_PENALTY_EPSILON = 0.1 # Mantenuto per il denominatore
-WEIGHT_V4H_NUMERATOR = 0.5 # Peso per V4h nel numeratore
-WEIGHT_V7D_NUMERATOR = 1.5 # Peso per V7d nel numeratore
+V7D_PENALTY_K = 50.0
+V7D_PENALTY_EPSILON = 0.1
+WEIGHT_V4H_NUMERATOR = 0.5
+WEIGHT_V7D_NUMERATOR = 1.5
 
 # --- Parametri Gestione Proxy Pytrends/Google ---
 MAX_CONCURRENT_PROXIES = 210
@@ -175,18 +181,13 @@ PYTRENDS_BACKOFF_FACTOR = 0.2
 # ==============================================================================
 def calculate_discover_score(rank_series, score_4h, score_7d, k_penalty=V7D_PENALTY_K, epsilon=V7D_PENALTY_EPSILON, weight_v4h=WEIGHT_V4H_NUMERATOR, weight_v7d=WEIGHT_V7D_NUMERATOR):
     """Calcola l'Heuristic Discover Score V7.9 (Numeratore Pesato)."""
-    # --- Calcolo Denominatore (basato su V7.5) ---
     low_v7d_penalty_factor = np.maximum(1.0, k_penalty / (score_7d + epsilon))
     effective_rank = rank_series * low_v7d_penalty_factor
     denominator = np.log1p(effective_rank)
-    denominator = np.maximum(denominator, 1e-9) # Evita divisione per zero
-
-    # --- Calcolo Numeratore MODIFICATO (V7.9) ---
+    denominator = np.maximum(denominator, 1e-9)
     numerator = 1 + (score_4h * weight_v4h) + (score_7d * weight_v7d)
-
-    # --- Calcolo Score Finale ---
     discover_score = numerator / denominator
-    discover_score = discover_score.fillna(0) # Gestisce eventuali NaN
+    discover_score = discover_score.fillna(0)
     return discover_score
 # ==============================================================================
 
@@ -211,7 +212,6 @@ def get_locale_for_geo(geo_code): return COUNTRY_LOCALE_MAP.get(geo_code.upper()
 
 # --- Funzione Utilità get_proxy_url (PER PYTRENDS/GOOGLE) ---
 def get_proxy_url(proxy_str):
-    """Converte la stringa proxy nel formato URL http://user:pass@host:port."""
     if not proxy_str: return None
     parts = proxy_str.split(':')
     if len(parts) == 4:
@@ -331,7 +331,7 @@ def get_trends_scores(keywords, timeframe):
     proxy_info, pytrends, geo_code = None, None, None
     max_proxy_attempts = min(len(proxy_manager.all_proxies) // 2, MAX_RETRIES_PYTRENDS_CONTEXT * 2); proxy_attempts_set = set()
     kw_list_str = ",".join(sorted(keywords)); kw_hash = hashlib.md5(kw_list_str.encode()).hexdigest()[:6]
-    while attempts < MAX_RETRIES_PYTRENDS_CONTEXT and len(proxy_attempts_set) < max_proxy_attempts: # Usa retry contesto
+    while attempts < MAX_RETRIES_PYTRENDS_CONTEXT and len(proxy_attempts_set) < max_proxy_attempts:
         attempts += 1; proxy_info, status_code, error_type_str, release_success = None, None, None, False; pytrends, session_data, geo_code = None, None, None
         try:
             get_proxy_attempts = 0
@@ -409,10 +409,12 @@ def get_all_context_scores(entities_subset, timeframe, max_threads=MAX_THREADS_P
     return {entity: all_scores.get(entity, 0) for entity in entity_list}
 
 # ==============================================================================
-# ==================== FUNZIONI INTEGRAZIONE OPENAI ==========================
+# ==================== FUNZIONI INTEGRAZIONE OPENAI (Entità & Sommario) ========
 # ==============================================================================
+
+# --- Funzione per Estrazione Entità Singole ---
 def get_single_entity_openai(trend_string, model=OPENAI_MODEL, max_retries=OPENAI_MAX_RETRIES, request_timeout=OPENAI_REQUEST_TIMEOUT):
-    """Chiama l'API OpenAI per estrarre entità."""
+    """Chiama l'API OpenAI per estrarre entità singole."""
     if not openai_client: return None
     prompt = f"""Data la seguente query di ricerca Google Trends, estrai le 3-5 entità o concetti chiave più importanti (persone, luoghi, eventi, organizzazioni, temi principali). Elencali separati da " - " (spazio trattino spazio). Sii conciso e pertinente alla query. Non aggiungere introduzioni, spiegazioni o virgolette attorno alla lista. Esempio: Se la query è "Meteo Roma prossimi giorni", la risposta dovrebbe essere "Meteo - Roma - Previsioni". Query di input: "{trend_string}" """
     attempts = 0
@@ -431,28 +433,27 @@ def get_single_entity_openai(trend_string, model=OPENAI_MODEL, max_retries=OPENA
             entities_text = re.sub(r"^(Ecco le entità estratte:|Le entità chiave sono:|Entità estratte:|Risposta:)\s*", "", entities_text, flags=re.IGNORECASE)
             entities_text = entities_text.strip('\'" ')
             if entities_text.endswith('.'): entities_text = entities_text[:-1].strip()
-            if entities_text and len(entities_text) > 1:
-                # print(f"      [OpenAI OK] '{trend_string}' -> '{entities_text}' (Tentativo {attempts})") # Debug
-                return entities_text
-            else: # print(f"      [OpenAI WARN] Risposta vuota/corta per '{trend_string}' (Tentativo {attempts})") # Debug
-                 return None
+            if entities_text and len(entities_text) > 1: return entities_text
+            else: return None
         except openai.APITimeoutError:
-            print(f"  !! [OpenAI Timeout] Tentativo {attempts}/{max_retries} per '{trend_string}'. Attesa..."); wait_time = 3 * attempts
+             print(f"  !! [OpenAI Timeout Entity] Tentativo {attempts}/{max_retries} per '{trend_string}'."); wait_time = 3 * attempts
         except openai.APIConnectionError as e:
-            print(f"  !! [OpenAI Connection Err] Tentativo {attempts}/{max_retries} per '{trend_string}': {e}. Attesa..."); wait_time = 5 * attempts
+            print(f"  !! [OpenAI Connection Err Entity] Tentativo {attempts}/{max_retries} per '{trend_string}'."); wait_time = 5 * attempts
         except openai.RateLimitError:
-            print(f"  !! [OpenAI Rate Limit] Tentativo {attempts}/{max_retries} per '{trend_string}'. Attesa lunga..."); wait_time = 15 * attempts
+            print(f"  !! [OpenAI Rate Limit Entity] Tentativo {attempts}/{max_retries} per '{trend_string}'."); wait_time = 15 * attempts
         except openai.APIStatusError as e:
-            print(f"  !! [OpenAI Status Err {e.status_code}] Tentativo {attempts}/{max_retries} per '{trend_string}': {e.message}. Attesa...")
-            if e.status_code >= 500 or e.status_code in [401, 403]: print(f"  !! Errore {e.status_code} non recuperabile OpenAI. Interruzione."); return None
+            print(f"  !! [OpenAI Status Err {e.status_code} Entity] Tentativo {attempts}/{max_retries} per '{trend_string}'.")
+            if e.status_code >= 500 or e.status_code in [401, 403]: return None
             wait_time = 5 * attempts
         except Exception as e:
-            print(f"  !! [OpenAI Generic Err] Tentativo {attempts}/{max_retries} per '{trend_string}': {type(e).__name__} - {e}"); wait_time = 3 * attempts
+            print(f"  !! [OpenAI Generic Err Entity] Tentativo {attempts}/{max_retries} per '{trend_string}': {type(e).__name__}")
+            wait_time = 3 * attempts
 
-        if attempts >= max_retries: print(f"  !! [OpenAI FAIL] Falliti tutti {max_retries} tentativi per '{trend_string}'"); return None
+        if attempts >= max_retries: print(f"  !! [OpenAI FAIL Entity] Falliti tutti {max_retries} tentativi per '{trend_string}'"); return None
         time.sleep(wait_time)
-    return None # Fallito dopo tutti i tentativi
+    return None
 
+# --- Funzione per Ottenere Entità in Parallelo ---
 def get_entities_with_openai(trend_list, max_workers=MAX_OPENAI_THREADS):
     """Ottiene le entità estratte da OpenAI per una lista di trend in parallelo."""
     if not openai_client or not FETCH_OPENAI_ENTITIES:
@@ -465,36 +466,128 @@ def get_entities_with_openai(trend_list, max_workers=MAX_OPENAI_THREADS):
     sem = threading.Semaphore(max_workers)
 
     def call_openai_safe(trend):
-        with sem:
-            return get_single_entity_openai(trend)
+        with sem: return get_single_entity_openai(trend)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        print(f"  Sottomissione {len(trend_list)} task a OpenAI...")
+        print(f"  Sottomissione {len(trend_list)} task a OpenAI (Entità)...")
         for trend in trend_list:
             future = executor.submit(call_openai_safe, trend)
             futures[future] = trend
-            time.sleep(random.uniform(0.02, 0.08)) # Piccolo delay per non sovraccaricare subito
+            time.sleep(random.uniform(0.02, 0.08))
 
-        print("  Attesa completamento task OpenAI...")
-        successful_count = 0
-        total_tasks = len(trend_list)
-
+        print("  Attesa completamento task OpenAI (Entità)...")
+        successful_count = 0; total_tasks = len(trend_list)
         for future in tqdm(concurrent.futures.as_completed(futures), total=total_tasks, desc="Estrazione Entità OpenAI", unit="trend", ncols=100):
-            trend = futures[future]
-            result = '' # Default a stringa vuota
+            trend = futures[future]; result = ''
             try:
-                result_raw = future.result(timeout=OPENAI_REQUEST_TIMEOUT * (OPENAI_MAX_RETRIES + 2)) # Timeout generoso
-                if result_raw:
-                    result = result_raw
-                    successful_count += 1
-            except concurrent.futures.TimeoutError:
-                print(f"\n!!! Timeout globale OpenAI per '{trend}' !!!")
-            except Exception as exc:
-                print(f"\n!!! Errore recupero risultato OpenAI per '{trend}': {exc} !!!")
-            extracted_entities_map[trend] = result # Mappa sempre, vuoto se fallito/non trovato
+                result_raw = future.result(timeout=OPENAI_REQUEST_TIMEOUT * (OPENAI_MAX_RETRIES + 2))
+                if result_raw: result = result_raw; successful_count += 1
+            except Exception as exc: print(f"\n!!! Errore recupero risultato Entità OpenAI per '{trend}': {exc} !!!")
+            extracted_entities_map[trend] = result
 
     print(f"--- Estrazione Entità OpenAI completata ({successful_count}/{total_tasks} con successo) ---")
     return extracted_entities_map
+
+# --- NUOVA FUNZIONE: Generazione Sommario AI ("Profezie") ---
+def generate_ai_summary(df_top_trends, model=OPENAI_SUMMARY_MODEL, max_retries=OPENAI_MAX_RETRIES, request_timeout=OPENAI_REQUEST_TIMEOUT + 15, max_tokens=OPENAI_SUMMARY_MAX_TOKENS, temperature=OPENAI_SUMMARY_TEMPERATURE):
+    """
+    Chiama OpenAI per generare un sommario analitico ("Profezie di Oggi")
+    basato sui dati dei trend forniti (il DataFrame passato come input).
+    """
+    if not openai_client or not FETCH_OPENAI_SUMMARY:
+        print("\n--- Generazione Sommario AI Saltata (client non inizializzato o flag disattivo) ---")
+        return "" # Ritorna stringa vuota se non attivo
+
+    num_trends_to_summarize = len(df_top_trends) # Numero effettivo di trend da analizzare
+    print(f"\n--- Avvio Generazione Sommario AI ('Profezie di Oggi') su {num_trends_to_summarize} trend con {model} ---")
+
+    # Prepara input per il prompt: Stringa formattata con TUTTI i trend forniti
+    trends_input_list = []
+    # Itera su tutto il DataFrame passato (es. df_final.head(50))
+    for index, row in df_top_trends.iterrows():
+        # Formatta saturation score
+        sat_score = row.get('Saturation_Score', -1.0)
+        sat_score_str = f"{int(sat_score):,}".replace(",", ".") if sat_score >= 0 else "N/D"
+        # Format string for each trend, includendo la posizione (#)
+        trend_str = (
+            f"#{index + 1}. '{row.get('Entita', 'N/A')}' "
+            f"(DScore: {row.get('Discover_Score', 0):.1f}, "
+            f"Rank: {row.get('Rank', 0)}, " # Rank originale
+            f"Trend 1h/4h/7d: {row.get('Score_Avg_now 1-H', 0):.0f}/{row.get('Score_Avg_now 4-H', 0):.0f}/{row.get('Score_Avg_now 7-d', 0):.0f}, "
+            f"Sat: {sat_score_str}, "
+            f"AI Ent: '{row.get('Extracted_Entities', '-')}')"
+        )
+        trends_input_list.append(trend_str)
+    formatted_trends_data = "\n".join(trends_input_list) # Lista completa per il prompt
+
+    # Costruisci il prompt aggiornato per analizzare TUTTI i dati forniti
+    prompt = f"""Sei "Discover Prophet", un analista esperto di Google Trends e Google Discover. Ti vengono forniti i dati più recenti sui top {num_trends_to_summarize} trend analizzati in Italia, identificati dal loro numero (#) e ordinati per "Discover Score" (DScore: un indice di potenziale per Discover). Per ogni trend sono inclusi: Rank originale, punteggi di interesse recenti (1h/4h/7d), punteggio di saturazione (Sat: num risultati intitle: 24h, alto=molto coperto, basso=nicchia, N/D=errore) ed entità chiave estratte da AI (AI Ent).
+
+Obiettivo: Genera un breve riassunto narrativo (massimo 180 parole) in italiano, chiamato "Profezie di Oggi". Analizza l'INTERO set di {num_trends_to_summarize} trend forniti per evidenziare:
+1. Temi Principali: Quali sono 2-3 temi o categorie di argomenti dominanti o ricorrenti che emergono dall'analisi complessiva dei dati (es. sport, politica, cronaca, tecnologia, meteo, personaggi specifici)? Considera sia i nomi dei trend che le entità AI.
+2. Opportunità Discover: Identifica 1-2 argomenti specifici dall'elenco che rappresentano le migliori opportunità PER CONTENUTI SU GOOGLE DISCOVER. Motiva brevemente la scelta basandoti su un buon DScore (alto potenziale Discover), un trend di interesse recente positivo (idealmente 1h > 4h o 7d > 0) e una saturazione (Sat) non eccessivamente alta (idealmente < 1000, non "Dominante"). Indica il numero # del trend scelto.
+3. Rischi o Cautela: Identifica 1-2 argomenti specifici o categorie di argomenti presenti nella lista che richiedono cautela. Motiva brevemente la scelta basandoti su altissima saturazione (Sat > 1500/2000) che indica forte competizione, oppure DScore basso nonostante interesse recente (potrebbe essere effimero), oppure Rank molto alto non supportato da DScore (rischio "fuoco di paglia"). Indica il numero # del trend se specifico.
+4. Tono e Stile: Usa un tono "profetico" ma pratico e piacevole. NON usare liste puntate, grassetto o markdown. Scrivi uno o due paragrafi brevi (max 180 parole totali). Concludi con una piccola osservazione generale o consiglio strategico per chi crea contenuti basandosi su queste tendenze.
+
+Dati dei Top {num_trends_to_summarize} Trend:
+{formatted_trends_data}
+
+Genera le "Profezie di Oggi":
+"""
+
+    # Chiamata API OpenAI
+    attempts = 0
+    while attempts < max_retries:
+        attempts += 1
+        try:
+            print(f"  Tentativo {attempts}/{max_retries} chiamata a OpenAI ({model}) per il sommario...")
+            response = openai_client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": "Sei 'Discover Prophet', un analista AI che interpreta dati di Google Trends per fornire brevi insight narrativi ('profezie') sul potenziale per Google Discover, mantenendo un tono profetico ma utile e analizzando tutti i dati forniti."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=temperature,
+                max_tokens=max_tokens,
+                n=1,
+                stop=None,
+                timeout=request_timeout
+            )
+            summary_text = response.choices[0].message.content.strip()
+            summary_text = summary_text.strip('"') # Pulizia
+            if summary_text:
+                print("  Sommario AI ('Profezia') generato con successo.")
+                return summary_text
+            else:
+                print("  !! [OpenAI Summary WARN] Risposta vuota ricevuta.")
+                # Riprova se la risposta è vuota
+                if attempts < max_retries:
+                    print("     Riprovo...")
+                    time.sleep(2 * attempts)
+                    continue
+                else:
+                    return "" # Ritorna vuoto dopo tentativi falliti
+        except openai.APITimeoutError:
+            print(f"  !! [OpenAI Timeout Summary] Tentativo {attempts}/{max_retries}."); wait_time = 3 * attempts
+        except openai.APIConnectionError as e:
+            print(f"  !! [OpenAI Connection Err Summary] Tentativo {attempts}/{max_retries}."); wait_time = 5 * attempts
+        except openai.RateLimitError:
+            print(f"  !! [OpenAI Rate Limit Summary] Tentativo {attempts}/{max_retries}."); wait_time = 15 * attempts
+        except openai.APIStatusError as e:
+            print(f"  !! [OpenAI Status Err {e.status_code} Summary] Tentativo {attempts}/{max_retries}.")
+            if e.status_code >= 500 or e.status_code in [401, 403]: return "" # Non recuperabile
+            wait_time = 5 * attempts
+        except Exception as e:
+            print(f"  !! [OpenAI Generic Err Summary] Tentativo {attempts}/{max_retries}: {type(e).__name__}")
+            # traceback.print_exc() # Decommenta per debug
+            wait_time = 3 * attempts
+
+        if attempts >= max_retries:
+             print(f"!!! [OpenAI FAIL Summary] Falliti tutti i {max_retries} tentativi per generare il sommario.")
+             return "Errore nella generazione della profezia di oggi."
+        time.sleep(wait_time)
+
+    return "Impossibile generare la profezia di oggi dopo i tentativi."
 
 # ==============================================================================
 # ================= FUNZIONI INTEGRAZIONE DATAFORSEO (SATURAZIONE) =============
@@ -505,191 +598,97 @@ def get_single_saturation_score(keyword, max_retries=DATA_FOR_SEO_MAX_RETRIES, c
     Restituisce se_results_count (int) o -1 in caso di fallimento.
     """
     if not FETCH_SATURATION or not DATA_FOR_SEO_AUTH:
-        # print(f"      [DataForSEO SKIP] Saturazione disattivata o chiave mancante per '{keyword}'") # Debug
         return -1
 
     url = DATA_FOR_SEO_URL
-    # Keyword nel formato richiesto: intitle:"keyword"
-    search_keyword = f'intitle:"{keyword}"' # Assumiamo che keyword non contenga già virgolette
-    # Payload per la richiesta POST
+    search_keyword = f'intitle:"{keyword}"'
     payload = json.dumps([{
-        "keyword": search_keyword,
-        "location_code": DATA_FOR_SEO_LOCATION,
-        "language_code": DATA_FOR_SEO_LANGUAGE,
-        "device": "desktop",
-        "os": "windows",
-        "depth": 10, # Bastano pochi risultati, ci serve solo il count totale
-        "calculate_rectangles": False,
-        "group_organic_results": False, # Non necessario per il count
-        "load_async_ai_overview": False,
-        "search_param": "&tbs=qdr:d" # Cerca nelle ultime 24 ore
+        "keyword": search_keyword, "location_code": DATA_FOR_SEO_LOCATION, "language_code": DATA_FOR_SEO_LANGUAGE,
+        "device": "desktop", "os": "windows", "depth": 10, "calculate_rectangles": False,
+        "group_organic_results": False, "load_async_ai_overview": False, "search_param": "&tbs=qdr:d"
     }])
-    headers = {
-        'Authorization': DATA_FOR_SEO_AUTH, # Già contiene 'Basic '
-        'Content-Type': 'application/json'
-    }
+    headers = {'Authorization': DATA_FOR_SEO_AUTH, 'Content-Type': 'application/json'}
 
     attempts = 0
     while attempts < max_retries:
         attempts += 1
         try:
-            response = requests.request(
-                "POST",
-                url,
-                headers=headers,
-                data=payload,
-                timeout=(connect_timeout, read_timeout)
-            )
-            response.raise_for_status() # Lancia HTTPError per status >= 400
-
+            response = requests.request("POST", url, headers=headers, data=payload, timeout=(connect_timeout, read_timeout))
+            response.raise_for_status()
             response_data = response.json()
 
-            # --- Estrazione sicura del dato ---
-            # Verifica la struttura base della risposta DataForSEO
-            if response_data.get("status_code") == 20000 and \
-               response_data.get("tasks_count") == 1 and \
-               isinstance(response_data.get("tasks"), list) and \
-               len(response_data["tasks"]) == 1:
-
+            if response_data.get("status_code") == 20000 and response_data.get("tasks_count") == 1 and isinstance(response_data.get("tasks"), list) and len(response_data["tasks"]) == 1:
                 task = response_data["tasks"][0]
-                if task.get("status_code") == 20000 and \
-                   isinstance(task.get("result"), list) and \
-                   len(task["result"]) == 1:
-
+                if task.get("status_code") == 20000 and isinstance(task.get("result"), list) and len(task["result"]) == 1:
                     result_item = task["result"][0]
-                    # se_results_count può essere None se Google non mostra il count
                     saturation_count = result_item.get("se_results_count")
-
-                    if isinstance(saturation_count, int):
-                        # print(f"      [DataForSEO OK] '{keyword}' -> {saturation_count} (Tentativo {attempts})") # Debug
-                        return saturation_count
-                    else:
-                         # Google non ha fornito il count (comune per query specifiche o a basso volume)
-                         # print(f"      [DataForSEO INFO] '{keyword}' -> Count non disponibile (Tentativo {attempts})") # Debug
-                         return 0 # Restituisci 0 se non disponibile
-                else:
-                    # Errore nel task specifico
-                    task_error = task.get("status_message", "Errore task sconosciuto")
-                    print(f"  !! [DataForSEO Task Err] Tentativo {attempts}/{max_retries} per '{keyword}': {task_error}")
-                    # Potrebbe essere un errore temporaneo, retry
-            else:
-                 # Errore generale API
-                 api_error = response_data.get("status_message", "Errore API sconosciuto")
-                 print(f"  !! [DataForSEO API Err] Tentativo {attempts}/{max_retries} per '{keyword}': {api_error}")
-                 # Potrebbe essere un errore temporaneo, retry
+                    if isinstance(saturation_count, int): return saturation_count
+                    else: return 0 # Count non disponibile
+                else: task_error = task.get("status_message", "Err task"); print(f"  !! [DataForSEO Task Err] T{attempts}/{max_retries} per '{keyword}': {task_error}")
+            else: api_error = response_data.get("status_message", "Err API"); print(f"  !! [DataForSEO API Err] T{attempts}/{max_retries} per '{keyword}': {api_error}")
 
         except requests.exceptions.HTTPError as http_err:
             status_code = http_err.response.status_code
-            print(f"  !! [DataForSEO HTTP Err {status_code}] Tentativo {attempts}/{max_retries} per '{keyword}'.")
-            if status_code == 401 or status_code == 403: # Auth error
-                print("  !! Errore Autenticazione DataForSEO. Controlla la chiave API. Interruzione tentativi.")
-                return -1 # Errore non recuperabile
-            # Altri errori 4xx o 5xx potrebbero essere temporanei
+            print(f"  !! [DataForSEO HTTP Err {status_code}] T{attempts}/{max_retries} per '{keyword}'.")
+            if status_code in [401, 403]: print("  !! Errore Auth DataForSEO."); return -1
             wait_time = 3 * attempts
-        except requests.exceptions.Timeout:
-            print(f"  !! [DataForSEO Timeout] Tentativo {attempts}/{max_retries} per '{keyword}'. Attesa...")
-            wait_time = 5 * attempts
-        except requests.exceptions.RequestException as req_err:
-            print(f"  !! [DataForSEO Request Err] Tentativo {attempts}/{max_retries} per '{keyword}': {req_err}")
-            wait_time = 4 * attempts
-        except json.JSONDecodeError:
-            print(f"  !! [DataForSEO JSON Err] Tentativo {attempts}/{max_retries} per '{keyword}'. Risposta non JSON.")
-            wait_time = 3 * attempts
-        except Exception as e:
-            print(f"  !! [DataForSEO Generic Err] Tentativo {attempts}/{max_retries} per '{keyword}': {type(e).__name__} - {e}")
-            wait_time = 3 * attempts
+        except requests.exceptions.Timeout: print(f"  !! [DataForSEO Timeout] T{attempts}/{max_retries} per '{keyword}'."); wait_time = 5 * attempts
+        except requests.exceptions.RequestException as req_err: print(f"  !! [DataForSEO Req Err] T{attempts}/{max_retries} per '{keyword}': {req_err}"); wait_time = 4 * attempts
+        except json.JSONDecodeError: print(f"  !! [DataForSEO JSON Err] T{attempts}/{max_retries} per '{keyword}'."); wait_time = 3 * attempts
+        except Exception as e: print(f"  !! [DataForSEO Gen Err] T{attempts}/{max_retries} per '{keyword}': {type(e).__name__}"); wait_time = 3 * attempts
 
-        if attempts >= max_retries:
-            print(f"!!! [DataForSEO FAIL] Falliti tutti i {max_retries} tentativi per '{keyword}'")
-            return -1 # Fallito dopo tutti i tentativi
-        # print(f"      [DataForSEO RETRY] Attesa {wait_time}s...") # Debug
+        if attempts >= max_retries: print(f"!!! [DataForSEO FAIL] Falliti {max_retries} tentativi per '{keyword}'"); return -1
         time.sleep(wait_time)
-
-    return -1 # Fallito dopo tutti i tentativi
+    return -1
 
 def get_saturation_scores_parallel(entity_list, max_workers=MAX_SATURATION_THREADS):
-    """
-    Ottiene i punteggi di saturazione da DataForSEO per una lista di entità in parallelo.
-    Restituisce un dizionario {entity: saturation_score}.
-    Score è -1 in caso di errore nel recupero.
-    """
-    if not FETCH_SATURATION or not DATA_FOR_SEO_AUTH:
-        print("\n--- Analisi Saturazione DataForSEO Saltata (flag disattivo o chiave mancante) ---")
-        return {}
-
+    """Ottiene i punteggi di saturazione in parallelo."""
+    if not FETCH_SATURATION or not DATA_FOR_SEO_AUTH: return {}
     print(f"\n--- Avvio Analisi Saturazione DataForSEO ({len(entity_list)} entità, Max Workers: {max_workers}) ---")
-    saturation_map = {}
-    futures = {}
-    # Non usare Semaphore qui, le limitazioni sono più a livello di account/secondo che di connessioni TCP
-    # L'API DataForSEO gestisce internamente la concorrenza lato server.
-    # Un numero ragionevole di threads è comunque utile per gestire la latenza I/O.
-
-    def call_saturation_safe(entity):
-        # Non c'è bisogno di Semaphore qui
-        return get_single_saturation_score(entity)
-
+    saturation_map = {}; futures = {}
+    def call_saturation_safe(entity): return get_single_saturation_score(entity)
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         print(f"  Sottomissione {len(entity_list)} task a DataForSEO...")
         for entity in entity_list:
             future = executor.submit(call_saturation_safe, entity)
-            futures[future] = entity
-            time.sleep(random.uniform(0.03, 0.1)) # Leggero stagger per evitare burst iniziali
-
+            futures[future] = entity; time.sleep(random.uniform(0.03, 0.1))
         print("  Attesa completamento task DataForSEO...")
-        successful_count = 0
-        failed_count = 0
-        total_tasks = len(entity_list)
-
+        successful_count = 0; failed_count = 0; total_tasks = len(entity_list)
         for future in tqdm(concurrent.futures.as_completed(futures), total=total_tasks, desc="Analisi Saturazione", unit="entity", ncols=100):
-            entity = futures[future]
-            result = -1 # Default a -1 (errore/non trovato)
+            entity = futures[future]; result = -1
             try:
-                # Usare un timeout globale generoso per result()
                 result_raw = future.result(timeout=DATA_FOR_SEO_REQUEST_TIMEOUT * (DATA_FOR_SEO_MAX_RETRIES + 1))
-                if isinstance(result_raw, int): # Accetta 0 come risultato valido
+                if isinstance(result_raw, int):
                     result = result_raw
-                    if result >= 0: # Considera successo se abbiamo un numero >= 0
-                        successful_count += 1
-                    else: # result == -1 indica fallimento interno
-                        failed_count +=1
-                else: # Non dovrebbe succedere se get_single_saturation_score ritorna int o -1
-                     failed_count += 1
-
-            except concurrent.futures.TimeoutError:
-                print(f"\n!!! Timeout globale DataForSEO per '{entity}' !!!")
-                failed_count += 1
-            except Exception as exc:
-                print(f"\n!!! Errore recupero risultato DataForSEO per '{entity}': {exc} !!!")
-                failed_count += 1
-            saturation_map[entity] = result # Mappa sempre, -1 se fallito/non trovato
-
-    print(f"--- Analisi Saturazione DataForSEO completata ({successful_count}/{total_tasks} con successo, {failed_count} falliti/non disponibili) ---")
+                    if result >= 0: successful_count += 1
+                    else: failed_count +=1
+                else: failed_count += 1
+            except Exception as exc: print(f"\n!!! Errore recupero Saturazione per '{entity}': {exc} !!!"); failed_count += 1
+            saturation_map[entity] = result
+    print(f"--- Analisi Saturazione DataForSEO completata ({successful_count}/{total_tasks} con successo, {failed_count} falliti/N.D.) ---")
     return saturation_map
-
 # ==============================================================================
 
-# --- FUNZIONE: Generazione output HTML (aggiornata per logica "Docs Only" + Saturazione) ---
+# --- FUNZIONE: Generazione output HTML (aggiornata per Profezia) ---
 def generate_html_output(df_final, runtime_info=None):
     """
-    Genera solo il file data.js nella directory di output, includendo la saturazione.
-    Assume che index.html, style.css, script.js esistano già in OUTPUT_DIR.
+    Genera solo il file data.js nella directory di output, includendo la profezia.
     """
     try:
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         base_files_ok = True
         for file_name in [OUTPUT_FILENAME, "style.css", "script.js"]:
             if not os.path.exists(os.path.join(OUTPUT_DIR, file_name)):
-                warnings.warn(f"File base '{file_name}' non trovato in '{OUTPUT_DIR}'. L'output potrebbe non funzionare correttamente.", UserWarning)
+                warnings.warn(f"File base '{file_name}' non trovato in '{OUTPUT_DIR}'.", UserWarning)
                 base_files_ok = False
 
         trend_list = []
-        # Aggiungi 'Saturation_Score' alle colonne richieste per la verifica (opzionale)
         required_cols = ['Rank', 'Entita', 'Discover_Score', 'Score_Avg_now 1-H', 'Score_Avg_now 4-H', 'Score_Avg_now 7-d', 'Extracted_Entities', 'Saturation_Score']
         available_cols = df_final.columns
         missing_warned = False
         for col in required_cols:
             if col not in available_cols and not missing_warned:
-                warnings.warn(f"Colonne mancanti nel DF finale: {', '.join([c for c in required_cols if c not in available_cols])}. Default usati.", UserWarning)
+                warnings.warn(f"Colonne mancanti nel DF: {', '.join([c for c in required_cols if c not in available_cols])}.", UserWarning)
                 missing_warned = True
 
         for _, row in df_final.iterrows():
@@ -701,21 +700,28 @@ def generate_html_output(df_final, runtime_info=None):
                 'score_4h': float(row.get('Score_Avg_now 4-H', 0)),
                 'score_7d': float(row.get('Score_Avg_now 7-d', 0)),
                 'extracted_entities': row.get('Extracted_Entities', ''),
-                # Aggiungi saturation_score, con default a -1.0 se non trovato/fallito
                 'saturation_score': float(row.get('Saturation_Score', -1.0))
             }
             trend_list.append(trend_data)
+
+        # Prepara i metadati, includendo la profezia presa da runtime_info
+        # Verifica esistenza di runtime_info prima di accedervi
+        rt_info = runtime_info if runtime_info else {}
+        start_time = rt_info.get('start_time', main_start_time) if 'main_start_time' in globals() else time.time() # Fallback più robusto
+        end_time = rt_info.get('end_time', time.time())
 
         run_metadata = {
             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'trends_count': len(trend_list),
             'top_score': max((t['discover_score'] for t in trend_list), default=0),
-            'runtime_minutes': (runtime_info['end_time'] - runtime_info['start_time']) / 60 if runtime_info and 'start_time' in runtime_info and 'end_time' in runtime_info else 0,
-            'pytrends_proxies_used': len(proxy_manager.all_proxies) if proxy_manager else 0,
-            'openai_enabled': FETCH_OPENAI_ENTITIES,
-            'openai_model': OPENAI_MODEL if FETCH_OPENAI_ENTITIES else 'N/A',
+            'runtime_minutes': (end_time - start_time) / 60,
+            'pytrends_proxies_used': len(proxy_manager.all_proxies) if 'proxy_manager' in globals() and proxy_manager else 0,
+            'openai_enabled': FETCH_OPENAI_ENTITIES or FETCH_OPENAI_SUMMARY,
+            'openai_model': OPENAI_MODEL if (FETCH_OPENAI_ENTITIES or FETCH_OPENAI_SUMMARY) else 'N/A',
             'saturation_enabled': FETCH_SATURATION,
-            'saturation_location': DATA_FOR_SEO_LOCATION if FETCH_SATURATION else 'N/A'
+            'saturation_location': DATA_FOR_SEO_LOCATION if FETCH_SATURATION else 'N/A',
+            # *** AGGIUNTA PROFEZIA ***
+            'prophecy_text': rt_info.get('prophecy_text', '') # Prende da runtime_info, default vuoto
         }
 
         js_data = f"const trendData = {json.dumps(trend_list, indent=2, ensure_ascii=False)};\n\n"
@@ -723,26 +729,26 @@ def generate_html_output(df_final, runtime_info=None):
 
         data_js_path = os.path.join(OUTPUT_DIR, 'data.js')
         try:
-            with open(data_js_path, 'w', encoding='utf-8') as f:
-                f.write(js_data)
+            with open(data_js_path, 'w', encoding='utf-8') as f: f.write(js_data)
         except Exception as e_write:
-            print(f"!!! Errore scrittura file {data_js_path}: {e_write} !!!")
-            return False
+            print(f"!!! Errore scrittura file {data_js_path}: {e_write} !!!"); return False
 
         print(f"\nFile dati '{os.path.basename(data_js_path)}' generato/aggiornato con successo in '{OUTPUT_DIR}'.")
         print(f"Apri '{os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)}' nel browser per visualizzare.")
         return True
+
     except Exception as e:
         print(f"Errore durante la generazione di data.js: {e}")
         traceback.print_exc()
         return False
 
 # ==============================================================================
-# ==================== SCRIPT PRINCIPALE (V7.8 - Docs Only, OpenAI, Saturation) ===================
+# ==================== SCRIPT PRINCIPALE (V7.9.1 - Con Profezie AI) ============
 # ==============================================================================
 if __name__ == "__main__":
     main_start_time = time.time()
     runtime_info = {'start_time': main_start_time}
+    prophecy_text_generated = "" # Inizializza variabile per la profezia
 
     # --- Validazioni iniziali parametri ---
     if FETCH_VOLUME_CONTEXT:
@@ -750,21 +756,24 @@ if __name__ == "__main__":
         if CONTEXT_N_RUNS <= 0: warnings.warn("CONTEXT_N_RUNS <= 0 non valido. Contesto Pytrends disattivato.", UserWarning); FETCH_VOLUME_CONTEXT = False
         if N_PROCESS_FOR_CONTEXT <= 0: warnings.warn("N_PROCESS_FOR_CONTEXT <= 0 non valido. Contesto Pytrends disattivato.", UserWarning); FETCH_VOLUME_CONTEXT = False
     if FETCH_OPENAI_ENTITIES:
-        if N_PROCESS_FOR_OPENAI <= 0: warnings.warn("N_PROCESS_FOR_OPENAI <= 0. OpenAI disattivato.", UserWarning); FETCH_OPENAI_ENTITIES = False
-        if not openai_client: warnings.warn("Client OpenAI non inizializzato. OpenAI disattivato.", UserWarning); FETCH_OPENAI_ENTITIES = False
+        # N_PROCESS_FOR_OPENAI è legato a N_PROCESS_FOR_CONTEXT, non serve check separato <= 0
+        if not openai_client: warnings.warn("Client OpenAI non inizializzato. Estrazione Entità OpenAI disattivata.", UserWarning); FETCH_OPENAI_ENTITIES = False
+    if FETCH_OPENAI_SUMMARY: # Check specifico per sommario
+         if not openai_client: warnings.warn("Client OpenAI non inizializzato. Generazione Sommario AI ('Profezie') disattivata.", UserWarning); FETCH_OPENAI_SUMMARY = False
     if FETCH_SATURATION:
-         if N_PROCESS_FOR_SATURATION <= 0: warnings.warn("N_PROCESS_FOR_SATURATION <= 0. Saturazione disattivata.", UserWarning); FETCH_SATURATION = False
-         if not DATA_FOR_SEO_AUTH: warnings.warn("Credenziali DataForSEO non trovate. Saturazione disattivata.", UserWarning); FETCH_SATURATION = False
+         if N_PROCESS_FOR_CONTEXT <= 0 : warnings.warn("N_PROCESS_FOR_CONTEXT <= 0 implica N_PROCESS_FOR_SATURATION <= 0. Saturazione disattivata.", UserWarning); FETCH_SATURATION = False
+         elif not DATA_FOR_SEO_AUTH: warnings.warn("Credenziali DataForSEO non trovate. Saturazione disattivata.", UserWarning); FETCH_SATURATION = False
 
 
-    print(f"--- Avvio script Discover Prophet V7.8 (Docs Only, OpenAI, Saturation) ---")
+    print(f"--- Avvio script Discover Prophet V7.9.1 (Con Profezie AI) ---") # Versione aggiornata
     print(f"Formula Discover Score: V7.9 (Numeratore Pesato: V4h={WEIGHT_V4H_NUMERATOR}, V7d={WEIGHT_V7D_NUMERATOR}; Denominatore K={V7D_PENALTY_K}, epsilon={V7D_PENALTY_EPSILON})")
     print(f"Modalità: Lavora direttamente su '{OUTPUT_DIR}', genera solo 'data.js'.")
     print(f"Estrazione Contesto Volume (Pytrends): {'ATTIVA' if FETCH_VOLUME_CONTEXT else 'DISATTIVATA'} (Top {N_PROCESS_FOR_CONTEXT}, Runs: {CONTEXT_N_RUNS})")
-    print(f"Estrazione Entità OpenAI: {'ATTIVA' if FETCH_OPENAI_ENTITIES else 'DISATTIVATA'} (Top {N_PROCESS_FOR_OPENAI}, Modello: {OPENAI_MODEL if FETCH_OPENAI_ENTITIES else 'N/A'})")
-    print(f"Analisi Saturazione (DataForSEO): {'ATTIVA' if FETCH_SATURATION else 'DISATTIVATA'} (Top {N_PROCESS_FOR_SATURATION}, Loc: {DATA_FOR_SEO_LOCATION}, Lang: {DATA_FOR_SEO_LANGUAGE})")
+    print(f"Estrazione Entità OpenAI: {'ATTIVA' if FETCH_OPENAI_ENTITIES else 'DISATTIVATA'} (Top {N_PROCESS_FOR_CONTEXT}, Modello: {OPENAI_MODEL if FETCH_OPENAI_ENTITIES else 'N/A'})")
+    print(f"Generazione Sommario AI ('Profezie'): {'ATTIVA' if FETCH_OPENAI_SUMMARY else 'DISATTIVATA'} (Modello: {OPENAI_SUMMARY_MODEL if FETCH_OPENAI_SUMMARY else 'N/A'})") # Info Sommario
+    print(f"Analisi Saturazione (DataForSEO): {'ATTIVA' if FETCH_SATURATION else 'DISATTIVATA'} (Top {N_PROCESS_FOR_CONTEXT}, Loc: {DATA_FOR_SEO_LOCATION}, Lang: {DATA_FOR_SEO_LANGUAGE})")
     print(f"Config Proxy Pytrends: MaxConc={MAX_CONCURRENT_PROXIES}, CD={PROXY_USE_COOLDOWN}s")
-    print(f"Config Threads: Pytrends={MAX_THREADS_PYTRENDS}, OpenAI={MAX_OPENAI_THREADS}, Saturazione={MAX_SATURATION_THREADS}")
+    print(f"Config Threads: Pytrends={MAX_THREADS_PYTRENDS}, OpenAI(Entità)={MAX_OPENAI_THREADS}, Saturazione={MAX_SATURATION_THREADS}")
     print(f"Output: '{OUTPUT_DIR}', Checkpoints: '{CHECKPOINT_DIR}'")
 
     ordered_entities = None
@@ -789,23 +798,17 @@ if __name__ == "__main__":
         df_final = df_initial.copy()
         for tf in CONTEXT_TIMEFRAMES: df_final[f'Score_Avg_{tf}'] = 0.0
         df_final['Extracted_Entities'] = ''
-        df_final['Saturation_Score'] = -1.0 # Inizializza saturazione a -1.0 (float)
+        df_final['Saturation_Score'] = -1.0
         df_final['Discover_Score'] = 0.0
 
-        # Determina le entità da processare (usa il minimo tra i vari N_PROCESS se attivi)
-        num_to_process_list = []
-        if FETCH_VOLUME_CONTEXT: num_to_process_list.append(N_PROCESS_FOR_CONTEXT)
-        if FETCH_OPENAI_ENTITIES: num_to_process_list.append(N_PROCESS_FOR_OPENAI)
-        if FETCH_SATURATION: num_to_process_list.append(N_PROCESS_FOR_SATURATION)
-        n_process_max = min(num_to_process_list) if num_to_process_list else len(ordered_entities)
-        n_process_max = min(n_process_max, len(ordered_entities)) # Non superare il numero totale di entità
+        # Determina le entità da processare (usa N_PROCESS_FOR_CONTEXT)
+        n_process_max = N_PROCESS_FOR_CONTEXT if N_PROCESS_FOR_CONTEXT > 0 else len(ordered_entities)
+        n_process_max = min(n_process_max, len(ordered_entities)) # Non può essere > del totale estratto
         print(f"\nProcessando fino a {n_process_max} entità principali per contesto/OpenAI/saturazione.")
-
         entities_to_process = ordered_entities[:n_process_max]
 
-
         # --- 2. Raccolta Score di Contesto Pytrends (se attivo) ---
-        if FETCH_VOLUME_CONTEXT:
+        if FETCH_VOLUME_CONTEXT and n_process_max > 0:
             print(f"\n--- Avvio Raccolta Score Contesto Pytrends per Top {len(entities_to_process)} Entità ---")
             timeframe_context_results = defaultdict(lambda: defaultdict(list))
             for run in range(1, CONTEXT_N_RUNS + 1):
@@ -828,7 +831,8 @@ if __name__ == "__main__":
             for tf_agg in CONTEXT_TIMEFRAMES:
                 sc_avg_col = f'Score_Avg_{tf_agg}'
                 avg_scores_map = {entity: np.mean(scores) if scores else 0 for entity, scores in timeframe_context_results[tf_agg].items()}
-                df_final[sc_avg_col] = df_final['Entita'].map(avg_scores_map).fillna(0)
+                # Applica solo alle entità processate per evitare di sovrascrivere quelle non processate con 0
+                df_final[sc_avg_col] = df_final['Entita'].map(avg_scores_map).combine_first(df_final[sc_avg_col])
                 print(f"    Media contesto Pytrends per {tf_agg} calcolata.")
             print("--- Fine Raccolta Score Contesto Pytrends ---")
             try:
@@ -837,12 +841,11 @@ if __name__ == "__main__":
             except Exception as e: print(f"  Errore salvataggio checkpoint medie contesto Pytrends: {e}")
         else:
             print("\n--- Raccolta Score Contesto Pytrends Saltata ---")
-            # Assicura che le colonne esistano anche se saltato, inizializzate a 0.0
             for tf in CONTEXT_TIMEFRAMES:
                 if f'Score_Avg_{tf}' not in df_final.columns: df_final[f'Score_Avg_{tf}'] = 0.0
 
         # --- 3. Estrazione Entità con OpenAI (se attiva) ---
-        if FETCH_OPENAI_ENTITIES:
+        if FETCH_OPENAI_ENTITIES and n_process_max > 0:
             extracted_entities_map = get_entities_with_openai(entities_to_process)
             df_final['Extracted_Entities'] = df_final['Entita'].map(extracted_entities_map).fillna('')
             print("  Entità OpenAI mappate nel DataFrame.")
@@ -855,13 +858,10 @@ if __name__ == "__main__":
              print("\n--- Estrazione Entità OpenAI Saltata ---")
              if 'Extracted_Entities' not in df_final.columns: df_final['Extracted_Entities'] = ''
 
-
         # --- 4. Analisi Saturazione con DataForSEO (se attiva) ---
-        if FETCH_SATURATION:
+        if FETCH_SATURATION and n_process_max > 0:
             saturation_map = get_saturation_scores_parallel(entities_to_process)
-            # Applica i risultati al DataFrame, sovrascrivendo il default -1.0 solo dove abbiamo un risultato
-            df_final['Saturation_Score'] = df_final['Entita'].map(saturation_map).fillna(df_final['Saturation_Score']) # Mantiene -1.0 se non processato/fallito
-            # Converti in float, gestendo possibili NaN risultanti da .map() se entity non era in saturation_map (improbabile qui)
+            df_final['Saturation_Score'] = df_final['Entita'].map(saturation_map).fillna(df_final['Saturation_Score'])
             df_final['Saturation_Score'] = df_final['Saturation_Score'].astype(float)
             print("  Punteggi di Saturazione DataForSEO mappati nel DataFrame.")
             try:
@@ -873,11 +873,9 @@ if __name__ == "__main__":
             print("\n--- Analisi Saturazione DataForSEO Saltata ---")
             if 'Saturation_Score' not in df_final.columns: df_final['Saturation_Score'] = -1.0
 
-
         # --- 5. Calcolo Heuristic Discover Score (V7.9) ---
         print("\n  Calcolo Heuristic Discover Score V7.9 (Numeratore Pesato)...")
         discover_score_col = 'Discover_Score'; score_4h_col = 'Score_Avg_now 4-H'; score_7d_col = 'Score_Avg_now 7-d'
-        # Assicurati che le colonne necessarie esistano e siano numeriche
         if score_4h_col in df_final.columns and score_7d_col in df_final.columns and 'Rank' in df_final.columns:
             score_4h = pd.to_numeric(df_final[score_4h_col], errors='coerce').fillna(0).clip(lower=0)
             score_7d = pd.to_numeric(df_final[score_7d_col], errors='coerce').fillna(0).clip(lower=0)
@@ -892,7 +890,6 @@ if __name__ == "__main__":
             missing_cols = [col for col in [score_4h_col, score_7d_col, 'Rank'] if col not in df_final.columns]
             warnings.warn(f"Colonne necessarie ({', '.join(missing_cols)}) per Discover Score mancanti. Score impostato a 0.", UserWarning)
             df_final[discover_score_col] = 0.0
-        # Assicura che la colonna sia float
         df_final[discover_score_col] = df_final[discover_score_col].astype(float)
 
         # --- 6. Ordinamento Finale per Discover Score ---
@@ -901,48 +898,56 @@ if __name__ == "__main__":
             print(f"\n  DataFrame finale ordinato per '{discover_score_col}'.")
         else: print(f"\n  ATTENZIONE: Colonna '{discover_score_col}' non trovata per l'ordinamento.")
 
-        # --- 7. Salva il DataFrame finale completo come CSV ---
+        # --- 7. Generazione Sommario AI "Profezie di Oggi" (se attivo) ---
+        # Passa le prime 'n_process_max' righe del DF finale ordinato
+        df_for_summary = df_final.head(n_process_max)
+        if FETCH_OPENAI_SUMMARY and not df_for_summary.empty:
+            # *** CHIAMA LA FUNZIONE PER GENERARE LA PROFEZIA ***
+            prophecy_text_generated = generate_ai_summary(df_for_summary)
+        else:
+            prophecy_text_generated = "" # Stringa vuota se non attivo o df vuoto
+
+        # --- 8. Salva il DataFrame finale completo come CSV ---
         try:
-            # Aggiorna nome file per riflettere la versione e l'inclusione della saturazione
             backup_filename = "06_final_sorted_data_v7.9_score_with_saturation.csv"
             df_final.to_csv(os.path.join(CHECKPOINT_DIR, backup_filename), index=False, encoding='utf-8-sig')
             print(f"\nDataFrame finale completo salvato: {os.path.join(CHECKPOINT_DIR, backup_filename)}")
         except Exception as e: print(f"\n!!! Errore salvataggio CSV finale completo: {e} !!!")
 
-        # --- 8. Genera l'output data.js ---
+        # --- 9. Genera l'output data.js (Passando la profezia) ---
         runtime_info['end_time'] = time.time()
-        html_result = generate_html_output(df_final, runtime_info)
-        # Non serve controllare html_result qui perché genera solo data.js
+        runtime_info['prophecy_text'] = prophecy_text_generated # Aggiungi profezia a runtime_info
+        html_result = generate_html_output(df_final, runtime_info) # Passa runtime_info aggiornato
 
-        # --- 9. Stampa Top N Finale ---
+        # --- 10. Stampa Top N Finale ---
         print(f"\n--- Top {TOP_N_FINAL_DISPLAY} Entità (Ordinate per Discover Score Heuristico V7.9) ---")
-        # Aggiungi Saturation_Score alle colonne da mostrare
         cols_to_show = [c for c in ['Discover_Score', 'Rank', 'Entita', 'Saturation_Score', 'Extracted_Entities', 'Score_Avg_now 1-H', 'Score_Avg_now 4-H', 'Score_Avg_now 7-d'] if c in df_final.columns]
         try:
-            pd.set_option('display.max_rows', TOP_N_FINAL_DISPLAY + 5); pd.set_option('display.width', 220); pd.set_option('display.max_colwidth', 50); pd.set_option('display.float_format', '{:.2f}'.format) # Adatta width e colwidth
-            # Formattazione specifica per Saturation_Score (intero, mostra -1 se è il caso)
+            pd.set_option('display.max_rows', TOP_N_FINAL_DISPLAY + 5); pd.set_option('display.width', 220); pd.set_option('display.max_colwidth', 50);
             formatters = {'Discover_Score': '{:.3f}'.format,
                           'Score_Avg_now 1-H': '{:.1f}'.format,
                           'Score_Avg_now 4-H': '{:.1f}'.format,
                           'Score_Avg_now 7-d': '{:.1f}'.format,
-                          'Saturation_Score': lambda x: f"{int(x)}" if x != -1.0 else "-"} # Mostra come intero o '-'
+                          'Saturation_Score': lambda x: f"{int(x):,}".replace(",",".") if pd.notna(x) and x >= 0 else "-"}
             print(df_final[cols_to_show].head(TOP_N_FINAL_DISPLAY).to_string(index=False, formatters=formatters))
         except Exception as e_print: print(f"Errore stampa finale: {e_print}")
-        finally: pd.reset_option('display.max_rows'); pd.reset_option('display.width'); pd.reset_option('display.max_colwidth'); pd.reset_option('display.float_format')
-
+        finally: pd.reset_option('all') # Resetta tutte le opzioni display pandas
 
     except Exception as main_exc:
         print(f"\n\n!!! ERRORE CRITICO SCRIPT: {type(main_exc).__name__} - {main_exc} !!!"); traceback.print_exc()
     finally:
+        # --- Stampa Statistiche Proxy ---
         print("\n--- Statistiche Proxy Pytrends Rilevate (Fine Esecuzione) ---")
         try:
             if 'proxy_manager' in locals() and proxy_manager:
                 ps = proxy_manager.get_proxy_stats_summary(); total_requests = ps.get('total_success', 0) + ps.get('total_fail_429', 0) + ps.get('total_fail_proxy_timeout', 0) + ps.get('total_fail_other_parse', 0); success_rate = (ps.get('total_success', 0) / total_requests * 100) if total_requests > 0 else 0
                 print(f"Req Tot Proxy Pytrends: {total_requests}, Successi: {ps.get('total_success', 0)} ({success_rate:.1f}%)"); print(f"  Fail: 429={ps.get('total_fail_429', 0)}, Proxy/Timeout={ps.get('total_fail_proxy_timeout', 0)}, Altri/Parse={ps.get('total_fail_other_parse', 0)}")
                 tfp = ps.get('top_failing_proxies', {});
-                if tfp: print("Top Failing Proxies Pytrends:"); [print(f"  - {pid}: Succ:{d['success']}, FailsCons:{d['consecutive_fails']} (429:{d['fail_429']}, P/T:{d['fail_proxy/timeout']}, O/P:{d['fail_other/parse']})") for pid, d in list(tfp.items())[:5]] # Mostra solo top 5
+                if tfp: print("Top Failing Proxies Pytrends:"); [print(f"  - {pid}: Succ:{d['success']}, FailsCons:{d['consecutive_fails']} (429:{d['fail_429']}, P/T:{d['fail_proxy/timeout']}, O/P:{d['fail_other/parse']})") for pid, d in list(tfp.items())[:5]]
             else: print("Proxy Manager Pytrends non disponibile per statistiche.")
         except Exception as stats_exc: print(f"Errore stampa stats proxy Pytrends: {stats_exc}")
 
         main_end_time = time.time(); total_duration = main_end_time - main_start_time
-        print(f"\n--- Script V7.8 (Score V7.9, Saturation) completato in {total_duration:.2f} sec ({total_duration/60:.2f} min) ---")
+        print(f"\n--- Script V7.9.1 (Con Profezie AI) completato in {total_duration:.2f} sec ({total_duration/60:.2f} min) ---")
+
+# END OF COMPLETE SCRIPT (V7.9.1)
