@@ -92,7 +92,7 @@ OPENAI_MAX_RETRIES = 3
 OPENAI_REQUEST_TIMEOUT = 45 # Timeout più lungo per sommario
 MAX_OPENAI_THREADS = 10 # Per estrazione entità parallela
 OPENAI_SUMMARY_MAX_TOKENS = 600 # Max token per la risposta del sommario
-OPENAI_SUMMARY_TEMPERATURE = 0.6 # Temperatura per sommario
+OPENAI_SUMMARY_TEMPERATURE = 1 # Temperatura per sommario
 
 # --- Parametri Integrazione DataForSEO (Saturazione) ---
 FETCH_SATURATION = True
