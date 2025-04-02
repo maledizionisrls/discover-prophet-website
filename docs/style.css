@@ -14,6 +14,14 @@
     --link-color: #007bff; /* Blu link standard */
     --header-text: #ffffff;
     --badge-text: #ffffff;
+    --prophecy-bg-start: #ffffff; /* Bianco per inizio gradiente */
+    --prophecy-bg-end: #f0f3f5; /* Grigio/Blu molto pallido per fine gradiente */
+}
+
+/* Animazione Fade-in */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 body {
@@ -55,76 +63,79 @@ h1 i { margin-right: 0.6rem; color: var(--secondary-color); }
 
 /* *** RIMOSSI: .stats-container e .stat-card *** */
 
-/* *** NUOVI STILI: Profezia *** */
+/* *** NUOVI STILI: Profezia (con "WOW" effect) *** */
 .prophecy-container {
-    background-color: var(--card-color);
-    border-radius: 8px;
-    padding: 1.5rem 2rem;
+    background: linear-gradient(145deg, var(--prophecy-bg-start) 0%, var(--prophecy-bg-end) 100%); /* Gradiente leggero */
+    border-radius: 12px; /* Angoli più arrotondati */
+    padding: 2rem 2.5rem; /* Più padding interno */
     border: 1px solid var(--border-color);
-    box-shadow: 0 3px 10px rgba(44, 62, 80, 0.08); /* Ombra leggermente più accentuata */
-    margin-bottom: 1.5rem;
-    border-left: 5px solid var(--secondary-color); /* Bordo laterale colorato */
-    position: relative; /* Per eventuali posizionamenti assoluti interni */
+    box-shadow: 0 5px 15px rgba(44, 62, 80, 0.1); /* Ombra più morbida e diffusa */
+    margin-bottom: 2rem; /* Più spazio sotto */
+    position: relative;
+    animation: fadeIn 0.6s ease-out; /* Animazione fade-in */
 }
 
 .prophecy-container h2 {
     margin-top: 0;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem; /* Più spazio sotto il titolo */
     color: var(--primary-color);
-    font-size: 1.4rem; /* Dimensione titolo */
+    font-size: 1.6rem; /* Titolo più grande */
     font-weight: 600;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--border-color); /* Linea separatrice sotto il titolo */
-    padding-bottom: 0.75rem;
+    justify-content: center; /* Centra titolo e icona */
+    text-align: center;
+    border-bottom: 1px solid rgba(44, 62, 80, 0.1); /* Linea separatrice più leggera */
+    padding-bottom: 1rem;
 }
 
 .prophecy-container h2 i {
-    margin-right: 0.8rem;
+    margin-right: 0.9rem;
     color: var(--secondary-color);
-    font-size: 1.3rem;
+    font-size: 1.5rem; /* Icona più grande */
 }
 
 .prophecy-content {
-    position: relative; /* Contesto per il bottone */
+    position: relative;
 }
 
 #prophecyText {
-    color: var(--text-color);
-    line-height: 1.7; /* Interlinea leggibile */
-    font-size: 1rem; /* Dimensione testo standard */
-    margin: 0; /* Rimuove margini default paragrafo */
-    padding-bottom: 0.5rem; /* Spazio sotto il testo prima del bottone */
-    /* Effetto WOW Semplice: transizione colore testo? */
-    /* transition: color 0.3s ease-in-out; */
+    color: #34495e; /* Colore testo leggermente più morbido del nero puro */
+    line-height: 1.8; /* Interlinea aumentata */
+    font-size: 1.05rem; /* Dimensione testo leggermente aumentata */
+    margin: 0;
+    padding-bottom: 0.5rem;
+    text-align: left; /* Mantiene allineamento a sinistra per leggibilità */
 }
 
-/* Stile per il bottone "Mostra tutto/meno" */
+/* Stile migliorato per il bottone */
 .toggle-prophecy {
-    background-color: transparent;
+    background-color: rgba(52, 152, 219, 0.1); /* Sfondo leggero */
     border: none;
-    color: var(--link-color); /* Usa colore link */
+    color: var(--secondary-color);
     cursor: pointer;
-    font-size: 0.85rem; /* Leggermente più piccolo del testo principale */
-    font-weight: 500;
-    padding: 0.2rem 0;
-    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600; /* Più bold */
+    padding: 0.4rem 0.8rem; /* Più padding */
+    margin-top: 1rem; /* Più spazio sopra */
     display: inline-block;
-    text-decoration: none; /* Rimuove sottolineatura default bottone */
-    transition: color 0.2s ease;
+    text-decoration: none;
+    border-radius: 20px; /* Bordi arrotondati */
+    transition: all 0.2s ease; /* Transizione per hover */
 }
 
 .toggle-prophecy:hover {
-    color: var(--primary-color); /* Scurisce al hover */
-    text-decoration: underline;
+    background-color: rgba(52, 152, 219, 0.2);
+    color: var(--primary-color);
+    box-shadow: 0 2px 5px rgba(44, 62, 80, 0.1); /* Ombra leggera su hover */
+    /* text-decoration: none; */
 }
 
 .toggle-prophecy i {
-    margin-left: 0.4rem;
+    margin-left: 0.5rem;
     font-size: 0.8em;
-    transition: transform 0.3s ease; /* Animazione freccia */
+    transition: transform 0.3s ease;
 }
-/* Ruota l'icona quando il bottone mostra "Mostra meno" ( JS aggiungerà/rimuoverà questa classe) */
 .toggle-prophecy.expanded i {
     transform: rotate(180deg);
 }
@@ -211,11 +222,11 @@ footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--tex
     h1 { font-size: 1.4rem; }
     .dashboard { padding: 0 0.8rem; }
     /* Stili Profezia mobile */
-    .prophecy-container { padding: 1rem 1.2rem; border-left-width: 4px; }
+    .prophecy-container { padding: 1rem 1.2rem; margin-bottom: 1rem;}
     .prophecy-container h2 { font-size: 1.2rem; margin-bottom: 0.8rem; padding-bottom: 0.6rem;}
     .prophecy-container h2 i { font-size: 1.1rem; margin-right: 0.6rem;}
     #prophecyText { font-size: 0.9rem; line-height: 1.6; }
-    .toggle-prophecy { font-size: 0.8rem; }
+    .toggle-prophecy { font-size: 0.8rem; margin-top: 0.8rem; padding: 0.3rem 0.7rem; }
 
     .controls { flex-direction: column; align-items: stretch; gap: 0.8rem; padding: 0.6rem; }
     /* .stats-container rimosso */
@@ -240,6 +251,7 @@ footer { text-align: center; padding: 1.5rem; margin-top: 2rem; color: var(--tex
      .prophecy-container { padding: 0.8rem 1rem; }
      .prophecy-container h2 { font-size: 1.1rem; margin-bottom: 0.6rem; }
      #prophecyText { font-size: 0.85rem; }
+     .toggle-prophecy { padding: 0.25rem 0.6rem;}
 
      /* Nascondi Rank(2), 1h(5), 4h(6), 7d(7), Saturazione(8) */
      .trends-table th:nth-child(2), .trends-table td:nth-child(2),
