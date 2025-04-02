@@ -2,502 +2,502 @@ const trendData = [
   {
     "rank": 1,
     "entity": "val kilmer",
-    "discover_score": 13.388193946618225,
-    "score_1h": 77.6896551724138,
-    "score_4h": 61.51890756302521,
-    "score_7d": 3.331360946745562,
-    "extracted_entities": "Val Kilmer - Attore - Film - Carriera - Salute",
-    "saturation_score": 1940.0
-  },
-  {
-    "rank": 29,
-    "entity": "gamestop",
-    "discover_score": 13.230482730117856,
-    "score_1h": 4.47457627118644,
-    "score_4h": 4.18552441897261,
-    "score_7d": 31.79585798816568,
-    "extracted_entities": "GameStop - Videogiochi - Azioni - Retail - Investimenti",
-    "saturation_score": 10.0
-  },
-  {
-    "rank": 33,
-    "entity": "pierina paganelli",
-    "discover_score": 11.047974057734892,
-    "score_1h": 12.157364114552895,
-    "score_4h": 1.9367989873773777,
-    "score_7d": 28.644970414201183,
-    "extracted_entities": "Pierina Paganelli",
-    "saturation_score": 5.0
-  },
-  {
-    "rank": 2,
-    "entity": "ilaria sula",
-    "discover_score": 7.7640393725758186,
-    "score_1h": 69.07758620689656,
-    "score_4h": 31.790671917302483,
-    "score_7d": 4.6982248520710055,
-    "extracted_entities": "Ilaria Sula",
-    "saturation_score": 1270.0
+    "discover_score": 13.586526923556896,
+    "score_1h": 79.16379310344828,
+    "score_4h": 62.97899159663865,
+    "score_7d": 3.2958579881656807,
+    "extracted_entities": "Val Kilmer - Attore - Film - Carriera",
+    "saturation_score": 1870.0
   },
   {
     "rank": 8,
     "entity": "dazi trump",
-    "discover_score": 6.29402369453263,
-    "score_1h": 30.008474576271187,
-    "score_4h": 17.535714285714285,
-    "score_7d": 9.31656804733728,
-    "extracted_entities": "Dazi - Trump - Commercio internazionale - Politica economica - Stati Uniti",
-    "saturation_score": 90.0
+    "discover_score": 10.633140885893631,
+    "score_1h": 34.93103448275862,
+    "score_4h": 33.273109243697476,
+    "score_7d": 12.807692307692308,
+    "extracted_entities": "Dazi - Donald Trump - Politica commerciale - Stati Uniti - Tariffe",
+    "saturation_score": 46.0
   },
   {
-    "rank": 5,
-    "entity": "suor paola",
-    "discover_score": 4.635166776080278,
-    "score_1h": 38.327586206896555,
-    "score_4h": 12.48529411764706,
-    "score_7d": 6.488165680473372,
-    "extracted_entities": "Suor Paola - Religione - Personaggio pubblico",
-    "saturation_score": 1240.0
+    "rank": 2,
+    "entity": "ilaria sula",
+    "discover_score": 9.077473224107665,
+    "score_1h": 68.62068965517241,
+    "score_4h": 55.66386554621849,
+    "score_7d": 2.662721893491124,
+    "extracted_entities": "Ilaria Sula",
+    "saturation_score": 1270.0
+  },
+  {
+    "rank": 21,
+    "entity": "musk",
+    "discover_score": 7.066534969366481,
+    "score_1h": 45.72413793103448,
+    "score_4h": 12.920168067226891,
+    "score_7d": 15.059171597633135,
+    "extracted_entities": "Elon Musk - SpaceX - Tesla - Twitter - Neuralink",
+    "saturation_score": 436.0
   },
   {
     "rank": 47,
     "entity": "empoli",
-    "discover_score": 4.590957736685456,
-    "score_1h": 43.31896551724138,
-    "score_4h": 30.200397313737213,
-    "score_7d": 7.023668639053255,
+    "discover_score": 6.155423636230455,
+    "score_1h": 40.43103448275862,
+    "score_4h": 48.40966386554622,
+    "score_7d": 7.011834319526628,
     "extracted_entities": "Empoli - Calcio - Serie A - Toscana - Comune",
-    "saturation_score": 1470.0
+    "saturation_score": 1460.0
   },
   {
-    "rank": 45,
-    "entity": "iperal",
-    "discover_score": 4.193391167285686,
-    "score_1h": 0.4224137931034483,
-    "score_4h": 1.0481786857002215,
-    "score_7d": 13.319526627218936,
-    "extracted_entities": "Iperal - Supermercato - Italia",
-    "saturation_score": 160.0
-  },
-  {
-    "rank": 10,
-    "entity": "nintendo",
-    "discover_score": 3.2297366183949463,
-    "score_1h": 72.61528345996493,
-    "score_4h": 11.016762772054427,
-    "score_7d": 5.396449704142012,
-    "extracted_entities": "Nintendo - Videogiochi - Console - Switch - Mario",
-    "saturation_score": 1660.0
-  },
-  {
-    "rank": 9,
-    "entity": "giovanni bagnasco",
-    "discover_score": 2.910713915130868,
-    "score_1h": 2.4224137931034484,
-    "score_4h": 15.031512605042018,
-    "score_7d": 3.636094674556213,
-    "extracted_entities": "Giovanni Bagnasco",
-    "saturation_score": 38.0
-  },
-  {
-    "rank": 4,
-    "entity": "empoli - bologna",
-    "discover_score": 2.662044092580934,
-    "score_1h": 8.43687901811806,
-    "score_4h": 4.741596638655462,
-    "score_7d": 4.491124260355029,
-    "extracted_entities": "Empoli - Bologna - Serie A - Partita di calcio - Squadre di calcio",
-    "saturation_score": 492.0
-  },
-  {
-    "rank": 22,
-    "entity": "musk",
-    "discover_score": 2.568160227870678,
-    "score_1h": 37.0,
-    "score_4h": 8.972073766745192,
-    "score_7d": 5.4171597633136095,
-    "extracted_entities": "Elon Musk - SpaceX - Tesla - Twitter - Neuralink",
-    "saturation_score": 457.0
-  },
-  {
-    "rank": 18,
-    "entity": "femminicidio",
-    "discover_score": 2.277092213256452,
-    "score_1h": 8.629310344827587,
-    "score_4h": 6.619747899159664,
-    "score_7d": 4.991124260355029,
-    "extracted_entities": "Femminicidio - Violenza di genere - Diritti delle donne - Crimine - Società",
-    "saturation_score": 655.0
+    "rank": 5,
+    "entity": "suor paola",
+    "discover_score": 4.718664703066087,
+    "score_1h": 32.43103448275862,
+    "score_4h": 22.03781512605042,
+    "score_7d": 4.568047337278107,
+    "extracted_entities": "Suor Paola - Religione - Personaggio pubblico",
+    "saturation_score": 1250.0
   },
   {
     "rank": 12,
     "entity": "giovanni paolo ii",
-    "discover_score": 2.2769561424036486,
-    "score_1h": 18.086206896551722,
-    "score_4h": 4.63530642382476,
-    "score_7d": 5.0295857988165675,
+    "discover_score": 4.682794132100012,
+    "score_1h": 13.060344827586208,
+    "score_4h": 11.886554621848738,
+    "score_7d": 8.624260355029586,
     "extracted_entities": "Giovanni Paolo II - Papa - Vaticano - Chiesa Cattolica - Pontificato",
-    "saturation_score": 692.0
+    "saturation_score": 786.0
   },
   {
-    "rank": 23,
-    "entity": "sciopero trenitalia",
-    "discover_score": 2.190167124341013,
-    "score_1h": 0.847457627118644,
-    "score_4h": 0.11549347772581836,
-    "score_7d": 6.77810650887574,
-    "extracted_entities": "Sciopero - Trenitalia - Trasporti - Lavoro",
-    "saturation_score": -1.0
-  },
-  {
-    "rank": 3,
-    "entity": "real madrid - real sociedad",
-    "discover_score": 1.9350598816394204,
-    "score_1h": 3.836206896551724,
-    "score_4h": 1.8109243697478992,
-    "score_7d": 3.5532544378698225,
-    "extracted_entities": "Real Madrid - Real Sociedad - Calcio - Partita - Liga Spagnola",
-    "saturation_score": 40.0
-  },
-  {
-    "rank": 26,
-    "entity": "pogba",
-    "discover_score": 1.9206677091090434,
-    "score_1h": 1.7155172413793103,
-    "score_4h": 1.0014503709433564,
-    "score_7d": 5.893491124260355,
-    "extracted_entities": "Paul Pogba - Calciatore - Juventus - Francia - Serie A",
-    "saturation_score": 6.0
-  },
-  {
-    "rank": 49,
-    "entity": "psg",
-    "discover_score": 1.8469174958970949,
-    "score_1h": 0.8620689655172413,
-    "score_4h": 0.3760504201680672,
-    "score_7d": 6.497041420118343,
-    "extracted_entities": "PSG - Paris Saint-Germain - Calcio - Ligue 1 - Club calcistico",
-    "saturation_score": 45.0
-  },
-  {
-    "rank": 6,
-    "entity": "nintendo switch 2",
-    "discover_score": 1.5144254471520202,
-    "score_1h": 69.75862068965517,
-    "score_4h": 9.224491051650787,
-    "score_7d": 1.529585798816568,
-    "extracted_entities": "Nintendo - Switch 2 - Console - Videogiochi",
-    "saturation_score": 390.0
-  },
-  {
-    "rank": 15,
-    "entity": "andrea vavassori",
-    "discover_score": 1.4459047692117286,
-    "score_1h": 0.0,
-    "score_4h": 14.22689075630252,
-    "score_7d": 0.9378698224852071,
-    "extracted_entities": "Andrea Vavassori",
-    "saturation_score": 2.0
-  },
-  {
-    "rank": 21,
-    "entity": "cory booker",
-    "discover_score": 1.393448479002401,
-    "score_1h": 0.8103448275862069,
-    "score_4h": 0.17016806722689076,
-    "score_7d": 4.355029585798817,
-    "extracted_entities": "Cory Booker - Politica - Senato degli Stati Uniti - New Jersey",
-    "saturation_score": 60.0
+    "rank": 29,
+    "entity": "gamestop",
+    "discover_score": 4.506872078889308,
+    "score_1h": 5.120689655172414,
+    "score_4h": 9.90126050420168,
+    "score_7d": 10.7603550295858,
+    "extracted_entities": "GameStop - Azioni - Videogiochi - Retail - Investimenti",
+    "saturation_score": 9.0
   },
   {
     "rank": 7,
     "entity": "top gun",
-    "discover_score": 1.3649717288112193,
-    "score_1h": 30.241379310344826,
-    "score_4h": 14.819327731092438,
-    "score_7d": 0.3846153846153846,
+    "discover_score": 3.9181654474137924,
+    "score_1h": 23.00862068965517,
+    "score_4h": 21.5063025210084,
+    "score_7d": 3.884615384615385,
     "extracted_entities": "Top Gun - Film - Tom Cruise - Aviazione - Anni '80",
-    "saturation_score": 435.0
+    "saturation_score": 437.0
+  },
+  {
+    "rank": 10,
+    "entity": "nintendo",
+    "discover_score": 3.2194186394721,
+    "score_1h": 71.7844827586207,
+    "score_4h": 10.972689075630253,
+    "score_7d": 5.384615384615385,
+    "extracted_entities": "Nintendo - Videogiochi - Console - Azienda - Intrattenimento",
+    "saturation_score": 1690.0
+  },
+  {
+    "rank": 9,
+    "entity": "giovanni bagnasco",
+    "discover_score": 2.8757779623129096,
+    "score_1h": 1.1120689655172413,
+    "score_4h": 14.682773109243698,
+    "score_7d": 3.63905325443787,
+    "extracted_entities": "Giovanni Bagnasco",
+    "saturation_score": 59.0
+  },
+  {
+    "rank": 4,
+    "entity": "empoli - bologna",
+    "discover_score": 2.847264497943112,
+    "score_1h": 11.646551724137932,
+    "score_4h": 6.2478991596638656,
+    "score_7d": 4.4674556213017755,
+    "extracted_entities": "Empoli - Bologna - Calcio - Serie A - Partita",
+    "saturation_score": 492.0
+  },
+  {
+    "rank": 45,
+    "entity": "iperal",
+    "discover_score": 2.1713958849136255,
+    "score_1h": 0.1810344827586207,
+    "score_4h": 2.0861344537815127,
+    "score_7d": 6.982248520710059,
+    "extracted_entities": "Iperal - Supermercato - Italia",
+    "saturation_score": 196.0
+  },
+  {
+    "rank": 3,
+    "entity": "real madrid - real sociedad",
+    "discover_score": 2.1450484046990392,
+    "score_1h": 7.525862068965518,
+    "score_4h": 3.4180672268907566,
+    "score_7d": 3.544378698224852,
+    "extracted_entities": "Real Madrid - Real Sociedad - Calcio - Partita - Liga",
+    "saturation_score": 37.0
+  },
+  {
+    "rank": 49,
+    "entity": "psg",
+    "discover_score": 1.9098247347685102,
+    "score_1h": 0.5258620689655172,
+    "score_4h": 0.9621848739495799,
+    "score_7d": 6.541420118343195,
+    "extracted_entities": "PSG - Paris Saint-Germain - Calcio - Ligue 1 - Club calcistico",
+    "saturation_score": 103.0
   },
   {
     "rank": 13,
     "entity": "francesca mannocchi sclerosi multipla",
-    "discover_score": 1.1781485207060138,
-    "score_1h": 0.0,
-    "score_4h": 0.09205020920502092,
-    "score_7d": 3.408284023668639,
+    "discover_score": 1.855744730804143,
+    "score_1h": 0.8620689655172413,
+    "score_4h": 0.4831932773109243,
+    "score_7d": 5.144970414201183,
     "extracted_entities": "Francesca Mannocchi - Sclerosi Multipla",
     "saturation_score": 1.0
   },
   {
-    "rank": 44,
-    "entity": "giornata mondiale autismo",
-    "discover_score": 1.106242916208388,
+    "rank": 18,
+    "entity": "femminicidio",
+    "discover_score": 1.5956427302613208,
+    "score_1h": 13.732758620689655,
+    "score_4h": 3.9495798319327733,
+    "score_7d": 3.807692307692308,
+    "extracted_entities": "Femminicidio - Violenza di genere - Crimine - Diritti delle donne - Giustizia",
+    "saturation_score": 530.0
+  },
+  {
+    "rank": 6,
+    "entity": "nintendo switch 2",
+    "discover_score": 1.5510514183461332,
+    "score_1h": 65.39655172413794,
+    "score_4h": 8.218487394957984,
+    "score_7d": 1.8224852071005917,
+    "extracted_entities": "Nintendo - Switch 2 - Console - Videogiochi",
+    "saturation_score": 447.0
+  },
+  {
+    "rank": 15,
+    "entity": "andrea vavassori",
+    "discover_score": 1.3100980072294548,
     "score_1h": 0.0,
-    "score_4h": 0.35084033613445376,
-    "score_7d": 3.8757396449704142,
-    "extracted_entities": "Giornata Mondiale - Autismo - Consapevolezza - Inclusione - Eventi",
-    "saturation_score": 90.0
-  },
-  {
-    "rank": 19,
-    "entity": "silksong",
-    "discover_score": 0.9322371979804607,
-    "score_1h": 2.2758620689655173,
-    "score_4h": 7.5942741113181675,
-    "score_7d": 1.002958579881657,
-    "extracted_entities": "Silksong - Videogioco - Hollow Knight - Team Cherry",
-    "saturation_score": 6.0
-  },
-  {
-    "rank": 36,
-    "entity": "nottingham forest - manchester united",
-    "discover_score": 0.7373978288090872,
-    "score_1h": 0.4482758620689655,
-    "score_4h": 1.0945378151260505,
-    "score_7d": 2.2366863905325447,
-    "extracted_entities": "Nottingham Forest - Manchester United - Partita di calcio - Premier League",
-    "saturation_score": 7.0
-  },
-  {
-    "rank": 14,
-    "entity": "rcb vs gt",
-    "discover_score": 0.6968870343653494,
-    "score_1h": 9.75,
-    "score_4h": 6.782514679511972,
-    "score_7d": 0.4201183431952663,
-    "extracted_entities": "RCB - GT - Cricket - Indian Premier League - Partita",
-    "saturation_score": 1.0
-  },
-  {
-    "rank": 16,
-    "entity": "probabili formazioni milan inter",
-    "discover_score": 0.6787146670444066,
-    "score_1h": 3.1465517241379306,
-    "score_4h": 0.6239407897050033,
-    "score_7d": 1.849112426035503,
-    "extracted_entities": "Probabili formazioni - Milan - Inter - Calcio - Serie A",
-    "saturation_score": 5.0
-  },
-  {
-    "rank": 35,
-    "entity": "giornalista paolo guzzanti",
-    "discover_score": 0.6150246089102553,
-    "score_1h": 0.8620689655172413,
-    "score_4h": 0.5293678140712352,
-    "score_7d": 1.9289940828402368,
-    "extracted_entities": "Giornalista - Paolo Guzzanti",
-    "saturation_score": 3.0
-  },
-  {
-    "rank": 34,
-    "entity": "fabio paratici",
-    "discover_score": 0.5950396783206241,
-    "score_1h": 1.2844827586206895,
-    "score_4h": 0.5441176470588236,
-    "score_7d": 1.8402366863905326,
-    "extracted_entities": "Fabio Paratici - Calcio - Juventus - Dirigente sportivo - Tottenham",
-    "saturation_score": 33.0
-  },
-  {
-    "rank": 46,
-    "entity": "switch 2 price",
-    "discover_score": 0.5910832287930334,
-    "score_1h": 0.0,
-    "score_4h": 6.066128124890123,
-    "score_7d": 0.5384615384615384,
-    "extracted_entities": "Switch 2 - Prezzo - Console di gioco",
-    "saturation_score": -1.0
-  },
-  {
-    "rank": 17,
-    "entity": "the duskbloods",
-    "discover_score": 0.5884856915465689,
-    "score_1h": 1.3620689655172415,
-    "score_4h": 5.464285714285714,
-    "score_7d": 0.4171597633136095,
-    "extracted_entities": "The Duskbloods - Fantasy - Libri - Serie - Autore",
-    "saturation_score": 24.0
-  },
-  {
-    "rank": 38,
-    "entity": "giulia penna",
-    "discover_score": 0.5526869337639362,
-    "score_1h": 0.7155172413793104,
-    "score_4h": 0.3046218487394958,
-    "score_7d": 1.7810650887573964,
-    "extracted_entities": "Giulia Penna - Cantante - Influencer",
-    "saturation_score": 3.0
-  },
-  {
-    "rank": 11,
-    "entity": "coppa del re",
-    "discover_score": 0.5153934773765598,
-    "score_1h": 0.0,
-    "score_4h": 0.441800569600225,
-    "score_7d": 1.2514792899408285,
-    "extracted_entities": "Coppa del Re - Calcio - Spagna - Torneo - Squadre",
-    "saturation_score": 33.0
-  },
-  {
-    "rank": 39,
-    "entity": "peter gomez",
-    "discover_score": 0.5118969143522306,
-    "score_1h": 0.0,
-    "score_4h": 4.331932773109244,
-    "score_7d": 0.5976331360946746,
-    "extracted_entities": "Peter Gomez - Giornalismo - Italia",
-    "saturation_score": 5.0
-  },
-  {
-    "rank": 50,
-    "entity": "luigi mangione pena capitale",
-    "discover_score": 0.5082924753191503,
-    "score_1h": 0.3706896551724138,
-    "score_4h": 0.9121954221018951,
-    "score_7d": 1.5177514792899407,
-    "extracted_entities": "Luigi Mangione - Pena capitale",
+    "score_4h": 12.602941176470589,
+    "score_7d": 0.9082840236686391,
+    "extracted_entities": "Andrea Vavassori - Tennis - Italia",
     "saturation_score": 2.0
-  },
-  {
-    "rank": 43,
-    "entity": "flavio cobolli",
-    "discover_score": 0.4488010338836403,
-    "score_1h": 0.3644067796610169,
-    "score_4h": 0.7119299602686263,
-    "score_7d": 1.2928994082840237,
-    "extracted_entities": "Flavio Cobolli - Tennis - Italia",
-    "saturation_score": 10.0
-  },
-  {
-    "rank": 48,
-    "entity": "deltarune",
-    "discover_score": 0.4373005209240251,
-    "score_1h": 0.7748392752776154,
-    "score_4h": 1.2689075630252102,
-    "score_7d": 1.121301775147929,
-    "extracted_entities": "Deltarune - Videogioco - Toby Fox - Undertale - RPG",
-    "saturation_score": 2.0
-  },
-  {
-    "rank": 37,
-    "entity": "my nintendo store",
-    "discover_score": 0.43511801923860094,
-    "score_1h": 0.6724137931034483,
-    "score_4h": 3.8004201680672267,
-    "score_7d": 0.4319526627218935,
-    "extracted_entities": "My Nintendo Store - Nintendo - E-commerce - Videogiochi - Prodotti Nintendo",
-    "saturation_score": 1.0
-  },
-  {
-    "rank": 28,
-    "entity": "cristiano iovino",
-    "discover_score": 0.4196196343308194,
-    "score_1h": 1.9681472822910577,
-    "score_4h": 0.5159892408846384,
-    "score_7d": 1.1301775147928994,
-    "extracted_entities": "Cristiano Iovino",
-    "saturation_score": 125.0
-  },
-  {
-    "rank": 27,
-    "entity": "anna kalinskaja",
-    "discover_score": 0.41540149696044504,
-    "score_1h": 13.466393921683228,
-    "score_4h": 3.1634084596181564,
-    "score_7d": 0.4437869822485207,
-    "extracted_entities": "Anna Kalinskaja",
-    "saturation_score": -1.0
-  },
-  {
-    "rank": 42,
-    "entity": "arsenal - fulham",
-    "discover_score": 0.3703808786088026,
-    "score_1h": 0.8620689655172413,
-    "score_4h": 0.0273109243697479,
-    "score_7d": 1.1568047337278107,
-    "extracted_entities": "Arsenal - Fulham - Partita di calcio - Premier League",
-    "saturation_score": 34.0
   },
   {
     "rank": 40,
     "entity": "copa del rey",
-    "discover_score": 0.3484693439283005,
-    "score_1h": 1.4827586206896552,
-    "score_4h": 1.0315126050420167,
-    "score_7d": 0.7840236686390533,
+    "discover_score": 1.158786920334023,
+    "score_1h": 1.2758620689655171,
+    "score_4h": 1.315126050420168,
+    "score_7d": 3.730769230769231,
     "extracted_entities": "Copa del Rey - Calcio - Spagna - Torneo - Squadre",
-    "saturation_score": 68.0
+    "saturation_score": 70.0
   },
   {
-    "rank": 20,
-    "entity": "bonus 1000 euro 2025",
-    "discover_score": 0.3184174179187325,
-    "score_1h": 3.8448275862068964,
-    "score_4h": 0.5273109243697479,
-    "score_7d": 0.6775147928994083,
-    "extracted_entities": "Bonus - 1000 euro - 2025",
+    "rank": 27,
+    "entity": "pogba",
+    "discover_score": 1.0819626986718693,
+    "score_1h": 4.206896551724138,
+    "score_4h": 0.384453781512605,
+    "score_7d": 3.4852071005917162,
+    "extracted_entities": "Paul Pogba - Calciatore - Juventus - Francia - Serie A",
+    "saturation_score": 6.0
+  },
+  {
+    "rank": 35,
+    "entity": "giornalista paolo guzzanti",
+    "discover_score": 1.0537569876472268,
+    "score_1h": 0.0,
+    "score_4h": 0.7121848739495797,
+    "score_7d": 3.452662721893491,
+    "extracted_entities": "Giornalista - Paolo Guzzanti",
+    "saturation_score": 3.0
+  },
+  {
+    "rank": 19,
+    "entity": "silksong",
+    "discover_score": 0.8277838779005965,
+    "score_1h": 4.086206896551724,
+    "score_4h": 4.159663865546219,
+    "score_7d": 1.4792899408284024,
+    "extracted_entities": "Silksong - Videogioco - Team Cherry - Hollow Knight - Data di uscita",
+    "saturation_score": 7.0
+  },
+  {
+    "rank": 42,
+    "entity": "arsenal - fulham",
+    "discover_score": 0.7757481598585916,
+    "score_1h": 1.0,
+    "score_4h": 0.7710084033613445,
+    "score_7d": 2.532544378698225,
+    "extracted_entities": "Arsenal - Fulham - Partita di calcio - Premier League",
+    "saturation_score": 30.0
+  },
+  {
+    "rank": 36,
+    "entity": "nottingham forest - manchester united",
+    "discover_score": 0.7096417887555121,
+    "score_1h": 0.8620689655172413,
+    "score_4h": 0.8109243697478992,
+    "score_7d": 2.21301775147929,
+    "extracted_entities": "Nottingham Forest - Manchester United - Partita di calcio - Premier League",
+    "saturation_score": 7.0
+  },
+  {
+    "rank": 11,
+    "entity": "coppa del re",
+    "discover_score": 0.6353816598473696,
+    "score_1h": 1.396551724137931,
+    "score_4h": 1.388655462184874,
+    "score_7d": 1.378698224852071,
+    "extracted_entities": "Coppa del Re - Calcio - Spagna - Torneo - Squadre",
+    "saturation_score": 82.0
+  },
+  {
+    "rank": 44,
+    "entity": "giornata mondiale autismo",
+    "discover_score": 0.6074991867293823,
+    "score_1h": 0.8620689655172413,
+    "score_4h": 1.3382352941176472,
+    "score_7d": 1.7544378698224852,
+    "extracted_entities": "Giornata Mondiale - Autismo - Consapevolezza - Inclusione - Eventi",
+    "saturation_score": 223.0
+  },
+  {
+    "rank": 38,
+    "entity": "giulia penna",
+    "discover_score": 0.5959547600882698,
+    "score_1h": 1.1896551724137931,
+    "score_4h": 0.8067226890756303,
+    "score_7d": 1.8076923076923077,
+    "extracted_entities": "Giulia Penna - Cantante - Influencer",
+    "saturation_score": 3.0
+  },
+  {
+    "rank": 46,
+    "entity": "switch 2 price",
+    "discover_score": 0.5781740191455033,
+    "score_1h": 0.0,
+    "score_4h": 7.048319327731092,
+    "score_7d": 0.3106508875739645,
+    "extracted_entities": "Nintendo Switch 2 - Prezzo - Console di gioco",
     "saturation_score": -1.0
   },
   {
-    "rank": 31,
-    "entity": "alessandro profumo",
-    "discover_score": 0.3032792885409779,
+    "rank": 50,
+    "entity": "luigi mangione pena capitale",
+    "discover_score": 0.5432067493792252,
     "score_1h": 0.0,
-    "score_4h": 0.5092472135297633,
-    "score_7d": 0.6952662721893491,
-    "extracted_entities": "Alessandro Profumo - Persone - Finanza - Banche",
+    "score_4h": 0.7794117647058824,
+    "score_7d": 1.6952662721893492,
+    "extracted_entities": "Luigi Mangione - Pena capitale",
+    "saturation_score": 2.0
+  },
+  {
+    "rank": 34,
+    "entity": "fabio paratici",
+    "discover_score": 0.5303695232562881,
+    "score_1h": 0.0,
+    "score_4h": 1.9180672268907561,
+    "score_7d": 1.2248520710059172,
+    "extracted_entities": "Fabio Paratici - Calcio - Juventus - Dirigente sportivo",
+    "saturation_score": 34.0
+  },
+  {
+    "rank": 39,
+    "entity": "peter gomez",
+    "discover_score": 0.5015781858387557,
+    "score_1h": 0.0,
+    "score_4h": 4.260504201680672,
+    "score_7d": 0.5769230769230769,
+    "extracted_entities": "Peter Gomez",
+    "saturation_score": 5.0
+  },
+  {
+    "rank": 14,
+    "entity": "rcb vs gt",
+    "discover_score": 0.4831391196808549,
+    "score_1h": 12.543103448275861,
+    "score_4h": 3.6449579831932777,
+    "score_7d": 0.4319526627218935,
+    "extracted_entities": "RCB - GT - Partita di cricket - Indian Premier League - Squadre di cricket",
     "saturation_score": 1.0
+  },
+  {
+    "rank": 33,
+    "entity": "pierina paganelli",
+    "discover_score": 0.47847503834997224,
+    "score_1h": 12.456896551724139,
+    "score_4h": 3.2983193277310923,
+    "score_7d": 0.6775147928994083,
+    "extracted_entities": "Pierina Paganelli",
+    "saturation_score": 5.0
+  },
+  {
+    "rank": 16,
+    "entity": "probabili formazioni milan inter",
+    "discover_score": 0.46656919645163103,
+    "score_1h": 2.043103448275862,
+    "score_4h": 1.0252100840336134,
+    "score_7d": 1.032544378698225,
+    "extracted_entities": "Probabili formazioni - Milan - Inter - Calcio - Serie A",
+    "saturation_score": 5.0
+  },
+  {
+    "rank": 26,
+    "entity": "anna kalinskaja",
+    "discover_score": 0.43334526146857594,
+    "score_1h": 7.448275862068966,
+    "score_4h": 2.0168067226890756,
+    "score_7d": 0.7721893491124261,
+    "extracted_entities": "Anna Kalinskaja - Tennis - Sportiva",
+    "saturation_score": -1.0
+  },
+  {
+    "rank": 37,
+    "entity": "my nintendo store",
+    "discover_score": 0.4282610759220421,
+    "score_1h": 2.1551724137931036,
+    "score_4h": 4.214285714285714,
+    "score_7d": 0.3224852071005917,
+    "extracted_entities": "My Nintendo Store - Nintendo - E-commerce - Videogiochi",
+    "saturation_score": 1.0
+  },
+  {
+    "rank": 22,
+    "entity": "cory booker",
+    "discover_score": 0.40686415961100847,
+    "score_1h": 1.3275862068965516,
+    "score_4h": 0.33613445378151263,
+    "score_7d": 1.0769230769230769,
+    "extracted_entities": "Cory Booker - Politica - Senato degli Stati Uniti - New Jersey",
+    "saturation_score": 99.0
+  },
+  {
+    "rank": 17,
+    "entity": "the duskbloods",
+    "discover_score": 0.37601244857047844,
+    "score_1h": 1.2327586206896552,
+    "score_4h": 4.628151260504201,
+    "score_7d": 0.01775147928994083,
+    "extracted_entities": "The Duskbloods - Serie - Fantasy - Letteratura",
+    "saturation_score": 24.0
+  },
+  {
+    "rank": 23,
+    "entity": "sciopero trenitalia",
+    "discover_score": 0.3303999722664273,
+    "score_1h": 2.155172413793103,
+    "score_4h": 0.6890756302521008,
+    "score_7d": 0.7041420118343196,
+    "extracted_entities": "Sciopero - Trenitalia - Trasporti - Lavoro - Italia",
+    "saturation_score": -1.0
+  },
+  {
+    "rank": 28,
+    "entity": "cristiano iovino",
+    "discover_score": 0.29124298556556927,
+    "score_1h": 3.5172413793103448,
+    "score_4h": 0.5126050420168067,
+    "score_7d": 0.6301775147928994,
+    "extracted_entities": "Cristiano Iovino",
+    "saturation_score": 79.0
+  },
+  {
+    "rank": 43,
+    "entity": "flavio cobolli",
+    "discover_score": 0.28805309765442105,
+    "score_1h": 1.5086206896551724,
+    "score_4h": 1.0063025210084033,
+    "score_7d": 0.5532544378698225,
+    "extracted_entities": "Flavio Cobolli - Tennis - Giocatore",
+    "saturation_score": 32.0
+  },
+  {
+    "rank": 30,
+    "entity": "federica masolin",
+    "discover_score": 0.2475542430770824,
+    "score_1h": 0.4051724137931034,
+    "score_4h": 0.3739495798319328,
+    "score_7d": 0.5,
+    "extracted_entities": "Federica Masolin - Giornalista - Sport - Televisione",
+    "saturation_score": 125.0
+  },
+  {
+    "rank": 48,
+    "entity": "deltarune",
+    "discover_score": 0.22990092317317745,
+    "score_1h": 0.31896551724137934,
+    "score_4h": 1.1050420168067225,
+    "score_7d": 0.2988165680473373,
+    "extracted_entities": "Deltarune - Videogioco - Toby Fox - Undertale - RPG",
+    "saturation_score": 3.0
   },
   {
     "rank": 25,
     "entity": "de zerbi milan",
-    "discover_score": 0.2758257816972705,
-    "score_1h": 0.7758620689655172,
-    "score_4h": 0.39600400829787985,
-    "score_7d": 0.5828402366863905,
+    "discover_score": 0.22481130848313338,
+    "score_1h": 0.12931034482758622,
+    "score_4h": 0.3550420168067227,
+    "score_7d": 0.3905325443786983,
     "extracted_entities": "De Zerbi - Milan - Calcio",
+    "saturation_score": -1.0
+  },
+  {
+    "rank": 32,
+    "entity": "alessandro profumo",
+    "discover_score": 0.20989834715832356,
+    "score_1h": 0.0,
+    "score_4h": 0.9201680672268908,
+    "score_7d": 0.21893491124260356,
+    "extracted_entities": "Alessandro Profumo - Finanza - Banche - Italia",
+    "saturation_score": 1.0
+  },
+  {
+    "rank": 20,
+    "entity": "bonus 1000 euro 2025",
+    "discover_score": 0.18919449273607428,
+    "score_1h": 2.4913793103448274,
+    "score_4h": 0.23109243697478993,
+    "score_7d": 0.257396449704142,
+    "extracted_entities": "Bonus - 1000 euro - 2025",
     "saturation_score": -1.0
   },
   {
     "rank": 24,
     "entity": "mario giuliacci",
-    "discover_score": 0.1964296915801867,
+    "discover_score": 0.1669795659780235,
     "score_1h": 0.0,
-    "score_4h": 0.29755458668823176,
-    "score_7d": 0.2869822485207101,
+    "score_4h": 0.5210084033613445,
+    "score_7d": 0.1183431952662722,
     "extracted_entities": "Mario Giuliacci - Meteorologia - Previsioni del tempo",
     "saturation_score": 1.0
   },
   {
+    "rank": 31,
+    "entity": "pro patria - atalanta u-23",
+    "discover_score": 0.1450085339787945,
+    "score_1h": 2.336206896551724,
+    "score_4h": 0.5147058823529411,
+    "score_7d": 0.05325443786982249,
+    "extracted_entities": "Pro Patria - Atalanta U-23 - Partita di calcio - Squadre di calcio - Serie C",
+    "saturation_score": -1.0
+  },
+  {
     "rank": 41,
     "entity": "leandro domingues",
-    "discover_score": 0.16336508420722776,
-    "score_1h": 0.0,
-    "score_4h": 0.41508737386167854,
-    "score_7d": 0.16863905325443787,
+    "discover_score": 0.13397142737618845,
+    "score_1h": 0.5517241379310345,
+    "score_4h": 0.25,
+    "score_7d": 0.08284023668639054,
     "extracted_entities": "Leandro Domingues",
     "saturation_score": 9.0
-  },
-  {
-    "rank": 30,
-    "entity": "federica masolin",
-    "discover_score": 0.15398809012154285,
-    "score_1h": 1.0146113383985973,
-    "score_4h": 0.43193804718540135,
-    "score_7d": 0.10355029585798817,
-    "extracted_entities": "Federica Masolin - Giornalista - Sport - Sky Sport",
-    "saturation_score": 85.0
-  },
-  {
-    "rank": 32,
-    "entity": "pro patria - atalanta u-23",
-    "discover_score": 0.1400605220921941,
-    "score_1h": 0.5603448275862069,
-    "score_4h": 0.1506276150627615,
-    "score_7d": 0.11538461538461539,
-    "extracted_entities": "Pro Patria - Atalanta U-23 - Calcio - Partita - Squadre giovanili",
-    "saturation_score": -1.0
   },
   {
     "rank": 51,
@@ -591,7 +591,7 @@ const trendData = [
   },
   {
     "rank": 60,
-    "entity": "banco bpm unicredit",
+    "entity": "lucia bronzetti",
     "discover_score": 0.09700275086590245,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -601,7 +601,7 @@ const trendData = [
   },
   {
     "rank": 61,
-    "entity": "lucia bronzetti",
+    "entity": "banco bpm unicredit",
     "discover_score": 0.096847471948296,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -671,7 +671,7 @@ const trendData = [
   },
   {
     "rank": 68,
-    "entity": "referendum 8 9 giugno",
+    "entity": "bianca guaccero",
     "discover_score": 0.09583918753297341,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -691,7 +691,7 @@ const trendData = [
   },
   {
     "rank": 70,
-    "entity": "bianca guaccero",
+    "entity": "new zealand vs pakistan",
     "discover_score": 0.09557367798275299,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -701,7 +701,7 @@ const trendData = [
   },
   {
     "rank": 71,
-    "entity": "new zealand vs pakistan",
+    "entity": "wolverhampton - west ham",
     "discover_score": 0.09544428995444114,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -711,7 +711,7 @@ const trendData = [
   },
   {
     "rank": 72,
-    "entity": "wolverhampton - west ham",
+    "entity": "referendum 8 9 giugno",
     "discover_score": 0.09531705411709313,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -731,7 +731,7 @@ const trendData = [
   },
   {
     "rank": 74,
-    "entity": "ps5",
+    "entity": "loredana errore",
     "discover_score": 0.09506878029106357,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -741,7 +741,7 @@ const trendData = [
   },
   {
     "rank": 75,
-    "entity": "loredana errore",
+    "entity": "ps5",
     "discover_score": 0.0949476199203152,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -821,7 +821,7 @@ const trendData = [
   },
   {
     "rank": 83,
-    "entity": "roncadelle",
+    "entity": "emanuela folliero",
     "discover_score": 0.09404265366460368,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -831,7 +831,7 @@ const trendData = [
   },
   {
     "rank": 84,
-    "entity": "emanuela folliero",
+    "entity": "roncadelle",
     "discover_score": 0.09393685767222369,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -971,7 +971,7 @@ const trendData = [
   },
   {
     "rank": 98,
-    "entity": "kean juventus",
+    "entity": "arsenal vs fulham",
     "discover_score": 0.09259605649919832,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -981,7 +981,7 @@ const trendData = [
   },
   {
     "rank": 99,
-    "entity": "arsenal vs fulham",
+    "entity": "kean juventus",
     "discover_score": 0.09250909328220575,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1011,7 +1011,7 @@ const trendData = [
   },
   {
     "rank": 102,
-    "entity": "anticipazioni uomini e donne",
+    "entity": "preschool",
     "discover_score": 0.09225432230774548,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1021,7 +1021,7 @@ const trendData = [
   },
   {
     "rank": 103,
-    "entity": "preschool",
+    "entity": "anticipazioni uomini e donne",
     "discover_score": 0.09217136515303313,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1031,7 +1031,7 @@ const trendData = [
   },
   {
     "rank": 104,
-    "entity": "sinodo",
+    "entity": "canale 5",
     "discover_score": 0.09208935642154824,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1041,7 +1041,7 @@ const trendData = [
   },
   {
     "rank": 105,
-    "entity": "canale 5",
+    "entity": "sinodo",
     "discover_score": 0.09200827617815434,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1091,7 +1091,7 @@ const trendData = [
   },
   {
     "rank": 110,
-    "entity": "alex rolfini",
+    "entity": "al ahly - al-hilal",
     "discover_score": 0.09161614562681378,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1101,7 +1101,7 @@ const trendData = [
   },
   {
     "rank": 111,
-    "entity": "al ahly - al-hilal",
+    "entity": "alex rolfini",
     "discover_score": 0.09154024996784299,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1141,7 +1141,7 @@ const trendData = [
   },
   {
     "rank": 115,
-    "entity": "spurs - magic",
+    "entity": "alessandra amoroso",
     "discover_score": 0.09124455884635378,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1151,7 +1151,7 @@ const trendData = [
   },
   {
     "rank": 116,
-    "entity": "alessandra amoroso",
+    "entity": "spurs - magic",
     "discover_score": 0.09117253369024364,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1241,7 +1241,7 @@ const trendData = [
   },
   {
     "rank": 125,
-    "entity": "virginia giuffrè",
+    "entity": "buongiorno 2 aprile 2025",
     "discover_score": 0.09055561254510894,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1251,7 +1251,7 @@ const trendData = [
   },
   {
     "rank": 126,
-    "entity": "buongiorno 2 aprile 2025",
+    "entity": "virginia giuffrè",
     "discover_score": 0.09049031916622662,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1261,7 +1261,7 @@ const trendData = [
   },
   {
     "rank": 127,
-    "entity": "sofia raffaeli",
+    "entity": "real sociedad",
     "discover_score": 0.09042563491478989,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1271,7 +1271,7 @@ const trendData = [
   },
   {
     "rank": 128,
-    "entity": "real sociedad",
+    "entity": "sofia raffaeli",
     "discover_score": 0.09036154931335562,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1311,7 +1311,7 @@ const trendData = [
   },
   {
     "rank": 132,
-    "entity": "uffici usi",
+    "entity": "papa francesco",
     "discover_score": 0.09011099281716795,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1321,7 +1321,7 @@ const trendData = [
   },
   {
     "rank": 133,
-    "entity": "papa francesco",
+    "entity": "uffici usi",
     "discover_score": 0.09004975214846297,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1341,7 +1341,7 @@ const trendData = [
   },
   {
     "rank": 135,
-    "entity": "bucks - suns",
+    "entity": "holland film",
     "discover_score": 0.08992888493555902,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1351,7 +1351,7 @@ const trendData = [
   },
   {
     "rank": 136,
-    "entity": "holland film",
+    "entity": "bucks - suns",
     "discover_score": 0.0898692409649093,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1781,7 +1781,7 @@ const trendData = [
   },
   {
     "rank": 179,
-    "entity": "marc marquez motogp",
+    "entity": "giulia salemi",
     "discover_score": 0.08770387253935127,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1791,7 +1791,7 @@ const trendData = [
   },
   {
     "rank": 180,
-    "entity": "giulia salemi",
+    "entity": "marc marquez motogp",
     "discover_score": 0.0876610416365951,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2051,7 +2051,7 @@ const trendData = [
   },
   {
     "rank": 206,
-    "entity": "stephen curry",
+    "entity": "campobasso",
     "discover_score": 0.08663638916231793,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2061,7 +2061,7 @@ const trendData = [
   },
   {
     "rank": 207,
-    "entity": "campobasso",
+    "entity": "stephen curry",
     "discover_score": 0.08660005667704586,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2322,14 +2322,14 @@ const trendData = [
 ];
 
 const runMetadata = {
-  "timestamp": "2025-04-02 16:46:16",
+  "timestamp": "2025-04-02 16:52:22",
   "trends_count": 232,
-  "top_score": 13.388193946618225,
-  "runtime_minutes": 3.5916111707687377,
+  "top_score": 13.586526923556896,
+  "runtime_minutes": 5.415408237775167,
   "pytrends_proxies_used": 207,
   "openai_enabled": true,
   "openai_model": "gpt-4o",
   "saturation_enabled": true,
   "saturation_location": 2380,
-  "prophecy_text": "Le Profezie di Oggi rivelano l'emergente potere dell'intrattenimento e dello sport nell'immaginario collettivo. Val Kilmer riemerge come figura simbolica, sostenuto da una carriera iconica e questioni di salute che stimolano sia l'ammirazione che la curiosità. Allo stesso modo, il calcio si erge sovrano, con numerosi trend legati a partite e squadre sia italiane che internazionali, come l'incontro Empoli-Bologna. Mentre i venti di cambiamento politico risuonano sotto forma di sinfonie economiche globali con temi come i dazi imposti da Trump.\n\nNel vasto paesaggio di Google Discover, GameStop (#2) appare come un terreno fertile: un DScore promettente, un interesse settimanale crescente (32) e una saturazione minima (10) fanno presagire un'opportunità tangibile per contenuti riguardanti investimenti e retail. D'altro canto, la figura di Val Kilmer (#1) richiede cautela a causa della saturazione elevata (1.940), che suggerisce una competizione feroce.\n\nPer chi cerca di navigare questi torrenti di tendenze, il consiglio è coltivare conoscenza e narrativa su nicchie emergenti, cogliendo il momento prima che il mercato diventi saturo."
+  "prophecy_text": "Nelle lande dei trend italiani, tre sono i temi che perforano il velo dell'ordinario per delineare un domani di contenuti. In primo luogo, la politica commerciale si staglia come un possente albero nel deserto delle discussioni geometriche, con il trend #2, \"dazi trump\", che rappresenta un'opportunità di grande rilievo per Google Discover, trainato da un DScore di 10.6 e una saturazione bassa. Questa è una chiamata per i creatori, intessuta nel destino economico globale.\n\nSeguono il calore senza tempo delle storie cinematografiche, incastonate nell'aura di leggende come Val Kilmer (#1) e racconti dell'aviazione anni '80 (#9, 'top gun') che, sebbene affascinanti, necessitano cautela per la competizione serrata nel campo dell'informazione, segnalata da una saturazione di 1.870 e 437 rispettivamente. Infine, il mondo virtuale si intreccia con quello reale nei venti dell'industria videoludica rappresentata da \"nintendo\" e \"silksong\".\n\nIn questo spettacolo di variazioni delle maree digitali, i prudenti cavalcano sui momenti di bassa saturazione, pianificando con attenzione. L'antico saggio dei creator di contenuti conosce il valore del tempismo e dell'originalità, navigando tra le onde delle tendenze come un marinaio esperto."
 };
