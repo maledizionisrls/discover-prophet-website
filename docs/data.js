@@ -1,507 +1,507 @@
 const trendData = [
   {
-    "rank": 46,
-    "entity": "inps",
-    "discover_score": 23.054635056656384,
-    "score_1h": 76.76724137931035,
-    "score_4h": 57.241596638655466,
-    "score_7d": 42.014792899408285,
-    "extracted_entities": "INPS - Previdenza Sociale - Pensioni - Italia - Contributi",
-    "saturation_score": 657.0
-  },
-  {
     "rank": 45,
-    "entity": "quotazione oro",
-    "discover_score": 15.012690429351734,
-    "score_1h": 9.594827586206897,
-    "score_4h": 10.983193277310924,
-    "score_7d": 36.93786982248521,
-    "extracted_entities": "Quotazione - Oro - Prezzo - Mercato - Investimenti",
-    "saturation_score": 8.0
+    "entity": "inps",
+    "discover_score": 23.842772253329652,
+    "score_1h": 78.5344827586207,
+    "score_4h": 60.615546218487395,
+    "score_7d": 42.485207100591715,
+    "extracted_entities": "INPS - Previdenza Sociale - Pensioni - Contributi - Italia",
+    "saturation_score": 447.0
   },
   {
-    "rank": 6,
-    "entity": "ticketone",
-    "discover_score": 11.948873335838703,
-    "score_1h": 59.45689655172414,
-    "score_4h": 36.03361344537815,
-    "score_7d": 12.751479289940828,
-    "extracted_entities": "TicketOne - Biglietti - Eventi - Concerti - Spettacoli",
-    "saturation_score": 696.0
+    "rank": 50,
+    "entity": "ansa",
+    "discover_score": 21.00290390360758,
+    "score_1h": 77.36206896551724,
+    "score_4h": 56.30882352941177,
+    "score_7d": 39.0,
+    "extracted_entities": "ANSA - Agenzia di stampa - Notizie - Italia - Media",
+    "saturation_score": 3780.0
   },
   {
-    "rank": 34,
-    "entity": "investing",
-    "discover_score": 11.729085848412156,
-    "score_1h": 24.21551724137931,
-    "score_4h": 14.073529411764707,
-    "score_7d": 27.100591715976332,
-    "extracted_entities": "Investimenti - Mercati finanziari - Azioni - Economia - Finanza personale",
-    "saturation_score": 7.0
-  },
-  {
-    "rank": 1,
-    "entity": "milan - inter",
-    "discover_score": 11.643848696111196,
-    "score_1h": 51.71551724137931,
-    "score_4h": 43.67226890756302,
-    "score_7d": 4.298816568047338,
-    "extracted_entities": "Milan - Inter - Calcio - Derby - Serie A",
-    "saturation_score": 2560.0
-  },
-  {
-    "rank": 37,
-    "entity": "milano finanza",
-    "discover_score": 10.896072164272951,
-    "score_1h": 7.603448275862069,
-    "score_4h": 1.8697478991596639,
-    "score_7d": 28.988165680473372,
-    "extracted_entities": "Milano - Finanza - Economia - Mercati finanziari - Investimenti",
-    "saturation_score": 1.0
-  },
-  {
-    "rank": 22,
-    "entity": "trump",
-    "discover_score": 10.177758807446642,
-    "score_1h": 81.55172413793105,
-    "score_4h": 54.686974789915965,
-    "score_7d": 11.857988165680473,
-    "extracted_entities": "Donald Trump - Politica - Stati Uniti - Elezioni - Presidente",
-    "saturation_score": 6640.0
-  },
-  {
-    "rank": 16,
-    "entity": "borsa italiana",
-    "discover_score": 10.07770862298443,
-    "score_1h": 64.00862068965517,
-    "score_4h": 56.491596638655466,
-    "score_7d": 9.976331360946746,
-    "extracted_entities": "Borsa - Italia - Mercati finanziari - Investimenti",
-    "saturation_score": 2990.0
-  },
-  {
-    "rank": 41,
-    "entity": "lady gaga",
-    "discover_score": 7.926114929463858,
-    "score_1h": 60.189655172413794,
-    "score_4h": 39.226890756302524,
-    "score_7d": 12.994082840236686,
-    "extracted_entities": "Lady Gaga - Cantante - Pop - Intrattenimento - Celebrità",
-    "saturation_score": 48.0
-  },
-  {
-    "rank": 21,
-    "entity": "minecraft film",
-    "discover_score": 7.852108304415405,
-    "score_1h": 10.956896551724137,
-    "score_4h": 17.69327731092437,
-    "score_7d": 15.535502958579881,
-    "extracted_entities": "Minecraft - Film - Videogioco - Adattamento cinematografico",
-    "saturation_score": 4.0
-  },
-  {
-    "rank": 15,
+    "rank": 14,
     "entity": "euro dollaro",
-    "discover_score": 7.504116622393252,
-    "score_1h": 60.51724137931035,
-    "score_4h": 27.850840336134453,
-    "score_7d": 11.139053254437869,
+    "discover_score": 17.060530328213943,
+    "score_1h": 58.9051724137931,
+    "score_4h": 49.983193277310924,
+    "score_7d": 22.218934911242606,
     "extracted_entities": "Euro - Dollaro - Tasso di cambio - Valuta - Mercato finanziario",
     "saturation_score": 7.0
   },
   {
-    "rank": 14,
+    "rank": 6,
     "entity": "nasdaq",
-    "discover_score": 6.215199770651387,
-    "score_1h": 63.62931034482759,
-    "score_4h": 31.869747899159663,
-    "score_7d": 7.497041420118343,
+    "discover_score": 15.402072027730798,
+    "score_1h": 63.827586206896555,
+    "score_4h": 43.71638655462185,
+    "score_7d": 15.585798816568047,
     "extracted_entities": "Nasdaq - Borsa valori - Indici azionari - Mercato finanziario - Tecnologia",
-    "saturation_score": 114.0
+    "saturation_score": 151.0
   },
   {
-    "rank": 3,
+    "rank": 1,
+    "entity": "milan - inter",
+    "discover_score": 10.500331941457834,
+    "score_1h": 66.12799532437171,
+    "score_4h": 37.74579831932773,
+    "score_7d": 4.322485207100591,
+    "extracted_entities": "Milan - Inter - Calcio - Derby - Serie A",
+    "saturation_score": 2080.0
+  },
+  {
+    "rank": 24,
+    "entity": "trump",
+    "discover_score": 10.470873476539339,
+    "score_1h": 76.0603448275862,
+    "score_4h": 59.455882352941174,
+    "score_7d": 11.792899408284024,
+    "extracted_entities": "Donald Trump - Politica USA - Elezioni - Ex Presidente USA - Controversie",
+    "saturation_score": 6860.0
+  },
+  {
+    "rank": 15,
+    "entity": "borsa italiana",
+    "discover_score": 9.71412118717889,
+    "score_1h": 60.9655172413793,
+    "score_4h": 41.46218487394958,
+    "score_7d": 12.224852071005916,
+    "extracted_entities": "Borsa - Italia - Mercati finanziari - Investimenti",
+    "saturation_score": 3010.0
+  },
+  {
+    "rank": 17,
+    "entity": "minecraft film",
+    "discover_score": 9.664080839450943,
+    "score_1h": 37.060344827586206,
+    "score_4h": 14.1890756302521,
+    "score_7d": 19.150887573964496,
+    "extracted_entities": "Minecraft - Film - Videogiochi - Adattamento cinematografico",
+    "saturation_score": 4.0
+  },
+  {
+    "rank": 26,
+    "entity": "investing",
+    "discover_score": 9.00435608084035,
+    "score_1h": 21.10637054354179,
+    "score_4h": 16.222689075630253,
+    "score_7d": 19.266272189349113,
+    "extracted_entities": "Investimenti - Mercati finanziari - Azioni - Economia - Finanza personale",
+    "saturation_score": 8.0
+  },
+  {
+    "rank": 4,
     "entity": "brignone",
-    "discover_score": 5.928216926241367,
-    "score_1h": 45.12931034482759,
-    "score_4h": 36.10504201680672,
-    "score_7d": 2.8727810650887573,
+    "discover_score": 8.906318288083344,
+    "score_1h": 54.36206896551724,
+    "score_4h": 50.96638655462185,
+    "score_7d": 4.668639053254438,
     "extracted_entities": "Federica Brignone - Sci alpino - Italia",
-    "saturation_score": 553.0
+    "saturation_score": 705.0
   },
   {
-    "rank": 50,
-    "entity": "barcelona",
-    "discover_score": 5.923654745299226,
-    "score_1h": 2.7413793103448274,
-    "score_4h": 5.006302521008403,
-    "score_7d": 17.307692307692307,
-    "extracted_entities": "Barcellona - Città - Spagna - Turismo - Calcio",
-    "saturation_score": 138.0
+    "rank": 10,
+    "entity": "ticketone",
+    "discover_score": 8.831766047536261,
+    "score_1h": 42.85344827586207,
+    "score_4h": 23.82563025210084,
+    "score_7d": 12.99112426035503,
+    "extracted_entities": "TicketOne - Biglietti - Eventi - Concerti - Spettacoli",
+    "saturation_score": 706.0
   },
   {
     "rank": 2,
     "entity": "nanni moretti",
-    "discover_score": 5.100294315805156,
-    "score_1h": 44.077586206896555,
-    "score_4h": 11.039915966386555,
-    "score_7d": 5.588757396449704,
-    "extracted_entities": "Nanni Moretti - Regista - Cinema Italiano",
-    "saturation_score": 1190.0
+    "discover_score": 5.896143077159058,
+    "score_1h": 31.482758620689655,
+    "score_4h": 29.521008403361343,
+    "score_7d": 3.1213017751479293,
+    "extracted_entities": "Nanni Moretti - Regista - Cinema italiano - Filmografia - Festival del cinema",
+    "saturation_score": 1260.0
   },
   {
-    "rank": 36,
-    "entity": "musk",
-    "discover_score": 4.778721230803058,
-    "score_1h": 5.180450029222676,
-    "score_4h": 5.228991596638655,
-    "score_7d": 13.2396449704142,
-    "extracted_entities": "Elon Musk - Tesla - SpaceX - Twitter - Neuralink",
-    "saturation_score": 986.0
+    "rank": 48,
+    "entity": "barcelona",
+    "discover_score": 5.24316539349515,
+    "score_1h": 9.613383985973115,
+    "score_4h": 7.38655462184874,
+    "score_7d": 14.683431952662723,
+    "extracted_entities": "Barcellona - Città - Spagna - Turismo - Calcio",
+    "saturation_score": 77.0
   },
   {
-    "rank": 18,
-    "entity": "cannavacciuolo",
-    "discover_score": 4.715416023905474,
-    "score_1h": 3.1551724137931036,
-    "score_4h": 0.24789915966386555,
-    "score_7d": 12.671597633136095,
-    "extracted_entities": "Cannavacciuolo - Chef - Cucina - Ristoranti - Televisione",
-    "saturation_score": 35.0
-  },
-  {
-    "rank": 31,
-    "entity": "nasdaq 100",
-    "discover_score": 4.6920191565009715,
-    "score_1h": 4.603448275862069,
-    "score_4h": 2.6134453781512605,
-    "score_7d": 13.340236686390533,
-    "extracted_entities": "Nasdaq 100 - Indice azionario - Mercato finanziario - Tecnologia - Borsa valori",
-    "saturation_score": 50.0
-  },
-  {
-    "rank": 5,
+    "rank": 3,
     "entity": "cambio euro dollaro",
-    "discover_score": 4.472301849797923,
-    "score_1h": 26.93103448275862,
-    "score_4h": 14.857142857142858,
-    "score_7d": 5.680473372781066,
-    "extracted_entities": "Cambio - Euro - Dollaro - Valuta - Tasso di cambio",
+    "discover_score": 3.5589544668471724,
+    "score_1h": 35.96551724137931,
+    "score_4h": 18.02200168770437,
+    "score_7d": 2.7633136094674553,
+    "extracted_entities": "Cambio - Euro - Dollaro - Tasso di cambio",
     "saturation_score": 5.0
-  },
-  {
-    "rank": 9,
-    "entity": "mourinho",
-    "discover_score": 2.8782788745366705,
-    "score_1h": 3.081092928112215,
-    "score_4h": 3.014705882352941,
-    "score_7d": 6.4674556213017755,
-    "extracted_entities": "José Mourinho - Allenatore di calcio - AS Roma - Premier League - Champions League",
-    "saturation_score": 418.0
-  },
-  {
-    "rank": 13,
-    "entity": "s&p 500",
-    "discover_score": 2.8088051979050204,
-    "score_1h": 11.094827586206897,
-    "score_4h": 1.754201680672269,
-    "score_7d": 7.180473372781065,
-    "extracted_entities": "S&P 500 - Indice azionario - Mercato finanziario - Borsa valori - Investimenti",
-    "saturation_score": 88.0
-  },
-  {
-    "rank": 25,
-    "entity": "ftse mib",
-    "discover_score": 1.5880187276060471,
-    "score_1h": 5.758620689655173,
-    "score_4h": 3.3445378151260505,
-    "score_7d": 4.221893491124261,
-    "extracted_entities": "FTSE MIB - Indice di Borsa - Mercato Azionario - Italia - Finanza",
-    "saturation_score": 204.0
-  },
-  {
-    "rank": 19,
-    "entity": "carlo acutis",
-    "discover_score": 1.5398893522168589,
-    "score_1h": 12.939070718877849,
-    "score_4h": 3.4747899159663866,
-    "score_7d": 3.816568047337278,
-    "extracted_entities": "Carlo Acutis - Beato - Cattolicesimo - Miracoli - Giovani",
-    "saturation_score": 10.0
-  },
-  {
-    "rank": 40,
-    "entity": "paolo villaggio",
-    "discover_score": 1.538888619814695,
-    "score_1h": 1.0517241379310345,
-    "score_4h": 3.323529411764706,
-    "score_7d": 4.467455621301775,
-    "extracted_entities": "Paolo Villaggio - Attore - Comico - Fantozzi - Cinema Italiano",
-    "saturation_score": 4.0
   },
   {
     "rank": 12,
     "entity": "sciopero 4 aprile 2025",
-    "discover_score": 1.3365568065080229,
-    "score_1h": 2.224137931034483,
-    "score_4h": 0.48739495798319327,
-    "score_7d": 3.6893491124260356,
+    "discover_score": 2.0740508505893955,
+    "score_1h": 1.7241379310344827,
+    "score_4h": 2.508403361344538,
+    "score_7d": 5.079881656804734,
     "extracted_entities": "Sciopero - 4 aprile 2025 - Proteste - Lavoratori - Sindacati",
-    "saturation_score": 119.0
+    "saturation_score": 21.0
   },
   {
-    "rank": 20,
-    "entity": "atlético madrid - barcellona",
-    "discover_score": 1.2951478218735146,
-    "score_1h": 0.6120689655172413,
-    "score_4h": 0.8739495798319328,
-    "score_7d": 3.828402366863905,
-    "extracted_entities": "Atlético Madrid - Barcellona - Partita di calcio - La Liga",
-    "saturation_score": -1.0
-  },
-  {
-    "rank": 42,
-    "entity": "paolo fox oroscopo capricorno",
-    "discover_score": 1.2462677299594542,
-    "score_1h": 0.8275862068965517,
-    "score_4h": 0.36764705882352944,
-    "score_7d": 4.331360946745562,
-    "extracted_entities": "Paolo Fox - Oroscopo - Capricorno",
-    "saturation_score": -1.0
-  },
-  {
-    "rank": 24,
+    "rank": 23,
     "entity": "sp500",
-    "discover_score": 1.1319037757624604,
-    "score_1h": 5.198275862068965,
-    "score_4h": 0.657563025210084,
-    "score_7d": 3.5,
+    "discover_score": 1.9652418245285896,
+    "score_1h": 1.669929865575687,
+    "score_4h": 4.336134453781512,
+    "score_7d": 4.994082840236686,
     "extracted_entities": "S&P 500 - Indice azionario - Mercato finanziario - Borsa valori - Investimenti",
     "saturation_score": 2.0
   },
   {
-    "rank": 43,
+    "rank": 31,
+    "entity": "musk",
+    "discover_score": 1.9360755778365926,
+    "score_1h": 2.3189655172413794,
+    "score_4h": 2.8088235294117645,
+    "score_7d": 5.6301775147929,
+    "extracted_entities": "Elon Musk - Tesla - SpaceX - Twitter - Neuralink",
+    "saturation_score": 938.0
+  },
+  {
+    "rank": 20,
+    "entity": "ftse mib",
+    "discover_score": 1.6934927787896839,
+    "score_1h": 8.637931034482758,
+    "score_4h": 4.733193277310924,
+    "score_7d": 3.9733727810650885,
+    "extracted_entities": "FTSE MIB - Borsa Italiana - Indice azionario - Mercato finanziario - Investimenti",
+    "saturation_score": 157.0
+  },
+  {
+    "rank": 37,
     "entity": "benfica - farense",
-    "discover_score": 0.7817106837671991,
-    "score_1h": 0.8620689655172413,
-    "score_4h": 0.5588235294117647,
-    "score_7d": 2.6242603550295858,
-    "extracted_entities": "Benfica - Farense - Partita di calcio - Primeira Liga - Squadre portoghesi",
+    "discover_score": 1.4043700394243488,
+    "score_1h": 0.0,
+    "score_4h": 0.1722689075630252,
+    "score_7d": 4.828402366863905,
+    "extracted_entities": "Benfica - Farense - Partita di calcio - Primeira Liga - Portogallo",
     "saturation_score": 3.0
+  },
+  {
+    "rank": 21,
+    "entity": "atlético madrid - barcellona",
+    "discover_score": 1.3239896746680442,
+    "score_1h": 0.4568965517241379,
+    "score_4h": 0.36134453781512604,
+    "score_7d": 4.091715976331361,
+    "extracted_entities": "Atlético Madrid - Barcellona - Calcio - Partita - Liga Spagnola",
+    "saturation_score": -1.0
   },
   {
     "rank": 7,
     "entity": "san riccardo",
-    "discover_score": 0.6527157212098963,
-    "score_1h": 1.3793103448275863,
-    "score_4h": 0.6638655462184875,
-    "score_7d": 1.467455621301775,
-    "extracted_entities": "San Riccardo - Santo - Religione - Festività",
+    "discover_score": 1.262148209273556,
+    "score_1h": 3.379310344827586,
+    "score_4h": 1.111344537815126,
+    "score_7d": 2.9585798816568047,
+    "extracted_entities": "San Riccardo - Santo - Ricorrenza religiosa",
     "saturation_score": 10.0
   },
   {
-    "rank": 4,
-    "entity": "sabina ciuffini",
-    "discover_score": 0.6431462713856366,
-    "score_1h": 12.129310344827587,
-    "score_4h": 3.82563025210084,
-    "score_7d": 0.5295857988165681,
-    "extracted_entities": "Sabina Ciuffini - Personaggio televisivo - Italia - Anni '70 - Show televisivi",
-    "saturation_score": 2.0
-  },
-  {
-    "rank": 8,
-    "entity": "gaetano migliaccio",
-    "discover_score": 0.6405064885437137,
-    "score_1h": 2.646551724137931,
-    "score_4h": 1.504201680672269,
-    "score_7d": 1.2603550295857988,
-    "extracted_entities": "Gaetano Migliaccio",
-    "saturation_score": 66.0
-  },
-  {
-    "rank": 28,
-    "entity": "riccardo muci",
-    "discover_score": 0.5945893001148311,
-    "score_1h": 0.9224137931034482,
-    "score_4h": 0.4894957983193277,
-    "score_7d": 1.7899408284023668,
-    "extracted_entities": "Riccardo Muci",
-    "saturation_score": 172.0
-  },
-  {
-    "rank": 47,
-    "entity": "fenerbahçe - galatasaray",
-    "discover_score": 0.5765071150980579,
-    "score_1h": 0.0,
-    "score_4h": 0.453781512605042,
-    "score_7d": 1.8994082840236688,
-    "extracted_entities": "Fenerbahçe - Galatasaray - Calcio - Derby - Turchia",
-    "saturation_score": 6.0
-  },
-  {
-    "rank": 35,
-    "entity": "vittorio pirbazari",
-    "discover_score": 0.543478040075892,
-    "score_1h": 0.0,
-    "score_4h": 0.13025210084033612,
-    "score_7d": 1.7692307692307694,
-    "extracted_entities": "Vittorio Pirbazari",
-    "saturation_score": 43.0
+    "rank": 41,
+    "entity": "quotazione oro",
+    "discover_score": 1.2549442345769715,
+    "score_1h": 10.78448275862069,
+    "score_4h": 4.497899159663865,
+    "score_7d": 3.2130177514792897,
+    "extracted_entities": "Quotazione - Oro - Prezzo - Mercato - Investimenti",
+    "saturation_score": 8.0
   },
   {
     "rank": 27,
-    "entity": "lino zani",
-    "discover_score": 0.5109058103153166,
-    "score_1h": 1.0086206896551724,
-    "score_4h": 0.40756302521008403,
-    "score_7d": 1.4940828402366864,
-    "extracted_entities": "Lino Zani - Alpinismo - Guida Alpina - Montagna - Televisione",
-    "saturation_score": 39.0
-  },
-  {
-    "rank": 11,
-    "entity": "manuel bortuzzo",
-    "discover_score": 0.5040242781074288,
-    "score_1h": 0.8189655172413793,
-    "score_4h": 0.8088235294117647,
-    "score_7d": 1.1183431952662721,
-    "extracted_entities": "Manuel Bortuzzo - Nuoto - Incidente - Paralisi - Italia",
-    "saturation_score": 173.0
-  },
-  {
-    "rank": 39,
-    "entity": "feyenoord - groningen",
-    "discover_score": 0.4746917738176959,
-    "score_1h": 0.3620689655172414,
-    "score_4h": 0.16176470588235295,
-    "score_7d": 1.5236686390532546,
-    "extracted_entities": "Feyenoord - Groningen - Calcio - Eredivisie",
-    "saturation_score": 3.0
-  },
-  {
-    "rank": 33,
-    "entity": "valentina persia",
-    "discover_score": 0.4726998281669236,
-    "score_1h": 1.2413793103448276,
-    "score_4h": 1.5525210084033616,
-    "score_7d": 1.0946745562130178,
-    "extracted_entities": "Valentina Persia - Personaggio pubblico - Intrattenimento",
-    "saturation_score": 4.0
-  },
-  {
-    "rank": 10,
-    "entity": "kkr vs srh",
-    "discover_score": 0.40781485061513034,
-    "score_1h": 8.60344827586207,
-    "score_4h": 2.0252100840336134,
-    "score_7d": 0.4911242603550296,
-    "extracted_entities": "KKR - SRH - Indian Premier League - Cricket",
-    "saturation_score": -1.0
-  },
-  {
-    "rank": 26,
     "entity": "luis henrique",
-    "discover_score": 0.39981649374898076,
-    "score_1h": 2.336206896551724,
-    "score_4h": 2.3151260504201683,
-    "score_7d": 0.5769230769230769,
-    "extracted_entities": "Luis Henrique - Calciatore - Sport",
-    "saturation_score": 60.0
+    "discover_score": 1.215853353152093,
+    "score_1h": 0.896551724137931,
+    "score_4h": 1.3991596638655461,
+    "score_7d": 3.642011834319527,
+    "extracted_entities": "Luis Henrique - Calciatore - Brasile - Sport",
+    "saturation_score": 62.0
+  },
+  {
+    "rank": 18,
+    "entity": "cannavacciuolo",
+    "discover_score": 1.0748394774243366,
+    "score_1h": 0.0,
+    "score_4h": 1.3403361344537814,
+    "score_7d": 2.9615384615384617,
+    "extracted_entities": "Cannavacciuolo - Chef - Cucina - Ristorazione - Televisione",
+    "saturation_score": 10.0
   },
   {
     "rank": 30,
     "entity": "liverpool - everton",
-    "discover_score": 0.39701956929412235,
-    "score_1h": 0.8620689655172413,
-    "score_4h": 0.38235294117647056,
-    "score_7d": 1.0946745562130178,
+    "discover_score": 1.0539397489554938,
+    "score_1h": 0.0,
+    "score_4h": 0.2415966386554622,
+    "score_7d": 3.494082840236686,
     "extracted_entities": "Liverpool - Everton - Calcio - Premier League - Derby di Merseyside",
-    "saturation_score": 33.0
-  },
-  {
-    "rank": 32,
-    "entity": "colombaccio",
-    "discover_score": 0.3445412414476544,
-    "score_1h": 0.0,
-    "score_4h": 0.029411764705882353,
-    "score_7d": 0.9970414201183433,
-    "extracted_entities": "Colombaccio - Uccello - Fauna selvatica - Caccia - Habitat",
-    "saturation_score": 1.0
-  },
-  {
-    "rank": 48,
-    "entity": "andrea condorelli",
-    "discover_score": 0.3394294264964424,
-    "score_1h": 0.6379310344827587,
-    "score_4h": 0.28361344537815125,
-    "score_7d": 0.9822485207100592,
-    "extracted_entities": "Andrea Condorelli",
-    "saturation_score": 5.0
-  },
-  {
-    "rank": 17,
-    "entity": "gianni alemanno",
-    "discover_score": 0.32512548577879213,
-    "score_1h": 1.6610169491525424,
-    "score_4h": 1.3403361344537816,
-    "score_7d": 0.47041420118343197,
-    "extracted_entities": "Gianni Alemanno - Politica - Italia",
-    "saturation_score": 31.0
-  },
-  {
-    "rank": 49,
-    "entity": "ticket master",
-    "discover_score": 0.28770501584002334,
-    "score_1h": 0.8620689655172413,
-    "score_4h": 0.23109243697478993,
-    "score_7d": 0.7781065088757396,
-    "extracted_entities": "Ticketmaster - Biglietti - Eventi - Concerti - Vendite",
-    "saturation_score": -1.0
-  },
-  {
-    "rank": 44,
-    "entity": "mattia bellucci",
-    "discover_score": 0.24417944986146464,
-    "score_1h": 0.0,
-    "score_4h": 0.542016806722689,
-    "score_7d": 0.49112426035502954,
-    "extracted_entities": "Mattia Bellucci",
-    "saturation_score": 25.0
+    "saturation_score": 41.0
   },
   {
     "rank": 29,
+    "entity": "lino zani",
+    "discover_score": 0.7611944415457714,
+    "score_1h": 3.189655172413793,
+    "score_4h": 1.9987342217221615,
+    "score_7d": 1.9881656804733727,
+    "extracted_entities": "Lino Zani - Persone - Alpinismo - Montagna",
+    "saturation_score": 9.0
+  },
+  {
+    "rank": 5,
+    "entity": "sabina ciuffini",
+    "discover_score": 0.6882985765824621,
+    "score_1h": 0.7672413793103449,
+    "score_4h": 3.8487394957983194,
+    "score_7d": 0.6923076923076923,
+    "extracted_entities": "Sabina Ciuffini - Personaggio televisivo - Italia - Anni '70",
+    "saturation_score": 2.0
+  },
+  {
+    "rank": 39,
+    "entity": "carlo acutis",
+    "discover_score": 0.6706359208765985,
+    "score_1h": 1.6551724137931036,
+    "score_4h": 3.512745684047678,
+    "score_7d": 1.375739644970414,
+    "extracted_entities": "Carlo Acutis - Beato - Cattolicesimo - Miracoli - Giovani",
+    "saturation_score": 38.0
+  },
+  {
+    "rank": 47,
+    "entity": "mattia bellucci",
+    "discover_score": 0.5962016743912428,
+    "score_1h": 0.0,
+    "score_4h": 1.603319151928554,
+    "score_7d": 1.6597633136094676,
+    "extracted_entities": "Mattia Bellucci - Tennis - Italia",
+    "saturation_score": 26.0
+  },
+  {
+    "rank": 35,
+    "entity": "valentina persia",
+    "discover_score": 0.5526111807932143,
+    "score_1h": 1.3017241379310345,
+    "score_4h": 1.6302521008403361,
+    "score_7d": 1.3934911242603552,
+    "extracted_entities": "Valentina Persia - Personaggio pubblico - Comico - Televisione",
+    "saturation_score": 4.0
+  },
+  {
+    "rank": 40,
+    "entity": "fenerbahçe - galatasaray",
+    "discover_score": 0.5333902588168921,
+    "score_1h": 0.5086206896551724,
+    "score_4h": 0.6982964734010759,
+    "score_7d": 1.6124260355029585,
+    "extracted_entities": "Fenerbahçe - Galatasaray - Calcio - Derby - Turchia",
+    "saturation_score": 6.0
+  },
+  {
+    "rank": 44,
+    "entity": "paolo villaggio",
+    "discover_score": 0.46543384344017497,
+    "score_1h": 0.5086206896551724,
+    "score_4h": 3.2058823529411766,
+    "score_7d": 0.7159763313609467,
+    "extracted_entities": "Paolo Villaggio - Attore - Comico - Fantozzi - Cinema Italiano",
+    "saturation_score": 4.0
+  },
+  {
+    "rank": 32,
+    "entity": "vittorio pirbazari",
+    "discover_score": 0.40923206864624556,
+    "score_1h": 0.0,
+    "score_4h": 0.5441176470588236,
+    "score_7d": 1.1124260355029585,
+    "extracted_entities": "Vittorio Pirbazari",
+    "saturation_score": 51.0
+  },
+  {
+    "rank": 19,
+    "entity": "riccardo muci",
+    "discover_score": 0.3805631547869292,
+    "score_1h": 1.7758620689655171,
+    "score_4h": 0.09243697478991596,
+    "score_7d": 1.014792899408284,
+    "extracted_entities": "Riccardo Muci",
+    "saturation_score": 89.0
+  },
+  {
+    "rank": 9,
+    "entity": "mourinho",
+    "discover_score": 0.3775772239967707,
+    "score_1h": 1.6896551724137931,
+    "score_4h": 0.6320540768608699,
+    "score_7d": 0.7130177514792899,
+    "extracted_entities": "José Mourinho - Allenatore di calcio - AS Roma - Premier League - Champions League",
+    "saturation_score": 440.0
+  },
+  {
+    "rank": 33,
+    "entity": "feyenoord - groningen",
+    "discover_score": 0.37478032696537716,
+    "score_1h": 0.0,
+    "score_4h": 0.591382159558384,
+    "score_7d": 0.9704142011834319,
+    "extracted_entities": "Feyenoord - Groningen - Calcio - Eredivisie",
+    "saturation_score": 4.0
+  },
+  {
+    "rank": 11,
+    "entity": "kkr vs srh",
+    "discover_score": 0.37102813731151313,
+    "score_1h": 10.39655172413793,
+    "score_4h": 3.08463134207658,
+    "score_7d": 0.1804733727810651,
+    "extracted_entities": "KKR - SRH - Indian Premier League - Cricket",
+    "saturation_score": 1.0
+  },
+  {
+    "rank": 28,
     "entity": "banco bpm unicredit",
-    "discover_score": 0.2057715362523284,
-    "score_1h": 0.8620689655172413,
-    "score_4h": 0.33613445378151263,
-    "score_7d": 0.334319526627219,
+    "discover_score": 0.367157101151902,
+    "score_1h": 1.3017241379310345,
+    "score_4h": 0.7664551176118983,
+    "score_7d": 0.8609467455621302,
     "extracted_entities": "Banco BPM - UniCredit - Banche - Finanza",
     "saturation_score": -1.0
   },
   {
-    "rank": 38,
-    "entity": "assemblea sinodale",
-    "discover_score": 0.11877821209613525,
-    "score_1h": 0.646551724137931,
-    "score_4h": 0.0,
-    "score_7d": 0.07100591715976332,
-    "extracted_entities": "Assemblea sinodale - Chiesa cattolica - Sinodo - Vescovi - Discussioni religiose",
-    "saturation_score": 61.0
+    "rank": 8,
+    "entity": "gaetano migliaccio",
+    "discover_score": 0.31025173786081617,
+    "score_1h": 0.7241379310344828,
+    "score_4h": 1.9348739495798317,
+    "score_7d": 0.1863905325443787,
+    "extracted_entities": "Gaetano Migliaccio",
+    "saturation_score": 126.0
   },
   {
-    "rank": 23,
+    "rank": 42,
+    "entity": "paolo fox oroscopo capricorno",
+    "discover_score": 0.3051956935967144,
+    "score_1h": 0.0,
+    "score_4h": 0.025210084033613446,
+    "score_7d": 0.8846153846153847,
+    "extracted_entities": "Paolo Fox - Oroscopo - Capricorno",
+    "saturation_score": -1.0
+  },
+  {
+    "rank": 46,
+    "entity": "andrea condorelli",
+    "discover_score": 0.2737706630604327,
+    "score_1h": 0.8362068965517241,
+    "score_4h": 0.31092436974789917,
+    "score_7d": 0.6863905325443787,
+    "extracted_entities": "Andrea Condorelli",
+    "saturation_score": 5.0
+  },
+  {
+    "rank": 43,
+    "entity": "ticket master",
+    "discover_score": 0.26767525924731844,
+    "score_1h": 1.8448275862068966,
+    "score_4h": 0.07983193277310924,
+    "score_7d": 0.7130177514792899,
+    "extracted_entities": "Ticketmaster - Biglietti - Concerti - Eventi - Vendite",
+    "saturation_score": -1.0
+  },
+  {
+    "rank": 38,
+    "entity": "alex belli",
+    "discover_score": 0.24023489673005757,
+    "score_1h": 1.9741379310344827,
+    "score_4h": 1.0252100840336134,
+    "score_7d": 0.334319526627219,
+    "extracted_entities": "Alex Belli - Personaggio televisivo - Attore",
+    "saturation_score": 4.0
+  },
+  {
+    "rank": 36,
+    "entity": "wall street journal",
+    "discover_score": 0.22298445223970942,
+    "score_1h": 2.336206896551724,
+    "score_4h": 0.226890756302521,
+    "score_7d": 0.45857988165680474,
+    "extracted_entities": "Wall Street Journal - Giornale - Media - Economia - Notizie",
+    "saturation_score": 2.0
+  },
+  {
+    "rank": 13,
+    "entity": "manuel bortuzzo",
+    "discover_score": 0.21084100700277703,
+    "score_1h": 1.5517241379310345,
+    "score_4h": 0.11554621848739496,
+    "score_7d": 0.3254437869822485,
+    "extracted_entities": "Manuel Bortuzzo - Nuoto - Incidente - Paralisi - Televisione",
+    "saturation_score": 155.0
+  },
+  {
+    "rank": 49,
+    "entity": "lafc - inter miami",
+    "discover_score": 0.19931153786017786,
+    "score_1h": 0.0,
+    "score_4h": 0.3025210084033614,
+    "score_7d": 0.3698224852071006,
+    "extracted_entities": "LAFC - Inter Miami - Calcio - Major League Soccer - Partita",
+    "saturation_score": -1.0
+  },
+  {
+    "rank": 22,
     "entity": "tallon griekspoor",
-    "discover_score": 0.11585102773773348,
-    "score_1h": 0.2288135593220339,
-    "score_4h": 0.10504201680672268,
-    "score_7d": 0.011834319526627219,
+    "discover_score": 0.17574035054912188,
+    "score_1h": 1.5172413793103448,
+    "score_4h": 0.5210084033613446,
+    "score_7d": 0.14497041420118345,
     "extracted_entities": "Tallon Griekspoor - Tennis - Giocatore",
-    "saturation_score": 1.0
+    "saturation_score": 2.0
+  },
+  {
+    "rank": 16,
+    "entity": "gianni alemanno",
+    "discover_score": 0.1741377921246765,
+    "score_1h": 0.8448275862068966,
+    "score_4h": 0.14261101930311876,
+    "score_7d": 0.20118343195266272,
+    "extracted_entities": "Gianni Alemanno - Politica - Italia",
+    "saturation_score": 77.0
+  },
+  {
+    "rank": 25,
+    "entity": "assemblea sinodale",
+    "discover_score": 0.1637667949632697,
+    "score_1h": 0.13793103448275862,
+    "score_4h": 0.029411764705882353,
+    "score_7d": 0.22485207100591717,
+    "extracted_entities": "Assemblea - Sinodo - Chiesa Cattolica - Vescovi - Discussione",
+    "saturation_score": 84.0
+  },
+  {
+    "rank": 34,
+    "entity": "bibbiano",
+    "discover_score": 0.15822869541547416,
+    "score_1h": 0.0,
+    "score_4h": 0.058823529411764705,
+    "score_7d": 0.21893491124260356,
+    "extracted_entities": "Bibbiano - Inchiesta - Affidi illeciti - Bambini - Politica",
+    "saturation_score": 155.0
   },
   {
     "rank": 51,
-    "entity": "selvaggia lucarelli",
+    "entity": "newcastle - brentford",
     "discover_score": 0.09855641515192037,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -511,7 +511,7 @@ const trendData = [
   },
   {
     "rank": 52,
-    "entity": "lafc - inter miami",
+    "entity": "mediaset play",
     "discover_score": 0.09836816773278892,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -521,7 +521,7 @@ const trendData = [
   },
   {
     "rank": 53,
-    "entity": "ansa",
+    "entity": "brighton & hove albion - aston villa",
     "discover_score": 0.09818420346099963,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -531,7 +531,7 @@ const trendData = [
   },
   {
     "rank": 54,
-    "entity": "amanda bynes",
+    "entity": "atlético madrid vs barcelona",
     "discover_score": 0.09800434553511525,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -541,7 +541,7 @@ const trendData = [
   },
   {
     "rank": 55,
-    "entity": "newcastle - brentford",
+    "entity": "colombaccio",
     "discover_score": 0.09782842758707197,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -551,7 +551,7 @@ const trendData = [
   },
   {
     "rank": 56,
-    "entity": "corinne clery",
+    "entity": "canale 5",
     "discover_score": 0.0976562928886095,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -561,7 +561,7 @@ const trendData = [
   },
   {
     "rank": 57,
-    "entity": "mediaset play",
+    "entity": "mediaset infinity",
     "discover_score": 0.09748779363109165,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -571,7 +571,7 @@ const trendData = [
   },
   {
     "rank": 58,
-    "entity": "brighton & hove albion - aston villa",
+    "entity": "selvaggia lucarelli",
     "discover_score": 0.09732279027076805,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -581,7 +581,7 @@ const trendData = [
   },
   {
     "rank": 59,
-    "entity": "atlético madrid vs barcelona",
+    "entity": "mediaset",
     "discover_score": 0.09716115093251035,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -591,7 +591,7 @@ const trendData = [
   },
   {
     "rank": 60,
-    "entity": "canale 5",
+    "entity": "corriere della sera",
     "discover_score": 0.09700275086590245,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -601,7 +601,7 @@ const trendData = [
   },
   {
     "rank": 61,
-    "entity": "console nintendo switch 2",
+    "entity": "amanda bynes",
     "discover_score": 0.096847471948296,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -611,7 +611,7 @@ const trendData = [
   },
   {
     "rank": 62,
-    "entity": "mediaset infinity",
+    "entity": "corinne clery",
     "discover_score": 0.09669520223007592,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -621,7 +621,7 @@ const trendData = [
   },
   {
     "rank": 63,
-    "entity": "nordio",
+    "entity": "barcellona calcio",
     "discover_score": 0.0965458355179304,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -631,7 +631,7 @@ const trendData = [
   },
   {
     "rank": 64,
-    "entity": "live nation",
+    "entity": "donald trump elon musk",
     "discover_score": 0.09639927099239892,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -641,7 +641,7 @@ const trendData = [
   },
   {
     "rank": 65,
-    "entity": "corriere della sera",
+    "entity": "nordio",
     "discover_score": 0.0962554128563897,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -651,7 +651,7 @@ const trendData = [
   },
   {
     "rank": 66,
-    "entity": "mediaset",
+    "entity": "francesca jones",
     "discover_score": 0.09611417001172222,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -661,7 +661,7 @@ const trendData = [
   },
   {
     "rank": 67,
-    "entity": "greta scarano",
+    "entity": "afc bournemouth - ipswich town",
     "discover_score": 0.09597545576107192,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -671,7 +671,7 @@ const trendData = [
   },
   {
     "rank": 68,
-    "entity": "barcellona calcio",
+    "entity": "inter oggi",
     "discover_score": 0.09583918753297341,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -681,7 +681,7 @@ const trendData = [
   },
   {
     "rank": 69,
-    "entity": "donald trump elon musk",
+    "entity": "greta scarano",
     "discover_score": 0.09570528662778736,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -691,7 +691,7 @@ const trendData = [
   },
   {
     "rank": 70,
-    "entity": "sabrina uomini e donne",
+    "entity": "nuggets - spurs",
     "discover_score": 0.09557367798275299,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -701,7 +701,7 @@ const trendData = [
   },
   {
     "rank": 71,
-    "entity": "francesca jones",
+    "entity": "thunder - pistons",
     "discover_score": 0.09544428995444114,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -711,7 +711,7 @@ const trendData = [
   },
   {
     "rank": 72,
-    "entity": "inter oggi",
+    "entity": "canale 5 streaming",
     "discover_score": 0.09531705411709313,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -721,7 +721,7 @@ const trendData = [
   },
   {
     "rank": 73,
-    "entity": "afc bournemouth - ipswich town",
+    "entity": "sempio",
     "discover_score": 0.09519190507548161,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -731,7 +731,7 @@ const trendData = [
   },
   {
     "rank": 74,
-    "entity": "thunder - pistons",
+    "entity": "liverpool",
     "discover_score": 0.09506878029106357,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -741,7 +741,7 @@ const trendData = [
   },
   {
     "rank": 75,
-    "entity": "nuggets - spurs",
+    "entity": "acqualatina",
     "discover_score": 0.0949476199203152,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -751,7 +751,7 @@ const trendData = [
   },
   {
     "rank": 76,
-    "entity": "canale 5 streaming",
+    "entity": "celtics - heat",
     "discover_score": 0.09482836666424431,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -761,7 +761,7 @@ const trendData = [
   },
   {
     "rank": 77,
-    "entity": "tom selleck",
+    "entity": "console nintendo switch 2",
     "discover_score": 0.09471096562817122,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -781,7 +781,7 @@ const trendData = [
   },
   {
     "rank": 79,
-    "entity": "acqualatina",
+    "entity": "referendum 8 9 giugno",
     "discover_score": 0.09448151188290471,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -791,7 +791,7 @@ const trendData = [
   },
   {
     "rank": 80,
-    "entity": "sempio",
+    "entity": "atletico madrid",
     "discover_score": 0.09436936027173116,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -801,7 +801,7 @@ const trendData = [
   },
   {
     "rank": 81,
-    "entity": "liverpool",
+    "entity": "tom selleck",
     "discover_score": 0.094258862855859,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -811,7 +811,7 @@ const trendData = [
   },
   {
     "rank": 82,
-    "entity": "celtics - heat",
+    "entity": "sabrina uomini e donne",
     "discover_score": 0.09414997496459536,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -821,7 +821,7 @@ const trendData = [
   },
   {
     "rank": 83,
-    "entity": "nicoletta manni",
+    "entity": "classroom",
     "discover_score": 0.09404265366460368,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -831,7 +831,7 @@ const trendData = [
   },
   {
     "rank": 84,
-    "entity": "cnn",
+    "entity": "la stampa",
     "discover_score": 0.09393685767222369,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -841,7 +841,7 @@ const trendData = [
   },
   {
     "rank": 85,
-    "entity": "referendum 8 9 giugno",
+    "entity": "kid rock",
     "discover_score": 0.09383254727120618,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -851,7 +851,7 @@ const trendData = [
   },
   {
     "rank": 86,
-    "entity": "atletico madrid",
+    "entity": "pro patria - atalanta u-23",
     "discover_score": 0.09372968423546808,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -861,7 +861,7 @@ const trendData = [
   },
   {
     "rank": 87,
-    "entity": "classroom",
+    "entity": "nicoletta manni",
     "discover_score": 0.09362823175650699,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -871,7 +871,7 @@ const trendData = [
   },
   {
     "rank": 88,
-    "entity": "kid rock",
+    "entity": "drive",
     "discover_score": 0.09352815437514386,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -881,7 +881,7 @@ const trendData = [
   },
   {
     "rank": 89,
-    "entity": "la stampa",
+    "entity": "tammy abraham",
     "discover_score": 0.09342941791728956,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -891,7 +891,7 @@ const trendData = [
   },
   {
     "rank": 90,
-    "entity": "drive",
+    "entity": "ticketmaster uk",
     "discover_score": 0.09333198943345576,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -901,7 +901,7 @@ const trendData = [
   },
   {
     "rank": 91,
-    "entity": "pro patria - atalanta u-23",
+    "entity": "top gun maverick",
     "discover_score": 0.09323583714175261,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -911,7 +911,7 @@ const trendData = [
   },
   {
     "rank": 92,
-    "entity": "tammy abraham",
+    "entity": "thomas berenbruch",
     "discover_score": 0.09314093037413629,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -921,7 +921,7 @@ const trendData = [
   },
   {
     "rank": 93,
-    "entity": "anticipazioni beautiful",
+    "entity": "universitario - river plate",
     "discover_score": 0.09304723952568791,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -931,7 +931,7 @@ const trendData = [
   },
   {
     "rank": 94,
-    "entity": "universitario - river plate",
+    "entity": "simone inzaghi",
     "discover_score": 0.09295473600672219,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -941,7 +941,7 @@ const trendData = [
   },
   {
     "rank": 95,
-    "entity": "samarcanda",
+    "entity": "partita stasera",
     "discover_score": 0.09286339219753927,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -951,7 +951,7 @@ const trendData = [
   },
   {
     "rank": 96,
-    "entity": "thomas berenbruch",
+    "entity": "mavericks - hawks",
     "discover_score": 0.09277318140564819,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -961,7 +961,7 @@ const trendData = [
   },
   {
     "rank": 97,
-    "entity": "top gun maverick",
+    "entity": "sky tg24",
     "discover_score": 0.09268407782530214,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -971,7 +971,7 @@ const trendData = [
   },
   {
     "rank": 98,
-    "entity": "inter news",
+    "entity": "christian caramia",
     "discover_score": 0.09259605649919832,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -981,7 +981,7 @@ const trendData = [
   },
   {
     "rank": 99,
-    "entity": "simone inzaghi",
+    "entity": "car parts",
     "discover_score": 0.09250909328220575,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -991,7 +991,7 @@ const trendData = [
   },
   {
     "rank": 100,
-    "entity": "mavericks - hawks",
+    "entity": "samarcanda",
     "discover_score": 0.09242316480699417,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1001,7 +1001,7 @@ const trendData = [
   },
   {
     "rank": 101,
-    "entity": "partita stasera",
+    "entity": "sottil",
     "discover_score": 0.09233824845144649,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1011,7 +1011,7 @@ const trendData = [
   },
   {
     "rank": 102,
-    "entity": "sky tg24",
+    "entity": "leao",
     "discover_score": 0.09225432230774548,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1021,7 +1021,7 @@ const trendData = [
   },
   {
     "rank": 103,
-    "entity": "mauritius",
+    "entity": "azioni stellantis",
     "discover_score": 0.09217136515303313,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1031,7 +1031,7 @@ const trendData = [
   },
   {
     "rank": 104,
-    "entity": "azioni stellantis",
+    "entity": "anticipazioni beautiful",
     "discover_score": 0.09208935642154824,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1041,7 +1041,7 @@ const trendData = [
   },
   {
     "rank": 105,
-    "entity": "car parts",
+    "entity": "mauritius",
     "discover_score": 0.09200827617815434,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1051,7 +1051,7 @@ const trendData = [
   },
   {
     "rank": 106,
-    "entity": "christian caramia",
+    "entity": "previsioni meteo 6 aprile",
     "discover_score": 0.09192810509317567,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1061,7 +1061,7 @@ const trendData = [
   },
   {
     "rank": 107,
-    "entity": "sottil",
+    "entity": "keanu reeves",
     "discover_score": 0.09184882441846551,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1071,7 +1071,7 @@ const trendData = [
   },
   {
     "rank": 108,
-    "entity": "leao",
+    "entity": "francesco renga",
     "discover_score": 0.09177041596463477,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1081,7 +1081,7 @@ const trendData = [
   },
   {
     "rank": 109,
-    "entity": "brenda lodigiani",
+    "entity": "okan buruk",
     "discover_score": 0.09169286207937509,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1101,7 +1101,7 @@ const trendData = [
   },
   {
     "rank": 111,
-    "entity": "previsioni meteo 6 aprile",
+    "entity": "man city vs leicester city",
     "discover_score": 0.09154024996784299,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1111,7 +1111,7 @@ const trendData = [
   },
   {
     "rank": 112,
-    "entity": "okan buruk",
+    "entity": "femminicidi in italia",
     "discover_score": 0.09146515894136831,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1121,7 +1121,7 @@ const trendData = [
   },
   {
     "rank": 113,
-    "entity": "keanu reeves",
+    "entity": "mondiale per club",
     "discover_score": 0.09139085684642648,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1131,7 +1131,7 @@ const trendData = [
   },
   {
     "rank": 114,
-    "entity": "francesco renga",
+    "entity": "inzaghi",
     "discover_score": 0.09131732842512419,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1141,7 +1141,7 @@ const trendData = [
   },
   {
     "rank": 115,
-    "entity": "man city vs leicester city",
+    "entity": "gabriele re cecconi",
     "discover_score": 0.09124455884635378,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1151,7 +1151,7 @@ const trendData = [
   },
   {
     "rank": 116,
-    "entity": "femminicidi in italia",
+    "entity": "stefano de martino",
     "discover_score": 0.09117253369024364,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1161,7 +1161,7 @@ const trendData = [
   },
   {
     "rank": 117,
-    "entity": "mondiale per club",
+    "entity": "stefania nobile",
     "discover_score": 0.0911012389333045,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1171,7 +1171,7 @@ const trendData = [
   },
   {
     "rank": 118,
-    "entity": "inzaghi",
+    "entity": "sportmediaset",
     "discover_score": 0.0910306609342344,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1181,7 +1181,7 @@ const trendData = [
   },
   {
     "rank": 119,
-    "entity": "gabriele re cecconi",
+    "entity": "ragazza uccisa",
     "discover_score": 0.09096078642034822,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1191,7 +1191,7 @@ const trendData = [
   },
   {
     "rank": 120,
-    "entity": "stefano de martino",
+    "entity": "barella",
     "discover_score": 0.09089160247459882,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1201,7 +1201,7 @@ const trendData = [
   },
   {
     "rank": 121,
-    "entity": "sportmediaset",
+    "entity": "stefania craxi",
     "discover_score": 0.09082309652315983,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1211,7 +1211,7 @@ const trendData = [
   },
   {
     "rank": 122,
-    "entity": "stefania nobile",
+    "entity": "cavaliers - knicks",
     "discover_score": 0.09075525632354065,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1221,7 +1221,7 @@ const trendData = [
   },
   {
     "rank": 123,
-    "entity": "ragazza uccisa",
+    "entity": "brenda lodigiani",
     "discover_score": 0.0906880699532074,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1231,7 +1231,7 @@ const trendData = [
   },
   {
     "rank": 124,
-    "entity": "cavaliers - knicks",
+    "entity": "di marco",
     "discover_score": 0.09062152579868396,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1241,7 +1241,7 @@ const trendData = [
   },
   {
     "rank": 125,
-    "entity": "barella",
+    "entity": "delivery",
     "discover_score": 0.09055561254510894,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1251,7 +1251,7 @@ const trendData = [
   },
   {
     "rank": 126,
-    "entity": "stefania craxi",
+    "entity": "infinity mediaset",
     "discover_score": 0.09049031916622662,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1261,7 +1261,7 @@ const trendData = [
   },
   {
     "rank": 127,
-    "entity": "the golden bachelor",
+    "entity": "lautaro martinez",
     "discover_score": 0.09042563491478989,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1271,7 +1271,7 @@ const trendData = [
   },
   {
     "rank": 128,
-    "entity": "buongiorno giovedi 3 aprile",
+    "entity": "bonus 1000 euro 2025",
     "discover_score": 0.09036154931335562,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1281,7 +1281,7 @@ const trendData = [
   },
   {
     "rank": 129,
-    "entity": "di marco",
+    "entity": "rockets - jazz",
     "discover_score": 0.09029805214545304,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1291,7 +1291,7 @@ const trendData = [
   },
   {
     "rank": 130,
-    "entity": "rockets - jazz",
+    "entity": "josep martínez",
     "discover_score": 0.09023513344710772,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1301,7 +1301,7 @@ const trendData = [
   },
   {
     "rank": 131,
-    "entity": "delivery",
+    "entity": "buongiorno giovedi 3 aprile",
     "discover_score": 0.09017278349870363,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1311,7 +1311,7 @@ const trendData = [
   },
   {
     "rank": 132,
-    "entity": "infinity mediaset",
+    "entity": "carrara",
     "discover_score": 0.09011099281716795,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1321,7 +1321,7 @@ const trendData = [
   },
   {
     "rank": 133,
-    "entity": "paolo guzzanti giornalista",
+    "entity": "partita oggi",
     "discover_score": 0.09004975214846297,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1331,7 +1331,7 @@ const trendData = [
   },
   {
     "rank": 134,
-    "entity": "bonus 1000 euro 2025",
+    "entity": "trenord",
     "discover_score": 0.08998905246037105,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1341,7 +1341,7 @@ const trendData = [
   },
   {
     "rank": 135,
-    "entity": "josep martínez",
+    "entity": "manchester city",
     "discover_score": 0.08992888493555902,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1351,7 +1351,7 @@ const trendData = [
   },
   {
     "rank": 136,
-    "entity": "trenord",
+    "entity": "unica",
     "discover_score": 0.0898692409649093,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1361,7 +1361,7 @@ const trendData = [
   },
   {
     "rank": 137,
-    "entity": "carrara",
+    "entity": "buon giovedi 3 aprile 2025",
     "discover_score": 0.0898101121411054,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1371,7 +1371,7 @@ const trendData = [
   },
   {
     "rank": 138,
-    "entity": "unica",
+    "entity": "monreale",
     "discover_score": 0.08975149025246065,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1381,7 +1381,7 @@ const trendData = [
   },
   {
     "rank": 139,
-    "entity": "buon giovedi 3 aprile 2025",
+    "entity": "cacciari",
     "discover_score": 0.08969336727697877,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1391,7 +1391,7 @@ const trendData = [
   },
   {
     "rank": 140,
-    "entity": "partita oggi",
+    "entity": "the golden bachelor",
     "discover_score": 0.08963573537663638,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1401,7 +1401,7 @@ const trendData = [
   },
   {
     "rank": 141,
-    "entity": "manchester city",
+    "entity": "fofana",
     "discover_score": 0.08957858689187757,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1411,7 +1411,7 @@ const trendData = [
   },
   {
     "rank": 142,
-    "entity": "monreale",
+    "entity": "etna",
     "discover_score": 0.08952191433631083,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1421,7 +1421,7 @@ const trendData = [
   },
   {
     "rank": 143,
-    "entity": "cacciari",
+    "entity": "lampedusa",
     "discover_score": 0.08946571039160013,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1431,7 +1431,7 @@ const trendData = [
   },
   {
     "rank": 144,
-    "entity": "fofana",
+    "entity": "zalewski",
     "discover_score": 0.08940996790254124,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1441,7 +1441,7 @@ const trendData = [
   },
   {
     "rank": 145,
-    "entity": "etna",
+    "entity": "ambra angiolini",
     "discover_score": 0.08935467987231561,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1451,7 +1451,7 @@ const trendData = [
   },
   {
     "rank": 146,
-    "entity": "lampedusa",
+    "entity": "i cesaroni",
     "discover_score": 0.08929983945791409,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1461,7 +1461,7 @@ const trendData = [
   },
   {
     "rank": 147,
-    "entity": "cristiano godano",
+    "entity": "lady gaga tour",
     "discover_score": 0.08924543996572334,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1471,7 +1471,7 @@ const trendData = [
   },
   {
     "rank": 148,
-    "entity": "campari azioni",
+    "entity": "paolo guzzanti giornalista",
     "discover_score": 0.08919147484726811,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1481,7 +1481,7 @@ const trendData = [
   },
   {
     "rank": 149,
-    "entity": "zalewski",
+    "entity": "allenatore milan",
     "discover_score": 0.08913793769510281,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1491,7 +1491,7 @@ const trendData = [
   },
   {
     "rank": 150,
-    "entity": "ambra angiolini",
+    "entity": "cristiano godano",
     "discover_score": 0.08908482223884619,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1501,7 +1501,7 @@ const trendData = [
   },
   {
     "rank": 151,
-    "entity": "i cesaroni",
+    "entity": "volpe 132",
     "discover_score": 0.08903212234135328,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1511,7 +1511,7 @@ const trendData = [
   },
   {
     "rank": 152,
-    "entity": "niccolò fabi",
+    "entity": "landini",
     "discover_score": 0.08897983199501883,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1521,7 +1521,7 @@ const trendData = [
   },
   {
     "rank": 153,
-    "entity": "allenatore milan",
+    "entity": "campari azioni",
     "discover_score": 0.08892794531820698,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1531,7 +1531,7 @@ const trendData = [
   },
   {
     "rank": 154,
-    "entity": "volpe 132",
+    "entity": "niccolò fabi",
     "discover_score": 0.08887645655180217,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1541,7 +1541,7 @@ const trendData = [
   },
   {
     "rank": 155,
-    "entity": "landini",
+    "entity": "florenzi",
     "discover_score": 0.08882536005587613,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1551,7 +1551,7 @@ const trendData = [
   },
   {
     "rank": 156,
-    "entity": "rai news",
+    "entity": "massimo cacciari",
     "discover_score": 0.08877465030646665,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1561,7 +1561,7 @@ const trendData = [
   },
   {
     "rank": 157,
-    "entity": "desio",
+    "entity": "attore top gun morto",
     "discover_score": 0.08872432189246328,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1571,7 +1571,7 @@ const trendData = [
   },
   {
     "rank": 158,
-    "entity": "florenzi",
+    "entity": "rai news",
     "discover_score": 0.08867436951259627,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1581,7 +1581,7 @@ const trendData = [
   },
   {
     "rank": 159,
-    "entity": "massimo cacciari",
+    "entity": "hakan çalhanoğlu",
     "discover_score": 0.08862478797252424,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1591,7 +1591,7 @@ const trendData = [
   },
   {
     "rank": 160,
-    "entity": "attore top gun morto",
+    "entity": "pierina paganelli",
     "discover_score": 0.0885755721820169,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1601,7 +1601,7 @@ const trendData = [
   },
   {
     "rank": 161,
-    "entity": "julia creek",
+    "entity": "trump live",
     "discover_score": 0.08852671715222935,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1611,7 +1611,7 @@ const trendData = [
   },
   {
     "rank": 162,
-    "entity": "hakan çalhanoğlu",
+    "entity": "paolo ruffini",
     "discover_score": 0.08847821799306398,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1621,7 +1621,7 @@ const trendData = [
   },
   {
     "rank": 163,
-    "entity": "paolo ruffini",
+    "entity": "chipotle",
     "discover_score": 0.08843006991061714,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1631,7 +1631,7 @@ const trendData = [
   },
   {
     "rank": 164,
-    "entity": "pierina paganelli",
+    "entity": "desio",
     "discover_score": 0.08838226820470695,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1641,7 +1641,7 @@ const trendData = [
   },
   {
     "rank": 165,
-    "entity": "chipotle",
+    "entity": "milan inter tv",
     "discover_score": 0.0883348082664794,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1661,7 +1661,7 @@ const trendData = [
   },
   {
     "rank": 167,
-    "entity": "milan inter tv",
+    "entity": "stoccarda lipsia",
     "discover_score": 0.08824089570045654,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1671,7 +1671,7 @@ const trendData = [
   },
   {
     "rank": 168,
-    "entity": "baustelle",
+    "entity": "julia creek",
     "discover_score": 0.088194434291085,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1681,7 +1681,7 @@ const trendData = [
   },
   {
     "rank": 169,
-    "entity": "stoccarda lipsia",
+    "entity": "amanda seyfried",
     "discover_score": 0.08814829708195837,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1691,7 +1691,7 @@ const trendData = [
   },
   {
     "rank": 170,
-    "entity": "amanda seyfried",
+    "entity": "cinzia leone",
     "discover_score": 0.08810247988749324,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1701,7 +1701,7 @@ const trendData = [
   },
   {
     "rank": 171,
-    "entity": "radio 24",
+    "entity": "the beginning after the end",
     "discover_score": 0.08805697860055793,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1711,7 +1711,7 @@ const trendData = [
   },
   {
     "rank": 172,
-    "entity": "the beginning after the end",
+    "entity": "stipendio noipa aprile 2025",
     "discover_score": 0.08801178919055067,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1721,7 +1721,7 @@ const trendData = [
   },
   {
     "rank": 173,
-    "entity": "personal injury attorney",
+    "entity": "beatles",
     "discover_score": 0.08796690770153576,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1731,7 +1731,7 @@ const trendData = [
   },
   {
     "rank": 174,
-    "entity": "cinzia leone",
+    "entity": "personal injury attorney",
     "discover_score": 0.08792233025043593,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1741,7 +1741,7 @@ const trendData = [
   },
   {
     "rank": 175,
-    "entity": "stipendio noipa aprile 2025",
+    "entity": "radio 24",
     "discover_score": 0.08787805302527825,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1761,7 +1761,7 @@ const trendData = [
   },
   {
     "rank": 177,
-    "entity": "beatles",
+    "entity": "steers",
     "discover_score": 0.08779038435025874,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1771,7 +1771,7 @@ const trendData = [
   },
   {
     "rank": 178,
-    "entity": "steers",
+    "entity": "andy garcia",
     "discover_score": 0.08774698561690537,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1781,7 +1781,7 @@ const trendData = [
   },
   {
     "rank": 179,
-    "entity": "andy garcia",
+    "entity": "golden bachelor",
     "discover_score": 0.08770387253935127,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1831,7 +1831,7 @@ const trendData = [
   },
   {
     "rank": 184,
-    "entity": "maurizio mosca",
+    "entity": "baustelle",
     "discover_score": 0.08749247228027847,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1841,7 +1841,7 @@ const trendData = [
   },
   {
     "rank": 185,
-    "entity": "tom hanks",
+    "entity": "maurizio mosca",
     "discover_score": 0.08745100214384822,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1851,7 +1851,7 @@ const trendData = [
   },
   {
     "rank": 186,
-    "entity": "مان سيتي ضد ليستر سيتي",
+    "entity": "skytg24",
     "discover_score": 0.08740979454154943,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1861,7 +1861,7 @@ const trendData = [
   },
   {
     "rank": 187,
-    "entity": "primark",
+    "entity": "tom hanks",
     "discover_score": 0.08736884639509886,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1871,7 +1871,7 @@ const trendData = [
   },
   {
     "rank": 188,
-    "entity": "lol",
+    "entity": "مان سيتي ضد ليستر سيتي",
     "discover_score": 0.08732815467865244,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1881,7 +1881,7 @@ const trendData = [
   },
   {
     "rank": 189,
-    "entity": "raffaele fitto",
+    "entity": "primark",
     "discover_score": 0.08728771641763704,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1891,7 +1891,7 @@ const trendData = [
   },
   {
     "rank": 190,
-    "entity": "santo del giorno 3 aprile",
+    "entity": "raffaele fitto",
     "discover_score": 0.08724752868761428,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1901,7 +1901,7 @@ const trendData = [
   },
   {
     "rank": 191,
-    "entity": "pulisic",
+    "entity": "lol",
     "discover_score": 0.0872075886131754,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1911,7 +1911,7 @@ const trendData = [
   },
   {
     "rank": 192,
-    "entity": "fatto quotidiano",
+    "entity": "pulisic",
     "discover_score": 0.08716789336686628,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1941,7 +1941,7 @@ const trendData = [
   },
   {
     "rank": 195,
-    "entity": "personal injury lawyer",
+    "entity": "fatto quotidiano",
     "discover_score": 0.08705024901972379,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1951,7 +1951,7 @@ const trendData = [
   },
   {
     "rank": 196,
-    "entity": "mediterranean",
+    "entity": "motore",
     "discover_score": 0.08701150573445693,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1961,7 +1961,7 @@ const trendData = [
   },
   {
     "rank": 197,
-    "entity": "motore",
+    "entity": "santo del giorno 3 aprile",
     "discover_score": 0.08697299382372246,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1971,7 +1971,7 @@ const trendData = [
   },
   {
     "rank": 198,
-    "entity": "milan news",
+    "entity": "personal injury lawyer",
     "discover_score": 0.08693471072678077,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1981,7 +1981,7 @@ const trendData = [
   },
   {
     "rank": 199,
-    "entity": "anna kalinskaja",
+    "entity": "mediterranean",
     "discover_score": 0.08689665392408505,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -1991,7 +1991,7 @@ const trendData = [
   },
   {
     "rank": 200,
-    "entity": "cina",
+    "entity": "anna kalinskaja",
     "discover_score": 0.08685882093641431,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2001,7 +2001,7 @@ const trendData = [
   },
   {
     "rank": 201,
-    "entity": "steam deck",
+    "entity": "panera bread",
     "discover_score": 0.08682120932402913,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2021,7 +2021,7 @@ const trendData = [
   },
   {
     "rank": 203,
-    "entity": "panera bread",
+    "entity": "corrado augias",
     "discover_score": 0.08674664065865081,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2031,7 +2031,7 @@ const trendData = [
   },
   {
     "rank": 204,
-    "entity": "corrado augias",
+    "entity": "cina",
     "discover_score": 0.08670967891628807,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2041,7 +2041,7 @@ const trendData = [
   },
   {
     "rank": 205,
-    "entity": "hunziker",
+    "entity": "milan news",
     "discover_score": 0.08667292916892963,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2051,7 +2051,7 @@ const trendData = [
   },
   {
     "rank": 206,
-    "entity": "coffee",
+    "entity": "hunziker",
     "discover_score": 0.08663638916231793,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2091,7 +2091,7 @@ const trendData = [
   },
   {
     "rank": 210,
-    "entity": "de martino",
+    "entity": "coffee",
     "discover_score": 0.08649228266327028,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2101,7 +2101,7 @@ const trendData = [
   },
   {
     "rank": 211,
-    "entity": "tesla",
+    "entity": "de martino",
     "discover_score": 0.08645675874198468,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2111,7 +2111,7 @@ const trendData = [
   },
   {
     "rank": 212,
-    "entity": "oxy",
+    "entity": "tesla",
     "discover_score": 0.08642143174368908,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2121,7 +2121,7 @@ const trendData = [
   },
   {
     "rank": 213,
-    "entity": "crosetto",
+    "entity": "oxy",
     "discover_score": 0.08638629964387144,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2151,7 +2151,7 @@ const trendData = [
   },
   {
     "rank": 216,
-    "entity": "parma inter",
+    "entity": "crosetto",
     "discover_score": 0.08628205294063337,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2161,7 +2161,7 @@ const trendData = [
   },
   {
     "rank": 217,
-    "entity": "kasatkina",
+    "entity": "parma inter",
     "discover_score": 0.08624768078615105,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2171,7 +2171,7 @@ const trendData = [
   },
   {
     "rank": 218,
-    "entity": "sivincetutto",
+    "entity": "kasatkina",
     "discover_score": 0.08621349384996026,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2181,7 +2181,7 @@ const trendData = [
   },
   {
     "rank": 219,
-    "entity": "unione sarda",
+    "entity": "sivincetutto",
     "discover_score": 0.08617949028054783,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2191,7 +2191,7 @@ const trendData = [
   },
   {
     "rank": 220,
-    "entity": "jimenez",
+    "entity": "unione sarda",
     "discover_score": 0.0861456682533207,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2201,7 +2201,7 @@ const trendData = [
   },
   {
     "rank": 221,
-    "entity": "varesenews",
+    "entity": "jimenez",
     "discover_score": 0.08611202597009364,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2211,7 +2211,7 @@ const trendData = [
   },
   {
     "rank": 222,
-    "entity": "copa italia",
+    "entity": "ليفربول ضد إيفرتون",
     "discover_score": 0.08607856165858876,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2221,7 +2221,7 @@ const trendData = [
   },
   {
     "rank": 223,
-    "entity": "ليفربول ضد إيفرتون",
+    "entity": "copa italia",
     "discover_score": 0.08604527357194709,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2231,7 +2231,7 @@ const trendData = [
   },
   {
     "rank": 224,
-    "entity": "southampton",
+    "entity": "subway",
     "discover_score": 0.08601215998825115,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2241,7 +2241,7 @@ const trendData = [
   },
   {
     "rank": 225,
-    "entity": "subway",
+    "entity": "southampton",
     "discover_score": 0.08597921921005885,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2261,7 +2261,7 @@ const trendData = [
   },
   {
     "rank": 227,
-    "entity": "tuttocampo",
+    "entity": "varesenews",
     "discover_score": 0.08591384940007134,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2281,7 +2281,7 @@ const trendData = [
   },
   {
     "rank": 229,
-    "entity": "angelo montanari",
+    "entity": "tuttocampo",
     "discover_score": 0.08584915103490709,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2331,7 +2331,7 @@ const trendData = [
   },
   {
     "rank": 234,
-    "entity": "bruno vespa",
+    "entity": "nicola zalewski",
     "discover_score": 0.08569025992265175,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2341,7 +2341,7 @@ const trendData = [
   },
   {
     "rank": 235,
-    "entity": "nicola zalewski",
+    "entity": "angelo montanari",
     "discover_score": 0.08565895891209697,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2351,7 +2351,7 @@ const trendData = [
   },
   {
     "rank": 236,
-    "entity": "matteo darmian",
+    "entity": "bruno vespa",
     "discover_score": 0.08562781352742248,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2361,7 +2361,7 @@ const trendData = [
   },
   {
     "rank": 237,
-    "entity": "il paradiso delle signore anticipazioni",
+    "entity": "matteo darmian",
     "discover_score": 0.08559682233216323,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2371,7 +2371,7 @@ const trendData = [
   },
   {
     "rank": 238,
-    "entity": "giornale di brescia",
+    "entity": "il paradiso delle signore anticipazioni",
     "discover_score": 0.08556598390914882,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2381,7 +2381,7 @@ const trendData = [
   },
   {
     "rank": 239,
-    "entity": "kyle walker",
+    "entity": "giornale di brescia",
     "discover_score": 0.08553529686016406,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2391,7 +2391,7 @@ const trendData = [
   },
   {
     "rank": 240,
-    "entity": "mediaset canale 5",
+    "entity": "kyle walker",
     "discover_score": 0.08550475980561698,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2401,7 +2401,7 @@ const trendData = [
   },
   {
     "rank": 241,
-    "entity": "chatgpt down",
+    "entity": "mediaset canale 5",
     "discover_score": 0.08547437138421397,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2441,7 +2441,7 @@ const trendData = [
   },
   {
     "rank": 245,
-    "entity": "oroscopo oggi capricorno",
+    "entity": "dune",
     "discover_score": 0.08535427742700234,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2451,7 +2451,7 @@ const trendData = [
   },
   {
     "rank": 246,
-    "entity": "dune",
+    "entity": "selçuksports",
     "discover_score": 0.08532461237048485,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2461,7 +2461,7 @@ const trendData = [
   },
   {
     "rank": 247,
-    "entity": "selçuksports",
+    "entity": "re cecconi inter",
     "discover_score": 0.08529508814628277,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2471,7 +2471,7 @@ const trendData = [
   },
   {
     "rank": 248,
-    "entity": "roncadelle",
+    "entity": "il foglio",
     "discover_score": 0.08526570351266076,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2481,7 +2481,7 @@ const trendData = [
   },
   {
     "rank": 249,
-    "entity": "re cecconi inter",
+    "entity": "emma navarro",
     "discover_score": 0.08523645724382045,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2491,7 +2491,7 @@ const trendData = [
   },
   {
     "rank": 250,
-    "entity": "il foglio",
+    "entity": "osimhen",
     "discover_score": 0.08520734812963249,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2501,7 +2501,7 @@ const trendData = [
   },
   {
     "rank": 251,
-    "entity": "emma navarro",
+    "entity": "koopmeiners",
     "discover_score": 0.08517837497537416,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2511,7 +2511,7 @@ const trendData = [
   },
   {
     "rank": 252,
-    "entity": "kean juventus",
+    "entity": "أتلتيكو مدريد ضد برشلونة",
     "discover_score": 0.08514953660147252,
     "score_1h": 0.0,
     "score_4h": 0.0,
@@ -2521,58 +2521,8 @@ const trendData = [
   },
   {
     "rank": 253,
-    "entity": "osimhen",
-    "discover_score": 0.08512083184325263,
-    "score_1h": 0.0,
-    "score_4h": 0.0,
-    "score_7d": 0.0,
-    "extracted_entities": "",
-    "saturation_score": -1.0
-  },
-  {
-    "rank": 254,
-    "entity": "koopmeiners",
-    "discover_score": 0.08509225955069119,
-    "score_1h": 0.0,
-    "score_4h": 0.0,
-    "score_7d": 0.0,
-    "extracted_entities": "",
-    "saturation_score": -1.0
-  },
-  {
-    "rank": 255,
-    "entity": "arshad khan",
-    "discover_score": 0.08506381858817494,
-    "score_1h": 0.0,
-    "score_4h": 0.0,
-    "score_7d": 0.0,
-    "extracted_entities": "",
-    "saturation_score": -1.0
-  },
-  {
-    "rank": 256,
-    "entity": "أتلتيكو مدريد ضد برشلونة",
-    "discover_score": 0.08503550783426429,
-    "score_1h": 0.0,
-    "score_4h": 0.0,
-    "score_7d": 0.0,
-    "extracted_entities": "",
-    "saturation_score": -1.0
-  },
-  {
-    "rank": 257,
-    "entity": "spurs - magic",
-    "discover_score": 0.08500732618146141,
-    "score_1h": 0.0,
-    "score_4h": 0.0,
-    "score_7d": 0.0,
-    "extracted_entities": "",
-    "saturation_score": -1.0
-  },
-  {
-    "rank": 258,
     "entity": "reddit",
-    "discover_score": 0.08497927253598325,
+    "discover_score": 0.08512083184325263,
     "score_1h": 0.0,
     "score_4h": 0.0,
     "score_7d": 0.0,
@@ -2582,14 +2532,14 @@ const trendData = [
 ];
 
 const runMetadata = {
-  "timestamp": "2025-04-03 14:45:34",
-  "trends_count": 258,
-  "top_score": 23.054635056656384,
-  "runtime_minutes": 4.163459499677022,
+  "timestamp": "2025-04-03 15:45:08",
+  "trends_count": 253,
+  "top_score": 23.842772253329652,
+  "runtime_minutes": 6.443135174115499,
   "pytrends_proxies_used": 207,
   "openai_enabled": true,
   "openai_model": "gpt-4o",
   "saturation_enabled": true,
   "saturation_location": 2380,
-  "prophecy_text": "Le Profezie di Oggi annunciano l'emergere di tre grandi domini: l'economia con una fervente attenzione sugli investimenti e le tendenze valutarie, lo sport con un focus particolare sui grandi derby calcistici e i personaggi del mondo spettacolo. Questi temi riflettono l'interesse collettivo verso la stabilità finanziaria e l'emozione delle competizioni sportive. \n\nTra gli argomenti illuminanti per Google Discover emerge la 'quotazione oro' (#2), che nonostante il suo basso livello di saturazione, mostra un DScore elevato e un interesse che si mantiene costante sul lungo periodo, rendendolo un fertile terreno per la creazione di contenuti. Parallelamente, il crescente fermento attorno a 'Minecraft film' (#10) mostra un intrigante potenziale di scoperta, supportato da una saturazione minima.\n\nA differenza di questi, le tendenze su 'milan - inter' (#5) e 'trump' (#7) registrano saturazioni elevate, suggerendo che chi crea contenuti dovrebbe trattarli con prudenza, vista l'affollata competizione e il rischio di estemporaneità degli interessi.\n\nIn questo gioco di equilibri, ricercare nicchie emergenti con un occhio attento alla saturazione può offrire grandi opportunità di visibilità su Google Discover."
+  "prophecy_text": "Profezie di Oggi\n\nNelle correnti di Google Trends emergono tre temi dominanti: il mondo finanziario, il calcio e la cultura italiana. Visualizzate nettamente sono le fluttuazioni del \"euro dollaro\" (#3) e della vivacità del \"Nasdaq\" (#4), simboli di un mercato che incanta e spaventa. Nel mondo calcistico, si stagliano le ombre di storici scontri come \"Milan - Inter\" (#5), richiamando passioni ancestrali nei cuori dei tifosi, mentre figure come \"Nanni Moretti\" (#12) e l'immortale \"Paolo Villaggio\" (#32) tessono fili dorati di narrazioni cinematografiche nella mente degli appassionati di cultura.\n\nUn'opportunità lucente per Google Discover emerge con \"Minecraft film\" (#8). L'interesse recente e una saturazione sorprendentemente bassa suggeriscono un terreno fertile per contenuti innovativi, ideali per chi sa raccontare l'incontro tra pixel e pellicola.\n\nTuttavia, c'è bisogno di cautela tra le fronde fitte di \"ansa\" (#2) e \"Trump\" (#6), il cui mantello di saturazione è denso, rendendo arduo distinguersi nel mare di voci. Come sempre, l'osservazione attenta del paesaggio trend fornisce strumenti indispensabili per chi intende navigare nel vasto oceano digitale, spingendo le proprie vele verso l'orizzonte delle idee e delle scoperte."
 };
