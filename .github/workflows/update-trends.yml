@@ -2,8 +2,22 @@ name: Discover Prophet Daily Update (Docs Only)
 
 on:
   schedule:
-    # Esegue alle 30 min di ogni ora UTC tra le 7:00 e le 17:00 (copre 9:30-18:30 Roma)
-    - cron: '30 6-19 * * *'
+    # Esegue agli orari specificati (UTC), corrispondenti a:
+    # 8:50, 10:00, 11:00, 12:00, 13:30, 14:30, 15:30, 16:30, 17:30, 18:20, 20:50 (Ora Italia - CEST/UTC+2)
+    # NOTA: Quando l'Italia tornerà all'ora solare (CET/UTC+1), questi orari UTC
+    # corrisponderanno a un'ora prima nell'ora italiana (es. 6:50 UTC -> 7:50 CET).
+    # Sarà necessario aggiornarli se vuoi mantenere gli stessi orari italiani.
+    - cron: '50 6 * * *'  # 08:50 CEST
+    - cron: '0 8 * * *'   # 10:00 CEST
+    - cron: '0 9 * * *'   # 11:00 CEST
+    - cron: '0 10 * * *'  # 12:00 CEST
+    - cron: '30 11 * * *' # 13:30 CEST
+    - cron: '30 12 * * *' # 14:30 CEST
+    - cron: '30 13 * * *' # 15:30 CEST
+    - cron: '30 14 * * *' # 16:30 CEST
+    - cron: '30 15 * * *' # 17:30 CEST
+    - cron: '20 16 * * *' # 18:20 CEST
+    - cron: '50 18 * * *' # 20:50 CEST
 
   # Permette l'esecuzione manuale
   workflow_dispatch:
