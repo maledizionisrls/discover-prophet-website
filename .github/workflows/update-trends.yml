@@ -7,17 +7,12 @@ on:
     # NOTA: Quando l'Italia tornerà all'ora solare (CET/UTC+1), questi orari UTC
     # corrisponderanno a un'ora prima nell'ora italiana (es. 6:50 UTC -> 7:50 CET).
     # Sarà necessario aggiornarli se vuoi mantenere gli stessi orari italiani.
-    - cron: '50 6 * * *'  # 08:50 CEST
-    - cron: '0 8 * * *'   # 10:00 CEST
-    - cron: '0 9 * * *'   # 11:00 CEST
-    - cron: '0 10 * * *'  # 12:00 CEST
-    - cron: '30 11 * * *' # 13:30 CEST
-    - cron: '30 12 * * *' # 14:30 CEST
-    - cron: '30 13 * * *' # 15:30 CEST
-    - cron: '30 14 * * *' # 16:30 CEST
-    - cron: '30 15 * * *' # 17:30 CEST
-    - cron: '20 16 * * *' # 18:20 CEST
-    - cron: '50 18 * * *' # 20:50 CEST
+- cron: '0 7 * * *'    # 09:00 CEST
+- cron: '30 9 * * *'   # 11:30 CEST
+- cron: '30 12 * * *'  # 14:30 CEST
+- cron: '0 15 * * *'   # 17:00 CEST
+- cron: '0 18 * * *'   # 20:00 CEST
+
 
   # Permette l'esecuzione manuale
   workflow_dispatch:
